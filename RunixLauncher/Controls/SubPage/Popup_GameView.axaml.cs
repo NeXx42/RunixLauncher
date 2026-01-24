@@ -113,6 +113,8 @@ public partial class Popup_GameView : UserControl, IControlChild
         {
             await inspectingGame!.Launch();
         }
+
+        UpdateRunningGameStatus(inspectingGame.getAbsoluteBinaryLocation, RunnerManager.IsIdentifierRunning(inspectingGame.gameName));
     }
 
     private void BrowseToGame() => inspectingGame?.BrowseToGame();

@@ -11,6 +11,7 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 using GameLibrary.AvaloniaUI.Utils;
 using GameLibrary.Controller;
+using GameLibrary.Logic.Helpers;
 
 namespace GameLibrary.AvaloniaUI.Controls
 {
@@ -42,7 +43,7 @@ namespace GameLibrary.AvaloniaUI.Controls
 
         public void RegisterClick(Func<Task> callback, string? asyncMessage = "")
         {
-            this.callback += () => _ = HandleUpdateAsync();
+            this.callback += ExtensionMethods.WrapTaskInExceptionHandler(HandleUpdateAsync);
 
             async Task HandleUpdateAsync()
             {

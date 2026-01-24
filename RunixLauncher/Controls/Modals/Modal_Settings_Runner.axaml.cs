@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
+using DynamicData;
 using GameLibrary.AvaloniaUI.Helpers;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Database.Tables;
@@ -36,6 +37,7 @@ public partial class Modal_Settings_Runner : UserControl
 
         btn_Wine_WineCfg.RegisterClick(OpenWineCfg, "Loading");
         btn_Wine_WineTricks.RegisterClick(OpenWineTricks, "Loading");
+        btn_Wine_WineCMD.RegisterClick(OpenWineCmd, "Loading");
         btn_Wine_SharedDocuments.Register(ShareDocuments, "Updating");
 
         tabGroup = new UITabGroup(TabGroup_Buttons, TabGroup_Content, true);
@@ -155,8 +157,10 @@ public partial class Modal_Settings_Runner : UserControl
 
         if (versionOptions != null)
         {
+            int selectedVersion = versionOptions.IndexOf(selectedRunner?.runnerVersion);
+
             inp_Version.IsVisible = true;
-            inp_Version.Setup(versionOptions, 0, null);
+            inp_Version.Setup(versionOptions, selectedVersion, null);
         }
         else
         {
@@ -189,6 +193,14 @@ public partial class Modal_Settings_Runner : UserControl
             return;
 
         await RunnerManager.RunWineTricks(selectedRunner!.runnerId, "winetricks", string.Empty);
+    }
+
+    private async Task OpenWineCmd()
+    {
+        if (!await EnsureExistingProfile())
+            return;
+
+        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, "wineconsole", string.Empty);
     }
 
     private async Task ShareDocuments(bool val)

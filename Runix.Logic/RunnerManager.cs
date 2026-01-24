@@ -27,7 +27,8 @@ public static class RunnerManager
     {
         return path.EndsWith(".exe", StringComparison.CurrentCultureIgnoreCase) ||
             path.EndsWith(".lnk", StringComparison.CurrentCultureIgnoreCase) ||
-            path.EndsWith(".AppImage", StringComparison.CurrentCultureIgnoreCase);
+            path.EndsWith(".AppImage", StringComparison.CurrentCultureIgnoreCase) ||
+            path.EndsWith(".bat", StringComparison.CurrentCultureIgnoreCase);
     }
 
     public static async Task Init()
@@ -127,13 +128,10 @@ public static class RunnerManager
         RunnerDto runnerDto = GetRunnerProfile(runnerId);
 
         await runnerDto.SetupRunner();
-        LaunchArguments req = await runnerDto.InitRunDetails(new LaunchRequest() { identifier = process, runnerId = runnerId });
-
-        req.command = process;
+        LaunchArguments req = await runnerDto.InitRunDetails(new LaunchRequest() { identifier = process, runnerId = runnerId, customExecutable = process });
 
         if (!string.IsNullOrEmpty(subprocess))
             req.arguments.AddFirst(subprocess);
-
 
         req.loggingLevel = LoggingLevel.Off;
         ExecuteRunRequest(req, null);
@@ -192,6 +190,9 @@ public static class RunnerManager
         info.UseShellExecute = false;
         info.RedirectStandardError = true;
         info.RedirectStandardOutput = true;
+        info.RedirectStandardInput = true;
+        info.ErrorDialog = true;
+        info.CreateNoWindow = true;
 
         foreach (var arg in req.arguments)
         {
@@ -361,7 +362,9 @@ public static class RunnerManager
 
         public int? gameId;
         public int? runnerId;
+
         public string path;
+        public string? customExecutable;
 
         public ConfigProvider<Game_Config>? gameConfig;
     }
@@ -437,6 +440,7 @@ public static class RunnerManager
                         await writer.WriteLineAsync(args.Data);
                         await writer.FlushAsync();
                     }
+                    catch { }
                     finally
                     {
                         _writeLock.Release();

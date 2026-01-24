@@ -118,10 +118,10 @@ public class RunnerDto
         string[] allowed = GetAcceptableExtensions();
 
         foreach (string extension in allowed)
-            if (!path.EndsWith($".{extension}", StringComparison.CurrentCultureIgnoreCase))
-                return false;
+            if (path.EndsWith($".{extension}", StringComparison.CurrentCultureIgnoreCase))
+                return true;
 
-        return true;
+        return false;
     }
 
     // Launching
