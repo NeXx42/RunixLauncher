@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using GameLibrary.Logic.Helpers;
 
 namespace GameLibrary.AvaloniaUI.Controls;
 
@@ -30,11 +31,16 @@ public partial class Common_InputField : UserControl
 
     public void OnChange(Func<Task> callback)
     {
-        onTextChange = () => _ = callback();
+        onTextChange = ExtensionMethods.WrapTaskInExceptionHandler(callback);
     }
 
     public void OnChange(Action callback)
     {
         onTextChange = callback;
+    }
+
+    public void SilentlyChangeValue(string? to)
+    {
+        inp.Text = to;
     }
 }

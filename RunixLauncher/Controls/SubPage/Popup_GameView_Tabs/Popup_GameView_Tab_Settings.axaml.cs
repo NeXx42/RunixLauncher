@@ -42,21 +42,30 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
         {
             configOptions = [
                 new ConfigChanger_Toggle(element.inp_Emulate, Game_Config.General_LocaleEmulation, () => inspectingGame),
-                    new ConfigChanger_Dropdown(element.inp_CaptureLogs, Game_Config.General_LoggingLevel, Enum.GetNames<LoggingLevel>(), () => inspectingGame),
+                new ConfigChanger_Dropdown(element.inp_CaptureLogs, Game_Config.General_LoggingLevel, Enum.GetNames<LoggingLevel>(), () => inspectingGame),
+                new ConfigChanger_InputField(element.inp_Arguments, Game_Config.General_Arguments, () => inspectingGame),
 
-                    new ConfigChanger_Toggle(element.inp_Wine_Windowed, Game_Config.Wine_Windowed, () => inspectingGame),
-                    new ConfigChanger_Toggle(element.inp_IsolatePrefix, Game_Config.Wine_IsolatedPrefix, () => inspectingGame),
-                    new ConfigChanger_Toggle(element.inp_Wine_VirtualDesktop, Game_Config.Wine_ExplorerLaunch, () => inspectingGame),
-                    new ConfigChanger_Toggle(element.inp_Wine_LaunchAsConsole, Game_Config.Wine_ConsoleLaunched, () => inspectingGame),
-                ];
+                new ConfigChanger_Toggle(element.inp_Wine_Windowed, Game_Config.Wine_Windowed, () => inspectingGame, RunnerDto.RunnerType.Wine, RunnerDto.RunnerType.Wine_GE),
+                new ConfigChanger_Toggle(element.inp_IsolatePrefix, Game_Config.Wine_IsolatedPrefix, () => inspectingGame, RunnerDto.RunnerType.Wine, RunnerDto.RunnerType.Wine_GE),
+                new ConfigChanger_Toggle(element.inp_Wine_VirtualDesktop, Game_Config.Wine_ExplorerLaunch, () => inspectingGame, RunnerDto.RunnerType.Wine, RunnerDto.RunnerType.Wine_GE),
+                new ConfigChanger_Toggle(element.inp_Wine_LaunchAsConsole, Game_Config.Wine_ConsoleLaunched, () => inspectingGame, RunnerDto.RunnerType.Wine, RunnerDto.RunnerType.Wine_GE),
+            ];
         }
 
         protected override async Task OpenWithGame(GameDto? game, bool isNewGame)
         {
+            if (game is GameDto_Steam)
+            {
+                element.IsVisible = false;
+                return;
+            }
+
+            DrawRunners(game!);
+
             if (isNewGame)
             {
-                DrawRunners(game!);
                 DrawBinaries(game!);
+                await UpdateSupportedSettings();
             }
 
             foreach (ConfigChangerBase config in configOptions)
@@ -102,6 +111,20 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
             }
 
             await inspectingGame!.ChangeRunnerId(newProfileId);
+            await UpdateSupportedSettings();
+        }
+
+        private async Task UpdateSupportedSettings()
+        {
+            var runnerType = (await RunnerManager.GetRunnerProfile(inspectingGame!.runnerId)).runnerType;
+
+            ((Visual)element.inp_binary.Parent!).IsVisible = runnerType == RunnerDto.RunnerType.Proton_GE
+                                            || runnerType == RunnerDto.RunnerType.Wine
+                                            || runnerType == RunnerDto.RunnerType.Wine_GE
+                                            || runnerType == RunnerDto.RunnerType.umu_Launcher;
+
+            foreach (ConfigChangerBase config in configOptions)
+                config.HandleSupportedType(runnerType);
         }
 
 
@@ -111,20 +134,33 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
             protected Game_Config key;
             protected Func<GameDto?> inspectingGameFetcher;
 
-            public ConfigChangerBase(Game_Config key, Func<GameDto?> getInspectingGame)
+            private RunnerDto.RunnerType[] supportedTypes;
+            private Visual control;
+
+            public ConfigChangerBase(Visual group, Game_Config key, Func<GameDto?> getInspectingGame, RunnerDto.RunnerType[] supportedTypes)
             {
                 this.key = key;
                 this.inspectingGameFetcher = getInspectingGame;
+
+                this.supportedTypes = supportedTypes;
+                this.control = group;
             }
 
             public abstract Task Load(GameDto game);
+
+            public void HandleSupportedType(RunnerDto.RunnerType selectedType)
+            {
+                bool supported = supportedTypes.Length > 0 ? supportedTypes.Contains(selectedType) : true;
+                control.IsVisible = supported;
+            }
         }
 
         internal sealed class ConfigChanger_Toggle : ConfigChangerBase
         {
             private Common_Toggle ui;
 
-            public ConfigChanger_Toggle(Common_Toggle ui, Game_Config key, Func<GameDto?> getInspectingGame) : base(key, getInspectingGame)
+            public ConfigChanger_Toggle(Common_Toggle ui, Game_Config key, Func<GameDto?> getInspectingGame, params RunnerDto.RunnerType[] supportedTypes)
+                : base((Visual)ui.Parent!, key, getInspectingGame, supportedTypes)
             {
                 this.ui = ui;
                 this.ui.RegisterOnChange(SaveToggle);
@@ -151,7 +187,8 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
         {
             private Common_Dropdown ui;
 
-            public ConfigChanger_Dropdown(Common_Dropdown ui, Game_Config key, string[] options, Func<GameDto?> getInspectingGame) : base(key, getInspectingGame)
+            public ConfigChanger_Dropdown(Common_Dropdown ui, Game_Config key, string[] options, Func<GameDto?> getInspectingGame, params RunnerDto.RunnerType[] supportedTypes)
+                : base((Visual)ui.Parent!, key, getInspectingGame, supportedTypes)
             {
                 this.ui = ui;
                 this.ui.Setup(options, 0, Save);
@@ -171,6 +208,34 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
                     return;
 
                 await game.config.SaveInteger(key, ui.selectedIndex);
+            }
+        }
+
+        internal sealed class ConfigChanger_InputField : ConfigChangerBase
+        {
+            private Common_InputField ui;
+
+            public ConfigChanger_InputField(Common_InputField ui, Game_Config key, Func<GameDto?> getInspectingGame, params RunnerDto.RunnerType[] supportedTypes)
+                : base((Visual)ui.Parent!, key, getInspectingGame, supportedTypes)
+            {
+                this.ui = ui;
+                this.ui.OnChange(Save);
+            }
+
+            public override Task Load(GameDto game)
+            {
+                ui.SilentlyChangeValue(game.config.GetValue(key));
+                return Task.CompletedTask;
+            }
+
+            private async Task Save()
+            {
+                GameDto? game = inspectingGameFetcher();
+
+                if (game == null)
+                    return;
+
+                await game.config.SaveValue(key, ui.getText);
             }
         }
     }

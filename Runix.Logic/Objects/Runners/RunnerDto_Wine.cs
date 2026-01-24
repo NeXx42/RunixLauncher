@@ -32,8 +32,6 @@ public class RunnerDto_Wine : RunnerDto
     public override async Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)
     {
         string prefixName = "shared";
-        string gamePath = game.path;
-
         RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = GetWineExecutable(game.customExecutable ?? "wine64") };
 
         if (game.gameConfig?.GetBoolean(Game_Config.Wine_ConsoleLaunched, false) ?? false)
@@ -59,7 +57,7 @@ public class RunnerDto_Wine : RunnerDto
             // from this i can later split on _ and get just the "folder name" or close enough
         }
 
-        res.arguments.AddLast(gamePath);
+        AddDefaultArgumentsToInit(ref game, ref res);
 
         if (game.gameConfig?.GetBoolean(Enums.Game_Config.Wine_Windowed, false) ?? false)
         {

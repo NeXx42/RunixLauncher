@@ -1,5 +1,6 @@
 using CSharpSqliteORM;
 using GameLibrary.Logic.Database.Tables;
+using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.GameRunners;
 using GameLibrary.Logic.Helpers;
 
@@ -12,7 +13,8 @@ public class RunnerDto
         AppImage = 0,
         Wine = 1,
         Wine_GE = 2,
-        umu_Launcher = 3,
+        umu_Launcher = 3, // dont like, but currently use it
+        Proton_GE = 4,
     }
 
     public enum RunnerConfigValues
@@ -55,6 +57,7 @@ public class RunnerDto
             case RunnerType.Wine: return new RunnerDto_Wine(runner, configValues);
             case RunnerType.Wine_GE: return new RunnerDto_WineGE(runner, configValues);
             case RunnerType.umu_Launcher: return new RunnerDto_umu(runner, configValues);
+            case RunnerType.Proton_GE: return new RunnerDto_ProtonGE(runner, configValues);
 
             default: return new RunnerDto(runner, configValues);
         }
@@ -103,6 +106,7 @@ public class RunnerDto
             case RunnerType.Wine: return await RunnerDto_Wine.GetRunnerVersions();
             case RunnerType.Wine_GE: return await RunnerDto_WineGE.GetRunnerVersions();
             case RunnerType.umu_Launcher: return await RunnerDto_umu.GetRunnerVersions();
+            case RunnerType.Proton_GE: return await RunnerDto_ProtonGE.GetRunnerVersions();
         }
 
         return null;
@@ -122,6 +126,19 @@ public class RunnerDto
                 return true;
 
         return false;
+    }
+
+    protected void AddDefaultArgumentsToInit(ref RunnerManager.LaunchRequest game, ref RunnerManager.LaunchArguments res)
+    {
+        res.arguments.AddLast(game.path);
+
+        if (game.gameConfig?.TryGetValue(Game_Config.General_Arguments, out string customArgs) ?? false)
+        {
+            string[] args = customArgs.Split(" ");
+
+            foreach (string arg in args)
+                res.arguments.AddLast(arg);
+        }
     }
 
     // Launching

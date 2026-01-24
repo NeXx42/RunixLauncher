@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
+using GameLibrary.Logic.Helpers;
 
 namespace GameLibrary.AvaloniaUI.Controls;
 

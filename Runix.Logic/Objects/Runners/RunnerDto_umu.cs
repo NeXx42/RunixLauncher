@@ -1,4 +1,5 @@
 using GameLibrary.Logic.Database.Tables;
+using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.GameRunners;
 
 namespace GameLibrary.Logic.Objects;
@@ -34,7 +35,7 @@ public class RunnerDto_umu : RunnerDto_Wine
             res.arguments.AddLast("/c");
         }
 
-        res.arguments.AddLast(game.path);
+        AddDefaultArgumentsToInit(ref game, ref res);
 
         if (game.gameConfig?.GetBoolean(Enums.Game_Config.Wine_Windowed, false) ?? false)
         {

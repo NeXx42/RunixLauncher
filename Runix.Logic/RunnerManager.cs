@@ -184,6 +184,9 @@ public static class RunnerManager
 
     public static Process ExecuteRunRequest(LaunchArguments req, string? logFile)
     {
+        if (req.loggingLevel == LoggingLevel.Off)
+            logFile = null;
+
         ProcessStartInfo info = new ProcessStartInfo();
         info.FileName = req.command;
 

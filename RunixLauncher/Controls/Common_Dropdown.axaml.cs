@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using GameLibrary.Logic.Helpers;
 
 namespace GameLibrary.AvaloniaUI.Controls;
 
@@ -26,7 +27,7 @@ public partial class Common_Dropdown : UserControl
     }
 
     public void Setup(IEnumerable collection, int? defaultOption, Func<Task>? onChange)
-        => SetupInternal(collection, defaultOption, onChange == null ? null : () => _ = onChange());
+        => SetupInternal(collection, defaultOption, onChange == null ? null : ExtensionMethods.WrapTaskInExceptionHandler(onChange));
 
     public void Setup(IEnumerable collection, int? defaultOption, Action? onChange)
         => SetupInternal(collection, defaultOption, onChange);
