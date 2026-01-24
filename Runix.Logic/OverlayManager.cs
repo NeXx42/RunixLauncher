@@ -22,7 +22,12 @@ public static class OverlayManager
             string gtkOverlay = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GameLibrary_GTKOverlay");
 
             if (!File.Exists(gtkOverlay))
-                throw new Exception("GTK overlay not found");
+            {
+                // maybe worth changing this to just hide the overlay in the ui if not found
+
+                return;
+                //throw new Exception("GTK overlay not found");
+            }
 
             var processInfo = new ProcessStartInfo
             {
