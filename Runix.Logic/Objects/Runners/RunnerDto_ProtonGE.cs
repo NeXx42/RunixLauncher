@@ -62,6 +62,34 @@ public class RunnerDto_ProtonGE : RunnerDto
         res.environmentArguments.Add("WINEPREFIX", "$STEAM_COMPAT_DATA_PATH/pfx");
         res.environmentArguments.Add("STEAM_COMPAT_CLIENT_INSTALL_PATH", "$HOME/.steam/steam");
 
+
+        AddLogging(res, game.gameConfig?.GetEnum(Game_Config.General_LoggingLevel, LoggingLevel.Off) ?? LoggingLevel.Off);
+
         return Task.FromResult(res);
+    }
+
+    protected virtual void AddLogging(RunnerManager.LaunchArguments args, LoggingLevel level)
+    {
+        string? logString = null;
+
+        switch (level)
+        {
+            case LoggingLevel.Low:
+                logString = "+err";
+                break;
+
+            case LoggingLevel.High:
+                logString = "+err,+warn";
+                break;
+
+            case LoggingLevel.Everything:
+                logString = "+all";
+                break;
+        }
+
+        if (string.IsNullOrEmpty(logString))
+            return;
+
+        args.environmentArguments.Add("WINEDEBUG", logString);
     }
 }
