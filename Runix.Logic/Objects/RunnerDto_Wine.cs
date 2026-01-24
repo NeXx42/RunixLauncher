@@ -12,12 +12,12 @@ public class RunnerDto_Wine : RunnerDto
     protected readonly string prefixRoot;
 
     protected virtual string getSharedPrefixFolder => Path.Combine(prefixRoot, "shared");
-    protected virtual string getWineExecutable => "wine";
 
     public static Task<string[]?> GetRunnerVersions() => Task.FromResult<string[]?>(null);
 
 
-    protected override string[] GetAcceptableExtensions() => ["exe"];
+    protected virtual string GetWineExecutable(string processName) => processName;
+    protected override string[] GetAcceptableExtensions() => ["exe", "bat"];
 
     public RunnerDto_Wine(dbo_Runner runner, dbo_RunnerConfig[] configValues) : base(runner, configValues)
     {
@@ -31,34 +31,35 @@ public class RunnerDto_Wine : RunnerDto
 
     public override async Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)
     {
-        RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = getWineExecutable };
-        res.command = getWineExecutable;
-
         string prefixName = "shared";
+        string gamePath = game.path;
 
-        if (game.gameConfig != null)
+        RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = GetWineExecutable(game.customExecutable ?? "wine64") };
+
+        if (game.gameConfig?.GetBoolean(Game_Config.Wine_ConsoleLaunched, false) ?? false)
         {
-            if (game.gameConfig.GetBoolean(Game_Config.Wine_ExplorerLaunch, false))
-            {
-                res.arguments.AddLast("explorer");
-                res.arguments.AddLast("/desktop=Game,800x600");
-            }
-
-            if (game.gameConfig.GetBoolean(Game_Config.Wine_IsolatedPrefix, false))
-            {
-                prefixName = game.path;
-                prefixName = prefixName.Replace("!", string.Empty);
-                prefixName = prefixName.Replace(",", string.Empty);
-                prefixName = prefixName.Replace(" ", string.Empty);
-                prefixName = prefixName.Replace("_", string.Empty);
-                prefixName = prefixName.Replace("'", string.Empty);
-                prefixName = prefixName.Replace("/", "_");
-
-                // from this i can later split on _ and get just the "folder name" or close enough
-            }
+            res.command = GetWineExecutable("wineconsole");
+        }
+        else if (game.gameConfig?.GetBoolean(Game_Config.Wine_ExplorerLaunch, false) ?? false)
+        {
+            res.arguments.AddLast("explorer");
+            res.arguments.AddLast("/desktop=Game,800x600");
         }
 
-        res.arguments.AddLast(game.path);
+        if (game.gameConfig?.GetBoolean(Game_Config.Wine_IsolatedPrefix, false) ?? false)
+        {
+            prefixName = game.path;
+            prefixName = prefixName.Replace("!", string.Empty);
+            prefixName = prefixName.Replace(",", string.Empty);
+            prefixName = prefixName.Replace(" ", string.Empty);
+            prefixName = prefixName.Replace("_", string.Empty);
+            prefixName = prefixName.Replace("'", string.Empty);
+            prefixName = prefixName.Replace("/", "_");
+
+            // from this i can later split on _ and get just the "folder name" or close enough
+        }
+
+        res.arguments.AddLast(gamePath);
 
         if (game.gameConfig?.GetBoolean(Enums.Game_Config.Wine_Windowed, false) ?? false)
         {

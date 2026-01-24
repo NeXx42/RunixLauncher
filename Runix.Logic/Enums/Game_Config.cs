@@ -8,4 +8,5 @@ public enum Game_Config
     Wine_Windowed,
     Wine_ExplorerLaunch,
     Wine_IsolatedPrefix,
+    Wine_ConsoleLaunched,
 }

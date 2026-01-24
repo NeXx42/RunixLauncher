@@ -11,9 +11,6 @@ public class RunnerDto_umu : RunnerDto_Wine
 
     private static string getRuntimeLocationRoot => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/Steam/compatibilitytools.d");
 
-    public string[] getAcceptableExtensions => ["exe"];
-
-
     public RunnerDto_umu(dbo_Runner runner, dbo_RunnerConfig[] configValues) : base(runner, configValues)
     {
         version = runnerVersion;
@@ -30,6 +27,12 @@ public class RunnerDto_umu : RunnerDto_Wine
     public override Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)
     {
         RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = "umu-run" };
+
+        if (game.path.EndsWith(".bat"))
+        {
+            res.arguments.AddLast("cmd");
+            res.arguments.AddLast("/c");
+        }
 
         res.arguments.AddLast(game.path);
 

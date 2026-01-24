@@ -45,6 +45,11 @@
         <common:Common_Toggle x:Name="inp_IsolatePrefix" Grid.Column="1"/>
       </Grid>
 
+      <Grid ColumnDefinitions="150, 300">
+        <Label Content="Launch from console" VerticalAlignment="Center"/>
+        <common:Common_Toggle x:Name="inp_Wine_LaunchAsConsole" Grid.Column="1"/>
+      </Grid>
+
     </StackPanel>
 
 
