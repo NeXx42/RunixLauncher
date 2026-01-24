@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -42,7 +43,7 @@ public partial class Indexer_Folder : UserControl
         if (folder == null)
             return;
 
-        string? result = await FileManager.ExtractFolder(folder.archiveFile ?? string.Empty);
+        string? result = await FileManager.RequestExtract(folder.archiveFile ?? string.Empty, new Progress<double>(), new CancellationTokenSource().Token);
 
         if (string.IsNullOrEmpty(result))
             return;

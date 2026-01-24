@@ -2,24 +2,22 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Windows;
 using CSharpSqliteORM;
 using GameLibrary.DB;
 using GameLibrary.DB.Tables;
+using GameLibrary.Logic.Helpers;
 using GameLibrary.Logic.Objects;
 using SharpCompress.Archives;
 using SharpCompress.Common;
+using SharpCompress.Readers;
 
 namespace GameLibrary.Logic
 {
     public static class FileManager
     {
-
-        //public static void SaveScreenshot(obj bmp)
-        //{
-        //    Cleanup();
-        //    bmp.Save(Path.Combine(GetTempLocation(), "temp.jpg"), ImageFormat.Jpeg);
-        //}
+        private static SemaphoreSlim _concurrentUnzipSlim = new SemaphoreSlim(3);
 
         public static async Task DeleteGameFiles(GameDto game)
         {
@@ -101,20 +99,24 @@ namespace GameLibrary.Logic
             {
                 string actualPath = path.Replace("%20", " ");
 
-                topLevelFolders.AddRange(Directory.GetDirectories(actualPath));
+                topLevelFolders.AddRange(Directory.GetDirectories(actualPath).Where(x => Directory.EnumerateFileSystemEntries(x).Any()));
                 extracts.AddRange(Directory.GetFiles(actualPath).Where(IsZip));
             }
 
             foreach (string extract in extracts)
             {
                 string archiveDir = Path.Combine(Path.GetDirectoryName(extract)!, Path.GetFileNameWithoutExtension(extract));
-                int extractedFolder = topLevelFolders.IndexOf(archiveDir);
-                ImportEntry_Folder folder = new ImportEntry_Folder(extract, extractedFolder >= 0 ? topLevelFolders[extractedFolder] : null);
 
-                if (extractedFolder >= 0)
-                    topLevelFolders.RemoveAt(extractedFolder);
+                int extractedFolderPos = topLevelFolders.IndexOf(archiveDir);
+                string? extractedFolder = null;
 
-                foundEntries.Add(folder);
+                if (extractedFolderPos >= 0)
+                {
+                    extractedFolder = topLevelFolders[extractedFolderPos];
+                    topLevelFolders.RemoveAt(extractedFolderPos);
+                }
+
+                foundEntries.Add(new ImportEntry_Folder(extract, extractedFolder));
             }
 
             foreach (string remainingFolder in topLevelFolders)
@@ -128,66 +130,161 @@ namespace GameLibrary.Logic
 
         public static bool IsZip(string path)
         {
-            return path.EndsWith(".7z", StringComparison.InvariantCultureIgnoreCase) ||
-                path.EndsWith(".rar", StringComparison.InvariantCultureIgnoreCase) ||
-                path.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase);
+            string extension = Path.GetExtension(path);
+
+            return extension.Equals(".7z", StringComparison.InvariantCultureIgnoreCase) ||
+                extension.Equals(".rar", StringComparison.InvariantCultureIgnoreCase) ||
+                extension.Equals(".zip", StringComparison.InvariantCultureIgnoreCase) ||
+                extension.Equals(".iso", StringComparison.InvariantCultureIgnoreCase);
         }
 
-        public static async Task<string?> ExtractFolder(string archiveFile)
+
+
+        public static async Task<string?> RequestExtract(string archivePath, Progress<double> progress, CancellationToken cancellationToken)
         {
-            if (!File.Exists(archiveFile))
-                return string.Empty;
-
-            bool didExtract = false;
-            string extractPath = Path.Combine(Path.GetDirectoryName(archiveFile)!, Path.GetFileNameWithoutExtension(archiveFile));
-
-            ExtractionOptions extractionOptions = new ExtractionOptions()
+            if (!File.Exists(archivePath) || !IsZip(archivePath))
             {
-                ExtractFullPath = true,
-                Overwrite = true,
-            };
+                throw new Exception($"Invalid archive - {archivePath}");
+            }
 
-            Directory.CreateDirectory(extractPath);
+            ReaderOptions readerOptions = new ReaderOptions();
+
+            if (IsArchiveEncrypted(archivePath))
+            {
+                readerOptions.Password = await DependencyManager.OpenStringInputModal("Archive Password") ?? string.Empty;
+            }
+
+            await _concurrentUnzipSlim.WaitAsync(cancellationToken);
+
+            if (cancellationToken.IsCancellationRequested)
+                return null;
 
             try
             {
-                using (IArchive? archive = ArchiveFactory.Open(archiveFile))
+                string extractName = Path.GetFileNameWithoutExtension(archivePath)!;
+                string dir = Path.GetDirectoryName(archivePath)!;
+
+                string extractedFolderName = Path.Combine(dir, extractName).CreateDirectoryIfNotExists();
+                string extension = Path.GetExtension(archivePath);
+
+                using var archive = ArchiveFactory.Open(archivePath, readerOptions);
+
+                switch (extension)
                 {
-                    await DependencyManager.OpenLoadingModal(false, async () => archive.WriteToDirectory(extractPath, extractionOptions));
-                    didExtract = true;
+                    case ".7z": return await ExtractFile_7z(archive, extractedFolderName, progress, cancellationToken);
+                    case ".iso": return await ExtractFile_7z(archive, extractedFolderName, progress, cancellationToken);
+                    case ".rar": return await ExtractFile_Rar(archive, archivePath, readerOptions.Password, extractedFolderName, progress, cancellationToken);
+
+                    default: return await ExtractFile_Basic(archive, extractedFolderName, progress, cancellationToken);
                 }
             }
             catch (CryptographicException)
             {
-                string? password = await DependencyManager.OpenStringInputModal("Archive Password") ?? string.Empty;
+                throw new Exception("Invalid Password");
+            }
+            catch (InvalidDataException)
+            {
+                throw new Exception("Invalid Password");
+            }
+            finally
+            {
+                _concurrentUnzipSlim.Release();
+            }
+        }
 
-                using (IArchive? archive = ArchiveFactory.Open(archiveFile, new SharpCompress.Readers.ReaderOptions() { Password = password }))
+        private static bool IsArchiveEncrypted(string path)
+        {
+            try
+            {
+                using (var archive = ArchiveFactory.Open(path))
                 {
-                    await DependencyManager.OpenLoadingModal(false, async () => archive.WriteToDirectory(extractPath, extractionOptions));
-                    didExtract = true;
+                    return archive.Entries.Any(x => !x.IsDirectory && x.IsEncrypted);
                 }
             }
-            catch
+            catch (CryptographicException)
             {
+                return true;
+            }
+        }
 
+
+        private static async Task<string?> ExtractFile_7z(IArchive archive, string extractFolderName, Progress<double> progress, CancellationToken cancellationToken)
+        {
+            await Task.Run(() =>
+            {
+                foreach (var entry in archive.Entries)
+                {
+                    if (entry.IsDirectory)
+                        continue;
+
+                    entry.WriteToDirectory(
+                        extractFolderName,
+                        new ExtractionOptions
+                        {
+                            ExtractFullPath = true,
+                            Overwrite = true
+                        });
+                }
+            }, cancellationToken);
+
+            return extractFolderName;
+        }
+
+        private static async Task<string?> ExtractFile_Rar(IArchive archive, string archivePath, string? password, string extractFolderName, Progress<double> progress, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(password))
+                return await ExtractFile_Basic(archive, extractFolderName, progress, cancellationToken);
+
+            ProcessStartInfo info = new ProcessStartInfo();
+            info.FileName = "unrar";
+
+            info.RedirectStandardError = true;
+            info.RedirectStandardOutput = true;
+            info.UseShellExecute = false;
+            info.CreateNoWindow = true;
+
+            info.ArgumentList.Add("x");
+            info.ArgumentList.Add("-o+");
+
+            info.ArgumentList.Add($"-p{password}");
+
+            info.ArgumentList.Add(archivePath);
+            info.ArgumentList.Add(extractFolderName);
+
+            Process p = new Process();
+            p.StartInfo = info;
+
+            p.Start();
+            await p.WaitForExitAsync();
+
+            if (p.ExitCode != 0)
+            {
+                throw new Exception("Failed to extract");
             }
 
-            if (didExtract)
+            return extractFolderName;
+        }
+
+        private static async Task<string?> ExtractFile_Basic(IArchive archive, string extractFolderName, Progress<double> progress, CancellationToken cancellationToken)
+        {
+            await Task.Run(() =>
             {
-                return extractPath;
-            }
+                foreach (var entry in archive.Entries)
+                {
+                    if (entry.IsDirectory)
+                        continue;
 
-            return string.Empty;
+                    entry.WriteToDirectory(
+                        extractFolderName,
+                        new ExtractionOptions
+                        {
+                            ExtractFullPath = true,
+                            Overwrite = true
+                        });
+                }
+            }, cancellationToken);
 
-            //async Task Extract(IArchive archive, string outputPath, ExtractionOptions options)
-            //{
-            //    Func<Task>[] tasks = archive.Entries
-            //        .Where(e => !e.IsDirectory)
-            //        .Select(entry => (Func<Task>)(() => entry.WriteToDirectoryAsync(outputPath, options)))
-            //        .ToArray();
-            //
-            //    await DependencyManager.OpenLoadingModal(true, tasks);
-            //}
+            return extractFolderName;
         }
 
 
@@ -209,7 +306,7 @@ namespace GameLibrary.Logic
 
             public string getPotentialName => Path.GetFileNameWithoutExtension(selectedBinary!).Replace(" ", string.Empty);
             public string getBinaryPath => selectedBinary!;
-            public string? getBinaryFolder => extractedEntry;
+            public string? getBinaryFolder => Path.GetDirectoryName(getBinaryPath);
 
 
             public ImportEntry_Folder(string? extract, string? extractedFolder)

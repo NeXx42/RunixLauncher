@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -10,6 +11,7 @@ using Avalonia.Media.Immutable;
 using GameLibrary.AvaloniaUI.Controls;
 using GameLibrary.AvaloniaUI.Controls.SubPage;
 using GameLibrary.Logic;
+using GameLibrary.Logic.Helpers;
 
 namespace GameLibrary.AvaloniaUI.Controls.SubPage.Indexer;
 
@@ -154,7 +156,7 @@ public partial class Indexer_FolderView : UserControl
             btn_Generic.IsVisible = true;
             btn_Generic.Label = "Extract Here";
 
-            btn_Generic_Callback = () => _ = ExtractFile(dir);
+            btn_Generic_Callback = ExtensionMethods.WrapTaskInExceptionHandler(async () => await ExtractFile(dir));
         }
     }
 
@@ -177,7 +179,9 @@ public partial class Indexer_FolderView : UserControl
 
     private async Task ExtractFile(string dir)
     {
-        await FileManager.ExtractFolder(dir);
+        Progress<double> progress = new Progress<double>();
+
+        await FileManager.RequestExtract(dir, progress, new CancellationTokenSource().Token);
         UpdateFolderDir(Path.GetDirectoryName(dir)!);
     }
 }
