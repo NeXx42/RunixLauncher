@@ -16,6 +16,7 @@ public static class RunnerManager
 {
     private static SemaphoreSlim _mutex = new SemaphoreSlim(1, 1);
 
+    private static int cachedDefaultRunnerId;
     private static Dictionary<int, RunnerDto> cachedRunners = new Dictionary<int, RunnerDto>();
     private static Dictionary<string, ActiveProcess> activeGames = new Dictionary<string, ActiveProcess>();
 
@@ -53,7 +54,7 @@ public static class RunnerManager
 
         try
         {
-            RunnerDto? selectedRunner = await GetRunnerProfile(launchRequest.runnerId);
+            RunnerDto selectedRunner = GetRunnerProfile(launchRequest.runnerId);
 
             if (selectedRunner == null)
             {
@@ -292,16 +293,8 @@ public static class RunnerManager
         {
             cachedRunners.Remove(existing);
         }
-    }
 
-    // use cached options once i add the default option
-    public static async Task<RunnerDto> GetRunnerProfile(int? id)
-    {
-        dbo_Runner? runnerDb = id.HasValue
-            ? await Database_Manager.GetItem<dbo_Runner>(SQLFilter.Equal(nameof(dbo_Runner.runnerId), id))
-            : await Database_Manager.GetItem<dbo_Runner>(SQLFilter.OrderAsc(nameof(dbo_Runner.runnerId)));
-
-        return await GetRunnerProfile(runnerDb);
+        cachedDefaultRunnerId = runnerDbs.OrderBy(x => x.runnerId).First().runnerId;
     }
 
     public static async Task<RunnerDto> GetRunnerProfile(dbo_Runner? runnerDb)
@@ -315,7 +308,7 @@ public static class RunnerManager
         return RunnerDto.Create(runnerDb, globalConfig);
     }
 
-    public static RunnerDto GetRunnerProfile(int id) => cachedRunners[id];
+    public static RunnerDto GetRunnerProfile(int? id) => cachedRunners[id ?? cachedDefaultRunnerId];
     public static RunnerDto[] GetRunnerProfiles() => cachedRunners.Values.ToArray();
 
     public static async Task<int> GetGameCountForRunner(int runnerId)

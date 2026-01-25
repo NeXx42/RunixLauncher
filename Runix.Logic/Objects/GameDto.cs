@@ -29,6 +29,7 @@ public abstract class GameDto
     public HashSet<int> tags { protected set; get; }
     public ConfigProvider<Game_Config> config { protected set; get; }
 
+    public RunnerDto.RunnerType? runnerType { protected set; get; }
 
     public virtual string getAbsoluteFolderLocation => Path.Combine(LibraryManager.GetLibraryRoute(this), folderPath);
     public virtual string getAbsoluteLogFile => $"{getAbsoluteBinaryLocation}.log";
@@ -226,39 +227,7 @@ public abstract class GameDto
         return $"{hours} hour{(hours > 1 ? "s" : "")}";
     }
 
-    public (string msg, Func<Task> resolution)[] GetWarnings()
-    {
-        List<(string, Func<Task>)> warnings = new List<(string, Func<Task>)>();
-
-        if (folderPath.Contains(',') || folderPath.Contains('!'))
-        {
-            CreateFixer("Illegal Folder", "This will rename the folder to remove the illegal characters", ResolveFolderPath);
-        }
-
-        return warnings.ToArray();
-
-        void CreateFixer(string title, string desc, Func<Task> body)
-        {
-            warnings.Add((
-                title,
-                async () => await DependencyManager.OpenYesNoModalAsync(title, desc, body, "Fixing")
-            ));
-        }
-    }
-
-    private async Task ResolveFolderPath()
-    {
-        if (!Directory.Exists(getAbsoluteFolderLocation))
-            return;
-
-        string existing = getAbsoluteFolderLocation;
-
-        folderPath = folderPath.Replace(",", string.Empty).Replace("!", string.Empty);
-        Directory.Move(existing, getAbsoluteFolderLocation);
-
-        await UpdateDatabaseEntry(nameof(dbo_Game.gameFolder));
-    }
-
+    public virtual (string msg, Func<Task> resolution)[] GetWarnings() => Array.Empty<(string, Func<Task>)>();
 
 
     // required behaviour    

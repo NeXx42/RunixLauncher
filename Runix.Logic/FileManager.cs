@@ -42,18 +42,30 @@ namespace GameLibrary.Logic
 
         public static string CreateEmptyGameFolder(string absoluteBinaryFile)
         {
-            string folderName = Path.Combine(Path.GetDirectoryName(absoluteBinaryFile)!, Path.GetFileName(absoluteBinaryFile).Replace(" ", string.Empty));
+            string folderName = Path.Combine(Path.GetDirectoryName(absoluteBinaryFile)!, Path.GetFileNameWithoutExtension(absoluteBinaryFile).Replace(" ", string.Empty));
 
             Directory.CreateDirectory(folderName);
-            Directory.Move(absoluteBinaryFile, folderName);
+            Directory.Move(absoluteBinaryFile, Path.Combine(folderName, Path.GetFileName(absoluteBinaryFile)));
 
             return folderName;
         }
 
-        public static Task MoveGameToItsLibrary(dbo_Game game, string binaryAbsolutePath, string libraryRootLocation)
+        public static async Task<bool> MoveGameToItsLibrary(dbo_Game game, string binaryAbsolutePath, string libraryRootLocation)
         {
             string destination = Path.Combine(libraryRootLocation, game.gameFolder);
             string existingFolderPath = Path.GetDirectoryName(binaryAbsolutePath)!;
+
+            if (Directory.Exists(destination))
+            {
+                if (await DependencyManager.OpenYesNoModal("Delete?", $"A directory already exsits at\n'{destination}'\n\nDo you want to delete it?"))
+                {
+                    Directory.Delete(destination, true);
+                }
+                else
+                {
+                    return false;
+                }
+            }
 
             try
             {
@@ -61,10 +73,14 @@ namespace GameLibrary.Logic
             }
             catch (IOException ex) when (ex.Message.Contains("Invalid cross-device link"))
             {
-                CopyFiles(existingFolderPath, destination);
+                await CopyFiles(existingFolderPath, destination);
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
 
-            return Task.CompletedTask;
+            return true;
         }
 
         private static Task CopyFiles(string existing, string destination)
@@ -356,7 +372,7 @@ namespace GameLibrary.Logic
             public string getBinaryPath => binaryLocation;
             public string? getBinaryFolder => null;
 
-            public ImportEntry_Binary(string loc) => binaryLocation = loc;
+            public ImportEntry_Binary(string loc) => binaryLocation = loc.Replace("%20", " ");
 
         }
     }

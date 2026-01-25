@@ -10,6 +10,7 @@ public class RunnerDto
 {
     public enum RunnerType
     {
+        None = -1,
         AppImage = 0,
         Wine = 1,
         Wine_GE = 2,

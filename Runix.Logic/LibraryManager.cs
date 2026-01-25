@@ -53,6 +53,7 @@ namespace GameLibrary.Logic
                 if (folder is FileManager.ImportEntry_Binary binaryImport)
                 {
                     absoluteFolder = FileManager.CreateEmptyGameFolder(binaryImport.binaryLocation);
+                    binaryImport.binaryLocation = Path.Combine(absoluteFolder, Path.GetFileName(binaryImport.binaryLocation));
                 }
                 else
                 {
@@ -68,23 +69,18 @@ namespace GameLibrary.Logic
                     status = (int)Game_Status.Active
                 };
 
-                try
+
+                if (libraryId.HasValue)
                 {
-                    if (libraryId.HasValue)
-                    {
-                        newGame.gameFolder = useGuidFolderNames ? Guid.NewGuid().ToString() : gameName;
-                        dbo_Libraries library = (await Database_Manager.GetItem<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libaryId), libraryId.Value)))!;
+                    newGame.gameFolder = useGuidFolderNames ? Guid.NewGuid().ToString() : gameName;
+                    dbo_Libraries library = (await Database_Manager.GetItem<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libaryId), libraryId.Value)))!;
 
-                        await FileManager.MoveGameToItsLibrary(newGame, folder.getBinaryPath, library.rootPath);
-                    }
-
-                    await Database_Manager.InsertItem(newGame);
-                    availableImports.RemoveAt(i);
+                    if (!await FileManager.MoveGameToItsLibrary(newGame, folder.getBinaryPath, library.rootPath))
+                        continue;
                 }
-                catch
-                {
 
-                }
+                await Database_Manager.InsertItem(newGame);
+                availableImports.RemoveAt(i);
             }
         }
 

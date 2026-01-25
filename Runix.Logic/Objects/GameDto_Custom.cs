@@ -9,6 +9,7 @@ public class GameDto_Custom : GameDto
 {
     public GameDto_Custom(dbo_Game game, dbo_GameTag[] tags, dbo_GameConfig[] config) : base(game, tags, config)
     {
+        runnerType = RunnerManager.GetRunnerProfile(game.runnerId).runnerType;
     }
 
     public override async Task Launch()
@@ -41,6 +42,8 @@ public class GameDto_Custom : GameDto
     public override async Task ChangeRunnerId(int? runnerId)
     {
         this.runnerId = runnerId;
+        runnerType = RunnerManager.GetRunnerProfile(runnerId).runnerType; // ....
+
         await UpdateDatabaseEntry(nameof(dbo_Game.runnerId));
     }
 
@@ -66,4 +69,56 @@ public class GameDto_Custom : GameDto
     }
 
     public override Task<string?> FetchIconFilePath() => Task.FromResult(string.IsNullOrEmpty(iconPath) ? null : getAbsoluteIconPath);
+
+    public override (string msg, Func<Task> resolution)[] GetWarnings()
+    {
+        List<(string, Func<Task>)> warnings = new List<(string, Func<Task>)>();
+
+        switch (runnerType)
+        {
+            case RunnerDto.RunnerType.Wine:
+            case RunnerDto.RunnerType.Wine_GE:
+            case RunnerDto.RunnerType.Proton_GE:
+            case RunnerDto.RunnerType.umu_Launcher:
+                if (folderPath.Contains(',') || folderPath.Contains('!'))
+                    CreateFixer("Illegal Folder", "This will rename the folder to remove the illegal characters", ResolveFolderPath);
+                break;
+
+            case RunnerDto.RunnerType.AppImage:
+                UnixFileMode info = new FileInfo(getAbsoluteBinaryLocation).UnixFileMode;
+
+                if (!info.HasFlag(UnixFileMode.UserExecute))
+                    CreateFixer("Not executable", "This file isnt marked as executable, Would you like to make it?", MakeAppImageExecutable);
+
+                break;
+        }
+
+        return warnings.ToArray();
+
+        void CreateFixer(string title, string desc, Func<Task> body)
+        {
+            warnings.Add((
+                title,
+                async () => await DependencyManager.OpenYesNoModalAsync(title, desc, body, "Fixing")
+            ));
+        }
+    }
+
+    private async Task ResolveFolderPath()
+    {
+        if (!Directory.Exists(getAbsoluteFolderLocation))
+            return;
+
+        string existing = getAbsoluteFolderLocation;
+
+        folderPath = folderPath.Replace(",", string.Empty).Replace("!", string.Empty);
+        Directory.Move(existing, getAbsoluteFolderLocation);
+
+        await UpdateDatabaseEntry(nameof(dbo_Game.gameFolder));
+    }
+
+    private async Task MakeAppImageExecutable()
+    {
+        File.SetUnixFileMode(getAbsoluteBinaryLocation, new FileInfo(getAbsoluteBinaryLocation).UnixFileMode | UnixFileMode.UserExecute);
+    }
 }

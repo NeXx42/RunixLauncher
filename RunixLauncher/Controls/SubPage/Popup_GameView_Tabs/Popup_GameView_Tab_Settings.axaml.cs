@@ -116,15 +116,13 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 
         private async Task UpdateSupportedSettings()
         {
-            var runnerType = (await RunnerManager.GetRunnerProfile(inspectingGame!.runnerId)).runnerType;
-
-            ((Visual)element.inp_binary.Parent!).IsVisible = runnerType == RunnerDto.RunnerType.Proton_GE
-                                            || runnerType == RunnerDto.RunnerType.Wine
-                                            || runnerType == RunnerDto.RunnerType.Wine_GE
-                                            || runnerType == RunnerDto.RunnerType.umu_Launcher;
+            ((Visual)element.inp_binary.Parent!).IsVisible = inspectingGame.runnerType == RunnerDto.RunnerType.Proton_GE
+                                            || inspectingGame.runnerType == RunnerDto.RunnerType.Wine
+                                            || inspectingGame.runnerType == RunnerDto.RunnerType.Wine_GE
+                                            || inspectingGame.runnerType == RunnerDto.RunnerType.umu_Launcher;
 
             foreach (ConfigChangerBase config in configOptions)
-                config.HandleSupportedType(runnerType);
+                config.HandleSupportedType(inspectingGame.runnerType ?? RunnerDto.RunnerType.None);
         }
 
 
