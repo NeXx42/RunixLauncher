@@ -150,10 +150,9 @@ public class RunnerDto
 
     public virtual Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest req)
     {
-        return Task.FromResult(new RunnerManager.LaunchArguments()
-        {
-            command = req.path,
-            whiteListedDirs = [Path.GetDirectoryName(req.path)!]
-        });
+        var args = new RunnerManager.LaunchArguments() { command = req.path };
+        args.whiteListedDirs.Add(req.path);
+
+        return Task.FromResult(args);
     }
 }

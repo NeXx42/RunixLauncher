@@ -203,9 +203,9 @@ public abstract class GameDto
 
         TimeSpan time = DateTime.UtcNow - lastPlayed.Value;
 
-        if (time.TotalDays > 0) return Format(time.TotalDays, "day");
-        if (time.TotalHours > 0) return Format(time.TotalHours, "hour");
-        if (time.TotalMinutes > 0) return Format(time.TotalMinutes, "min");
+        if (Math.Floor(time.TotalDays) > 0) return Format(time.TotalDays, "day");
+        if (Math.Floor(time.TotalHours) > 0) return Format(time.TotalHours, "hour");
+        if (Math.Floor(time.TotalMinutes) > 0) return Format(time.TotalMinutes, "min");
 
         return "Just now";
 
@@ -233,6 +233,8 @@ public abstract class GameDto
     // required behaviour    
 
     public abstract Task Launch();
+    public abstract bool IsRunning();
+
     public abstract Task<string?> FetchIconFilePath();
 
     // overridable behaviour    

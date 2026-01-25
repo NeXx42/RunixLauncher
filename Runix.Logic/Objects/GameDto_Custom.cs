@@ -26,6 +26,8 @@ public class GameDto_Custom : GameDto
         });
     }
 
+    public override bool IsRunning() => RunnerManager.IsIdentifierRunning(gameName);
+
     public override async Task ChangeBinaryLocation(string? path)
     {
         string newAbsolutePath = Path.Combine(getAbsoluteFolderLocation, path!);

@@ -196,7 +196,6 @@ public static class RunnerManager
         info.RedirectStandardOutput = true;
         info.RedirectStandardInput = true;
         info.ErrorDialog = true;
-        info.CreateNoWindow = true;
 
         foreach (var arg in req.arguments)
         {
@@ -208,7 +207,14 @@ public static class RunnerManager
 
         foreach (var arg in req.environmentArguments)
         {
-            info.EnvironmentVariables.Add(arg.Key, arg.Value);
+            try
+            {
+                info.EnvironmentVariables.Add(arg.Key, arg.Value);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         Process process = new Process();
@@ -251,7 +257,6 @@ public static class RunnerManager
 
         onGameStatusChange?.Invoke(identifier, false);
     }
-
 
 
 
@@ -405,6 +410,9 @@ public static class RunnerManager
                     Access = FileAccess.ReadWrite,
                     Share = FileShare.ReadWrite
                 });
+
+                process.OutputDataReceived += OnOutput;
+                process.ErrorDataReceived += OnOutput;
             }
 
             this.gameId = gameId;
@@ -414,13 +422,13 @@ public static class RunnerManager
 
             process.Exited += HandleExit;
 
-            process.OutputDataReceived += OnOutput;
-            process.ErrorDataReceived += OnOutput;
-
             process.Start();
 
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
+            if (!string.IsNullOrEmpty(logFile))
+            {
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+            }
         }
 
         private async void OnOutput(object sender, DataReceivedEventArgs args)

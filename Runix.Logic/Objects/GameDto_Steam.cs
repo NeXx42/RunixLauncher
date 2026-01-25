@@ -45,4 +45,6 @@ public class GameDto_Steam : GameDto
     {
         await RunnerManager.RunSteamGame(this);
     }
+
+    public override bool IsRunning() => RunnerManager.IsIdentifierRunning(gameName);
 }

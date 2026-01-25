@@ -26,13 +26,13 @@
     <Label FontSize="18" Content="Runner Settings" Margin="0 15 0 0" />
     <StackPanel x:Name="tab_Settings_Wine" Margin="10 0" Spacing="5">
       <Grid ColumnDefinitions="150, 300">
-        <Label Content="Binary" VerticalAlignment="Center"/>
-        <common:Common_Dropdown x:Name="inp_binary" Grid.Column="1"/>
+        <Label Content="Runner" VerticalAlignment="Center"/>
+        <common:Common_Dropdown x:Name="inp_WineProfile" Grid.Column="1"/>
       </Grid>
 
       <Grid ColumnDefinitions="150, 300">
-        <Label Content="Runner" VerticalAlignment="Center"/>
-        <common:Common_Dropdown x:Name="inp_WineProfile" Grid.Column="1"/>
+        <Label Content="Binary" VerticalAlignment="Center"/>
+        <common:Common_Dropdown x:Name="inp_binary" Grid.Column="1"/>
       </Grid>
 
       <Grid ColumnDefinitions="150, 300">

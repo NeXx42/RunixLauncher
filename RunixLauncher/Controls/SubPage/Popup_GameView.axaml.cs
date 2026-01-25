@@ -48,7 +48,7 @@ public partial class Popup_GameView : UserControl, IControlChild
 
         lbl_Title.PointerPressed += (_, __) => _ = StartNameChange();
 
-        LibraryManager.onGameDetailsUpdate.RegisterTask(RefreshSelectedGame);
+        LibraryManager.onGameDetailsUpdate += (i) => _ = RefreshSelectedGame(i);
         RunnerManager.onGameStatusChange += (a, b) => HelperFunctions.WrapUIThread(() => UpdateRunningGameStatus(a, b));
     }
 
@@ -105,16 +105,14 @@ public partial class Popup_GameView : UserControl, IControlChild
 
     private async Task LaunchGame()
     {
-        if (RunnerManager.IsIdentifierRunning(inspectingGame!.getAbsoluteBinaryLocation))
+        if (inspectingGame!.IsRunning())
         {
-            RunnerManager.KillProcess(inspectingGame!.getAbsoluteBinaryLocation);
+            RunnerManager.KillProcess(inspectingGame!.gameName);
         }
         else
         {
             await inspectingGame!.Launch();
         }
-
-        UpdateRunningGameStatus(inspectingGame.getAbsoluteBinaryLocation, RunnerManager.IsIdentifierRunning(inspectingGame.gameName));
     }
 
     private void BrowseToGame() => inspectingGame?.BrowseToGame();
@@ -152,10 +150,10 @@ public partial class Popup_GameView : UserControl, IControlChild
 
     private void UpdateRunningGameStatus(string binary, bool to)
     {
-        if (inspectingGame?.getAbsoluteBinaryLocation != binary)
+        if (inspectingGame?.gameName != binary)
             return;
 
-        btn_Launch.Label = to ? "Stop" : "Play";
+        btn_Launch.Label = to ? "Stop" : "▶ Launch";
     }
 
     public Task Enter()
