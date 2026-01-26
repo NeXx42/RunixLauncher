@@ -19,6 +19,8 @@ public enum ConfigKeys
     Appearance_Layout,
     Appearance_BackgroundImage,
     Appearance_DefaultFilter,
+    Appearance_ImageResolution,
+    Appearance_ImageInterpolation,
 
     Input_ControllerSupport,
 }

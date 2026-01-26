@@ -39,7 +39,17 @@ public class ConfigProvider<ENUMTYPE>
 
     public async Task<bool> SaveGeneric<T>(ENUMTYPE key, T obj)
     {
-        switch (typeof(T).Name)
+        if (obj == null)
+        {
+            if (handleDelete != null)
+                await handleDelete(key.ToString());
+
+            return true;
+        }
+
+        var type = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
+
+        switch (type.Name)
         {
             case nameof(String): return await SaveValue(key, Convert.ToString(obj));
             case nameof(Boolean): return await SaveBool(key, Convert.ToBoolean(obj));
@@ -48,7 +58,7 @@ public class ConfigProvider<ENUMTYPE>
             case nameof(Int32): return await SaveInteger(key, Convert.ToInt32(obj));
         }
 
-        return false;
+        throw new Exception($"Invalid type - {typeof(T).Name}");
     }
 
     public async Task<bool> SaveEnum<T>(ENUMTYPE key, T v) where T : Enum => await SaveInteger(key, Convert.ToInt32(v));
@@ -76,12 +86,9 @@ public class ConfigProvider<ENUMTYPE>
     // get
 
     public T GetGeneric<T>(ENUMTYPE key, T defaultVal)
-        => GetGeneric<T>(key) ?? defaultVal;
-
-    public T? GetGeneric<T>(ENUMTYPE key)
     {
         if (!TryGetValue(key, out string res))
-            return default;
+            return defaultVal;
 
         switch (typeof(T).Name)
         {
@@ -92,7 +99,7 @@ public class ConfigProvider<ENUMTYPE>
             case nameof(Int32): return (T)(object)int.Parse(res);
         }
 
-        return default;
+        return defaultVal;
     }
 
     public T GetEnum<T>(ENUMTYPE key, T defaultVal) where T : Enum
@@ -103,10 +110,22 @@ public class ConfigProvider<ENUMTYPE>
         return defaultVal;
     }
 
-    public int GetInteger(ENUMTYPE key, int defaultVal)
+    public bool GetInteger(ENUMTYPE key, out int val)
     {
         if (TryGetValue(key, out string res))
-            return int.Parse(res);
+        {
+            val = int.Parse(res);
+            return true;
+        }
+
+        val = 0;
+        return false;
+    }
+
+    public int GetInteger(ENUMTYPE key, int defaultVal)
+    {
+        if (GetInteger(key, out int v))
+            return v;
 
         return defaultVal;
     }

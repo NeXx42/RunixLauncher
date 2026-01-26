@@ -14,7 +14,7 @@ public class Setting_SteamIntegration : SettingBase
     public override SettingOSCompatibility getCompatibility => SettingOSCompatibility.Universal;
     public override ISettingsUI GetUI() => new SettingsUI_Toggle("Sync", "Enable");
 
-    public override async Task<T?> LoadSetting<T>() where T : default
+    public override async Task<T> LoadSetting<T>(T fallback) where T : default
     {
         return (T)(object)await Database_Manager.Exists<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libraryExternalType), (int)Library_ExternalProviders.Steam));
     }

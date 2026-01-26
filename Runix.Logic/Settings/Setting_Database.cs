@@ -9,9 +9,9 @@ public class Setting_Database : SettingBase
 
     public override ISettingsUI GetUI() => new SettingsUI_Toggle("Change", "WHAT???");
 
-    public override Task<T?> LoadSetting<T>() where T : default
+    public override Task<T> LoadSetting<T>(T fallback)
     {
-        return Task.FromResult((T?)(object)true);
+        return Task.FromResult((T)(object)true);
     }
 
     public override async Task<bool> SaveSetting<T>(T val)

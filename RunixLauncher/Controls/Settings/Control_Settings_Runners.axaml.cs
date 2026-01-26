@@ -74,7 +74,7 @@ public partial class Control_Settings_Runners : UserControl, ISettingControl
     {
         selectedProfile = null;
 
-        existingProfiles = await setting!.LoadSetting<RunnerDto[]>();
+        existingProfiles = await setting!.LoadSetting<RunnerDto[]>(null);
         profileUIS = new Border[existingProfiles?.Length ?? 0];
 
         container.Children.Clear();

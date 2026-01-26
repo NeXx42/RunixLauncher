@@ -14,9 +14,20 @@ namespace GameLibrary.AvaloniaUI.Utils;
 
 public class AvaloniaImageBrushFetcher : IImageFetcher
 {
-    public async Task<object?> GetIcon(string absolutePath)
+    public async Task<object?> GetIcon(string absolutePath, int? resolution, int? interpolation)
     {
-        var bitmap = new Bitmap(absolutePath);
+        Bitmap bitmap;
+
+        if (resolution.HasValue)
+        {
+            using FileStream stream = new FileStream(absolutePath, new FileStreamOptions() { Access = FileAccess.Read, Share = FileShare.ReadWrite });
+            bitmap = Bitmap.DecodeToWidth(stream, resolution.Value, (BitmapInterpolationMode)((interpolation ?? 1) + 2)); // default medium, low is 2 hence the offset
+        }
+        else
+        {
+            bitmap = new Bitmap(absolutePath);
+        }
+
         ImageBrush? brush = null;
 
         await Dispatcher.UIThread.InvokeAsync(() =>

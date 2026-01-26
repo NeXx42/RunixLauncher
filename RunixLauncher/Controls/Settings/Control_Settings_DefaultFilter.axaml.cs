@@ -26,8 +26,8 @@ public partial class Control_Settings_DefaultFilter : UserControl, ISettingContr
 
     public async Task LoadValue()
     {
-        int? res = await setting.LoadSetting<int>();
-        (int order, isAscending) = GameFilterRequest.DecodeOrder(res ?? 0);
+        int res = await setting.LoadSetting(0);
+        (int order, isAscending) = GameFilterRequest.DecodeOrder(res);
 
         type.SilentlyChangeValue(order);
         RedrawDirection();

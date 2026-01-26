@@ -16,9 +16,6 @@ public static class DependencyManager
 
     public static async Task PreSetup(IUILinker linker, IImageFetcher imageFetcher)
     {
-        uiLinker = linker;
-        ImageManager.Init(imageFetcher);
-
         string root = GetUserStorageFolder();
 
         if (!Directory.Exists(root))
@@ -40,6 +37,9 @@ public static class DependencyManager
 
         await Database_Manager.Init(cachedDBLocation!, HandleDatabaseException);
         await ConfigHandler.Init();
+
+        uiLinker = linker;
+        ImageManager.Init(imageFetcher);
     }
 
     public static async Task CreateDBPointerFile(string path)

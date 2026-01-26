@@ -34,7 +34,7 @@ public partial class Control_Settings_DirectorySelector : UserControl, ISettingC
         if (setting == null)
             return;
 
-        UpdateLabel(await setting.LoadSetting<string>());
+        UpdateLabel(await setting.LoadSetting(string.Empty));
     }
 
     private async Task SelectDirectory()

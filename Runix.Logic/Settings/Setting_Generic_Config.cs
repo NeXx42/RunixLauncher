@@ -30,8 +30,10 @@ public class Setting_Generic_Config : SettingBase
     public override ISettingsUI GetUI() => uiSettings;
 
 
-    public override async Task<T?> LoadSetting<T>() where T : default
-        => ConfigHandler.configProvider!.GetGeneric<T>(configValue);
+    public override async Task<T> LoadSetting<T>(T fallback)
+    {
+        return ConfigHandler.configProvider!.GetGeneric(configValue, fallback);
+    }
 
     public override async Task<bool> SaveSetting<T>(T val)
     {

@@ -17,6 +17,9 @@ public static class ImageManager
 
     private static Thread? imageFetchThread;
 
+    private static int? targetIconResolution;
+    private static int? iconInterpolationLevel;
+
 
     public static void Init<T>(T implementation) where T : IImageFetcher
     {
@@ -25,6 +28,14 @@ public static class ImageManager
         imageFetchThread = new Thread(GameImageFetcher);
         imageFetchThread.Name = "Image Thread";
         imageFetchThread.Start();
+
+        int temp;
+
+        if (ConfigHandler.configProvider?.GetInteger(Enums.ConfigKeys.Appearance_ImageInterpolation, out temp) ?? false)
+            iconInterpolationLevel = temp;
+
+        if (ConfigHandler.configProvider?.GetInteger(Enums.ConfigKeys.Appearance_ImageResolution, out temp) ?? false)
+            targetIconResolution = (int)Math.Round(Math.Pow(2, (8 - temp) + 3));
     }
 
     public static async Task GetGameImage<T>(GameDto game, Action<int, T?> onFetch)
@@ -76,7 +87,7 @@ public static class ImageManager
                     return;
                 }
 
-                object? response = await fetcher!.GetIcon(path);
+                object? response = await fetcher!.GetIcon(path, targetIconResolution, iconInterpolationLevel);
 
                 DependencyManager.InvokeOnUIThread(() =>
                 {

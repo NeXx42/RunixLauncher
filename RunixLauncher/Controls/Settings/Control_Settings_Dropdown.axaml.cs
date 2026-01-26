@@ -9,6 +9,7 @@ namespace GameLibrary.AvaloniaUI.Controls.Settings;
 
 public partial class Control_Settings_Dropdown : UserControl, ISettingControl
 {
+    private bool hasNullEntry;
     private SettingBase? settings;
 
     public Control_Settings_Dropdown()
@@ -18,22 +19,39 @@ public partial class Control_Settings_Dropdown : UserControl, ISettingControl
 
     public ISettingControl Draw(SettingBase settings, SettingsUI_Dropdown ui)
     {
+        this.hasNullEntry = !string.IsNullOrEmpty(ui.nullEntry);
         this.settings = settings;
 
         title.Content = settings.getName;
-        btn.Setup(ui.options, 0, SaveValue);
+
+        if (hasNullEntry)
+        {
+            btn.Setup((string[])[ui.nullEntry!, .. ui.options], 0, SaveValue);
+        }
+        else
+        {
+            btn.Setup(ui.options, 0, SaveValue);
+        }
 
         return this;
     }
 
     public async Task LoadValue()
     {
-        int selected = await settings!.LoadSetting<int>();
-        btn.SilentlyChangeValue(selected);
+        int selected = await settings!.LoadSetting(-1);
+        btn.SilentlyChangeValue(hasNullEntry ? selected + 1 : selected);
     }
 
     private async Task SaveValue()
     {
-        await settings!.SaveSetting(btn.selectedIndex);
+        int? selected = btn.selectedIndex;
+
+        if (hasNullEntry)
+        {
+            selected--;
+            selected = selected < 0 ? null : selected;
+        }
+
+        await settings!.SaveSetting(selected);
     }
 }

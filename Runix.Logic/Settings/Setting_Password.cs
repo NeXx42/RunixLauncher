@@ -11,10 +11,10 @@ public class Setting_Password : SettingBase
 
     public override ISettingsUI GetUI() => new SettingsUI_Toggle("Change Password", "Add Password");
 
-    public override async Task<T?> LoadSetting<T>() where T : default
+    public override async Task<T> LoadSetting<T>(T fallback)
     {
         string? hash = ConfigHandler.configProvider!.GetValue(ConfigKeys.PasswordHash);
-        return (T?)(object)!string.IsNullOrEmpty(hash);
+        return (T)(object)!string.IsNullOrEmpty(hash);
     }
 
     public override async Task<bool> SaveSetting<T>(T val)

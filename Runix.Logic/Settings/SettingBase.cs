@@ -9,7 +9,7 @@ public abstract class SettingBase
     public abstract SettingOSCompatibility getCompatibility { get; }
 
 
-    public abstract Task<T?> LoadSetting<T>();
+    public abstract Task<T> LoadSetting<T>(T fallback);
     public abstract Task<bool> SaveSetting<T>(T val);
 
     public abstract ISettingsUI GetUI();

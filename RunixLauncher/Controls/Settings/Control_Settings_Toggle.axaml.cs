@@ -36,7 +36,7 @@ public partial class Control_Settings_Toggle : UserControl, ISettingControl
 
     public async Task LoadValue()
     {
-        selectedOption = await setting!.LoadSetting<bool>();
+        selectedOption = await setting!.LoadSetting(false);
         RedrawButton();
     }
 
