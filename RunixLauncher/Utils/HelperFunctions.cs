@@ -1,7 +1,7 @@
 using System;
 using Avalonia.Threading;
 
-namespace GameLibrary.AvaloniaUI.Utils;
+namespace RunixLauncher.Utils;
 
 public static class HelperFunctions
 {

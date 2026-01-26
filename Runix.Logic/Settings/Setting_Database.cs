@@ -26,7 +26,7 @@ public class Setting_Database : SettingBase
 
     private async Task SelectDatabase()
     {
-        string? path = await DependencyManager.OpenFileDialog("Select database", "*.db");
+        string? path = await DependencyManager.OpenFileDialog("Select database", "db");
 
         if (string.IsNullOrEmpty(path))
             return;

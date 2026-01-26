@@ -1,187 +1,122 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media;
-using Avalonia.Media.Immutable;
-using GameLibrary.AvaloniaUI.Controls;
-using GameLibrary.AvaloniaUI.Controls.SubPage;
 using GameLibrary.Logic;
-using GameLibrary.Logic.Helpers;
+using GameLibrary.Logic.Objects;
 
-namespace GameLibrary.AvaloniaUI.Controls.SubPage.Indexer;
+namespace RunixLauncher.Controls.SubPage.Indexer;
 
 public partial class Indexer_FolderView : UserControl
 {
-    private Popup_AddGames? master;
+    private string? rootFolder;
 
-    private FileManager.ImportEntry_Folder? inspectingFolder;
-    private Indexer_Folder? inspectingFolderUI;
+    private Action? actionCallback;
+    private Action? action2Callback;
 
-    private List<Label>? drawnFiles = new List<Label>();
-    private Action? btn_Generic_Callback;
-    private Action? btn_Launch_Callback;
+    private Action<string>? binarySelection;
 
     public Indexer_FolderView()
     {
         InitializeComponent();
+
+        folderStructure.SelectionMode = SelectionMode.Toggle;
+        folderStructure.SelectionChanged += (_, __) => HandleFolderSelection();
+
+        btn_Action.RegisterClick(() => actionCallback?.Invoke());
+        btn_Action2.RegisterClick(() => action2Callback?.Invoke());
     }
 
-    public Task Setup(Popup_AddGames master)
+    public void Explore(string root, Action<string>? binarySelection)
     {
-        this.master = master;
+        this.rootFolder = root;
+        this.binarySelection = binarySelection;
 
-        btn_FolderView_Close.RegisterClick(master.CloseFolderView);
-        btn_Generic.RegisterClick(() => btn_Generic_Callback?.Invoke());
-        btn_Launch.RegisterClick(() => btn_Launch_Callback?.Invoke());
-
-        return Task.CompletedTask;
+        DataContext = new Indexer_FolderViewModel(root);
     }
 
-    public void RequestFolderView(FileManager.ImportEntry_Folder folder, Indexer_Folder ui)
+    private void HandleFolderSelection()
     {
-        if (string.IsNullOrEmpty(folder.extractedEntry) || !Directory.Exists(folder.extractedEntry))
+        Indexer_FolderViewModel_Node selectedItem = (Indexer_FolderViewModel_Node)folderStructure.SelectedItem!;
+        string extension = string.Empty;
+
+        if (selectedItem != null)
+        {
+            extension = Path.GetExtension(selectedItem.fullPath);
+        }
+
+
+        switch (extension)
+        {
+            case ".exe":
+            case ".appimage":
+                btn_Action.IsVisible = true;
+                btn_Action2.IsVisible = true;
+
+                btn_Action.Label = "Select";
+                btn_Action2.Label = "Launch";
+
+                actionCallback = () => SelectBinary(selectedItem!.fullPath);
+                action2Callback = () => _ = LaunchBinary(selectedItem!.fullPath);
+                break;
+
+            case ".7z":
+            case ".rar":
+            case ".iso":
+            case ".zip":
+            case ".bin":
+                btn_Action.IsVisible = true;
+                btn_Action.Label = "Extract";
+
+                actionCallback = () => _ = ExtractArchive(selectedItem!.fullPath);
+                break;
+
+            default:
+                actionCallback = null;
+                action2Callback = null;
+
+
+                btn_Action.IsVisible = false;
+                btn_Action2.IsVisible = false;
+                break;
+        }
+    }
+
+    private void SelectBinary(string path)
+    {
+        this.IsVisible = false;
+        this.binarySelection?.Invoke(path);
+    }
+
+    private async Task LaunchBinary(string path)
+    {
+        RunnerDto[] runners = RunnerManager.GetRunnerProfiles();
+        int? selected = await DependencyManager.OpenMultiModal("Runner", runners.Select(x => x.runnerName).ToArray());
+
+        if (selected == null)
             return;
 
-        inspectingFolder = folder;
-        inspectingFolderUI = ui;
 
-        UpdateFolderDir(folder.extractedEntry);
-    }
-
-
-    private void UpdateFolderDir(string path)
-    {
-        string[] dirs = Directory.GetDirectories(path);
-        string[] files = Directory.GetFiles(path);
-
-        cont_FolderView_URI.Children.Clear();
-        cont_FolderView_Entries.Children.Clear();
-        drawnFiles!.Clear();
-
-        Common_Button rootBtn = new Common_Button();
-        rootBtn.Label = "/";
-
-        rootBtn.RegisterClick(() => UpdateFolderDir(inspectingFolder!.extractedEntry!));
-        cont_FolderView_URI.Children.Add(rootBtn);
-
-        if (path != inspectingFolder!.extractedEntry!)
-        {
-            string localPath = path.Remove(0, inspectingFolder.extractedEntry!.Length);
-            string[] portions = localPath.Split("/");
-
-            string buildingLoc = inspectingFolder.extractedEntry!;
-
-            foreach (string portion in portions)
-            {
-                if (string.IsNullOrEmpty(portion))
-                    continue;
-
-                buildingLoc += "/" + portion;
-                string temp = buildingLoc;
-
-                Common_Button btn = new Common_Button();
-                btn.Label = portion;
-
-                btn.RegisterClick(() => UpdateFolderDir(temp));
-                cont_FolderView_URI.Children.Add(btn);
-            }
-
-            string previousPath = Directory.GetParent(path)!.FullName;
-            CreateEntry("..", true, () => UpdateFolderDir(previousPath));
-        }
-
-        foreach (string dir in dirs)
-            CreateEntry(dir, true, () => UpdateFolderDir(dir));
-
-        foreach (string dir in files)
-            CreateEntry(dir, false, () => SelectFile(dir));
-
-        void CreateEntry(string dir, bool isFolder, Action? callback)
-        {
-            Control control;
-
-            if (isFolder)
-            {
-                Border b = new Border();
-                b.Background = new ImmutableSolidColorBrush(Color.FromRgb(255, 0, 0));
-                b.CornerRadius = new CornerRadius(5);
-
-                Label l = new Label();
-                l.Content = dir;
-                l.Margin = new Thickness(5);
-
-                b.Child = l;
-                control = b;
-            }
-            else
-            {
-                Label l = new Label();
-                l.Content = dir;
-
-                control = l;
-            }
-
-            if (callback != null)
-                control.PointerPressed += (_, __) => callback();
-
-            cont_FolderView_Entries.Children.Add(control);
-        }
-    }
-
-    private void SelectFile(string dir)
-    {
-        btn_Generic_Callback = null;
-        btn_Launch_Callback = null;
-
-        btn_Generic.IsVisible = false;
-        btn_Launch.IsVisible = false;
-
-        if (RunnerManager.IsUniversallyAcceptedExecutableFormat(dir))
-        {
-            btn_Launch.IsVisible = true;
-            btn_Launch_Callback = () => _ = LaunchSelectedBinary(dir);
-
-            btn_Generic.IsVisible = true;
-            btn_Generic.Label = "Select Binary";
-
-            btn_Generic_Callback = () => UpdateSelectedFolderBinary(dir);
-        }
-        else if (FileManager.IsZip(dir))
-        {
-            btn_Generic.IsVisible = true;
-            btn_Generic.Label = "Extract Here";
-
-            btn_Generic_Callback = ExtensionMethods.WrapTaskInExceptionHandler(async () => await ExtractFile(dir));
-        }
-    }
-
-    private async Task LaunchSelectedBinary(string dir)
-    {
         await RunnerManager.RunGame(new RunnerManager.LaunchRequest()
         {
-            path = dir,
-            identifier = dir
+            identifier = path,
+            path = path,
+            runnerId = runners[selected.Value].runnerId,
+            extraWhitelist = [rootFolder!]
         });
     }
 
-    private void UpdateSelectedFolderBinary(string dir)
+    private async Task ExtractArchive(string path)
     {
-        inspectingFolder!.selectedBinary = dir;
-        inspectingFolderUI!.RedrawUI();
+        Progress<double> prog = new Progress<double>();
+        await FileManager.RequestExtract(path, prog, CancellationToken.None);
 
-        master!.CloseFolderView();
-    }
-
-    private async Task ExtractFile(string dir)
-    {
-        Progress<double> progress = new Progress<double>();
-
-        await FileManager.RequestExtract(dir, progress, new CancellationTokenSource().Token);
-        UpdateFolderDir(Path.GetDirectoryName(dir)!);
+        Explore(rootFolder!, binarySelection);
     }
 }

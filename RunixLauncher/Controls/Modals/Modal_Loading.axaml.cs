@@ -5,10 +5,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
-using GameLibrary.AvaloniaUI.Helpers;
 using GameLibrary.Logic;
+using RunixLauncher.Helpers;
 
-namespace GameLibrary.AvaloniaUI.Controls.Modals;
+namespace RunixLauncher.Controls.Modals;
 
 public partial class Modal_Loading : UserControl
 {

@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
-using GameLibrary.AvaloniaUI.Controls.SubPages.Popup_GameView_Tabs;
-using GameLibrary.AvaloniaUI.Utils;
 using GameLibrary.Controller;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Objects;
+using RunixLauncher.Controls.SubPages.Popup_GameView_Tabs;
+using RunixLauncher.Utils;
 
-namespace GameLibrary.AvaloniaUI.Controls.SubPage;
+namespace RunixLauncher.Controls.SubPage;
 
 public partial class Popup_GameView : UserControl, IControlChild
 {

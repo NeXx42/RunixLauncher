@@ -6,16 +6,16 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
-using GameLibrary.AvaloniaUI.Controls.Pages.Library;
-using GameLibrary.AvaloniaUI.Utils;
 using GameLibrary.Controller;
 using GameLibrary.DB.Tables;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.Objects;
 using GameLibrary.Logic.Objects.Tags;
+using RunixLauncher.Controls.Pages.Library;
+using RunixLauncher.Utils;
 
-namespace GameLibrary.AvaloniaUI.Controls.Pages;
+namespace RunixLauncher.Controls.Pages;
 
 public partial class Page_Library : UserControl, IControlChild
 {

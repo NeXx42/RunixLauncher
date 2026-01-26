@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="RunixLauncher.Controls.SubPage.Indexer.Indexer_Selected"
+  xmlns:Common="clr-namespace:RunixLauncher.Controls"
+  xmlns:SubComps="clr-namespace:RunixLauncher.Controls.SubPage.Indexer">
+  <Grid>
+
+    <StackPanel x:Name="cont_FoundGames" Margin="0,100,0,100" VerticalAlignment="Top">
+    </StackPanel>
+
+    <!-- Controls -->
+
+    <Border VerticalAlignment="Bottom" BorderBrush="#21262b" BorderThickness="0 1 0 0">
+      <Grid Margin="15">
+        <StackPanel Orientation="Horizontal" x:Name="cont_ImportView_BTNS" HorizontalAlignment="Left" Spacing="5">
+          <Common:Common_Button x:Name="btn_Add" Height="30" Width="150" Label="Add" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Spacing="5">
+          <Common:Common_Dropdown x:Name="inp_Library" Width="400"/>
+          <Common:Common_Button x:Name="btn_Import" Height="30" Width="150" Label="Import" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="positive"/>
+        </StackPanel>
+      </Grid>
+
+    </Border>
+
+    <SubComps:Indexer_FolderView Margin="20" x:Name="FileBrowser"/>
+
+  </Grid>
+</UserControl>

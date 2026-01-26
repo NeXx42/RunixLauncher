@@ -104,46 +104,6 @@ namespace GameLibrary.Logic
         }
 
 
-        public static async Task<List<IImportEntry>> CrawlGames(string[] paths)
-        {
-            List<IImportEntry> foundEntries = new List<IImportEntry>();
-
-            List<string> topLevelFolders = new List<string>();
-            List<string> extracts = new List<string>();
-
-            foreach (string path in paths)
-            {
-                string actualPath = path.Replace("%20", " ");
-
-                topLevelFolders.AddRange(Directory.GetDirectories(actualPath).Where(x => Directory.EnumerateFileSystemEntries(x).Any()));
-                extracts.AddRange(Directory.GetFiles(actualPath).Where(IsZip));
-            }
-
-            foreach (string extract in extracts)
-            {
-                string archiveDir = Path.Combine(Path.GetDirectoryName(extract)!, Path.GetFileNameWithoutExtension(extract));
-
-                int extractedFolderPos = topLevelFolders.IndexOf(archiveDir);
-                string? extractedFolder = null;
-
-                if (extractedFolderPos >= 0)
-                {
-                    extractedFolder = topLevelFolders[extractedFolderPos];
-                    topLevelFolders.RemoveAt(extractedFolderPos);
-                }
-
-                foundEntries.Add(new ImportEntry_Folder(extract, extractedFolder));
-            }
-
-            foreach (string remainingFolder in topLevelFolders)
-            {
-                ImportEntry_Folder folder = new ImportEntry_Folder(null, remainingFolder);
-                foundEntries.Add(folder);
-            }
-
-            return foundEntries;
-        }
-
         public static bool IsZip(string path)
         {
             string extension = Path.GetExtension(path);
@@ -153,7 +113,6 @@ namespace GameLibrary.Logic
                 extension.Equals(".zip", StringComparison.InvariantCultureIgnoreCase) ||
                 extension.Equals(".iso", StringComparison.InvariantCultureIgnoreCase);
         }
-
 
 
         public static async Task<string?> RequestExtract(string archivePath, Progress<double> progress, CancellationToken cancellationToken)
@@ -312,57 +271,31 @@ namespace GameLibrary.Logic
             public string? getBinaryFolder { get; }
         }
 
-        public class ImportEntry_Folder : IImportEntry
-        {
-            public string? archiveFile;
-            public string? extractedEntry;
 
+        public class ImportEntry_Archive : IImportEntry
+        {
+            public readonly string archivePath;
+
+            public string? extractedFolder;
             public string? selectedBinary;
 
-
-            public string getPotentialName => Path.GetFileNameWithoutExtension(selectedBinary!).Replace(" ", string.Empty);
+            public string getPotentialName => Path.GetFileName(extractedFolder)!;
             public string getBinaryPath => selectedBinary!;
+
             public string? getBinaryFolder => Path.GetDirectoryName(getBinaryPath);
 
-
-            public ImportEntry_Folder(string? extract, string? extractedFolder)
+            public ImportEntry_Archive(string archive)
             {
-                this.archiveFile = extract?.Replace("%20", " ");
-                this.extractedEntry = extractedFolder?.Replace("%20", " ");
+                archivePath = archive;
+                string potentialExtracted = archivePath.Substring(0, archivePath.Length - Path.GetExtension(archive).Length);
 
-                if (!string.IsNullOrEmpty(extractedEntry))
-                    CrawlForExecutable(extractedEntry);
-            }
-
-            public void CrawlForExecutable(string root)
-            {
-                string[] files = Directory.GetFiles(root);
-                IEnumerable<string> binaries = files.Where(RunnerManager.IsUniversallyAcceptedExecutableFormat);
-
-                if (binaries?.Count() > 0)
+                if (Directory.Exists(potentialExtracted))
                 {
-                    selectedBinary = TryFindBestExecutable(binaries);
-                    return;
-                }
-
-                string[] subDirs = Directory.GetDirectories(root);
-
-                foreach (string sub in subDirs)
-                    CrawlForExecutable(sub);
-
-                string TryFindBestExecutable(IEnumerable<string> possible)
-                {
-                    string? bestPossible = possible.FirstOrDefault(x =>
-                    {
-                        string name = Path.GetFileName(x).ToLower();
-                        return !name.Contains("crash", StringComparison.InvariantCulture)
-                                && !name.Contains("crash", StringComparison.InvariantCulture);
-                    });
-
-                    return bestPossible ?? possible.FirstOrDefault() ?? "";
+                    extractedFolder = potentialExtracted;
                 }
             }
         }
+
 
         public class ImportEntry_Binary : IImportEntry
         {
@@ -372,7 +305,7 @@ namespace GameLibrary.Logic
             public string getBinaryPath => binaryLocation;
             public string? getBinaryFolder => null;
 
-            public ImportEntry_Binary(string loc) => binaryLocation = loc.Replace("%20", " ");
+            public ImportEntry_Binary(string loc) => binaryLocation = loc;
 
         }
     }

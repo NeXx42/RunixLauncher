@@ -1,11 +1,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
-using GameLibrary.AvaloniaUI.Controls.SubPage;
-using GameLibrary.AvaloniaUI.Helpers;
 using GameLibrary.Logic.Objects;
+using RunixLauncher.Controls.SubPage;
+using RunixLauncher.Helpers;
 
-namespace GameLibrary.AvaloniaUI.Controls.SubPages.Popup_GameView_Tabs;
+namespace RunixLauncher.Controls.SubPages.Popup_GameView_Tabs;
 
 
 

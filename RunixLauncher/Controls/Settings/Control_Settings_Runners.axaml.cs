@@ -6,14 +6,14 @@ using Avalonia.Layout;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
-using GameLibrary.AvaloniaUI.Controls.Modals;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Database.Tables;
 using GameLibrary.Logic.Objects;
 using GameLibrary.Logic.Settings;
 using GameLibrary.Logic.Settings.UI;
+using RunixLauncher.Controls.Modals;
 
-namespace GameLibrary.AvaloniaUI.Controls.Settings;
+namespace RunixLauncher.Controls.Settings;
 
 public partial class Control_Settings_Runners : UserControl, ISettingControl
 {
@@ -74,7 +74,7 @@ public partial class Control_Settings_Runners : UserControl, ISettingControl
     {
         selectedProfile = null;
 
-        existingProfiles = await setting!.LoadSetting<RunnerDto[]>(null);
+        existingProfiles = await setting!.LoadSetting<RunnerDto[]>(null!);
         profileUIS = new Border[existingProfiles?.Length ?? 0];
 
         container.Children.Clear();

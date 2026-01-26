@@ -4,7 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using GameLibrary.Logic.Objects;
 
-namespace GameLibrary.AvaloniaUI.Controls.SubPages.Popup_GameView_Tabs;
+namespace RunixLauncher.Controls.SubPages.Popup_GameView_Tabs;
 
 public partial class Popup_GameView_Tab_Logs : Popup_GameView_TabBase
 {

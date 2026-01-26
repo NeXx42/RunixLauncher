@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
-using GameLibrary.AvaloniaUI.Controls.Modals;
 using GameLibrary.Logic.Interfaces;
+using RunixLauncher.Controls.Modals;
 
-namespace GameLibrary.AvaloniaUI.Helpers;
+namespace RunixLauncher.Helpers;
 
 public class UILinker : IUILinker
 {
@@ -78,6 +78,19 @@ public class UILinker : IUILinker
         }
     }
 
+    public async Task<int?> OpenMultiSelectModal(string title, string[] options)
+    {
+        int? res = null;
+        await MainWindow.instance!.DisplayModalAsync<Modal_MultiSelect>(ModalRequest);
+
+        return res;
+
+        async Task ModalRequest(Modal_MultiSelect modal)
+        {
+            res = await modal.RequestModal(title, options);
+        }
+    }
+
     public void InvokeOnUIThread(Action a) => Dispatcher.UIThread.Post(a);
 
     public async Task<string[]?> OpenFoldersDialog(string title)
@@ -105,7 +118,7 @@ public class UILinker : IUILinker
         FilePickerFileType[]? types = null;
 
         if (allowedTypes.Length > 0)
-            types = allowedTypes.Select(x => new FilePickerFileType(x) { Patterns = [x] }).ToArray();
+            types = [new FilePickerFileType(string.Join(" | ", allowedTypes)) { Patterns = allowedTypes.Select(x => $"*.{x}").ToArray() }];
 
         var res = await MainWindow.instance!.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions()
         {

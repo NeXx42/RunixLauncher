@@ -9,11 +9,11 @@ using Avalonia.Media;
 using Avalonia.Media.Immutable;
 using Avalonia.Styling;
 using Avalonia.Threading;
-using GameLibrary.AvaloniaUI.Utils;
 using GameLibrary.Controller;
 using GameLibrary.Logic.Helpers;
+using RunixLauncher.Utils;
 
-namespace GameLibrary.AvaloniaUI.Controls
+namespace RunixLauncher.Controls
 {
     public partial class Common_Button : UserControl, IControlChild
     {

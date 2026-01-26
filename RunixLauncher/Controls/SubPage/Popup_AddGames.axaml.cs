@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Avalonia.Controls;
-using GameLibrary.AvaloniaUI.Controls.SubPage.Indexer;
 using GameLibrary.Logic;
+using RunixLauncher.Controls.SubPage.Indexer;
 
-namespace GameLibrary.AvaloniaUI.Controls.SubPage;
+namespace RunixLauncher.Controls.SubPage;
 
 public partial class Popup_AddGames : UserControl
 {
@@ -16,8 +16,8 @@ public partial class Popup_AddGames : UserControl
     {
         InitializeComponent();
 
-        _ = cont_ImportView.Setup(this);
-        _ = cont_FolderView.Setup(this);
+        //_ = cont_ImportView.Setup(this);
+        //_ = cont_FolderView.Setup(this);
     }
 
 
@@ -29,19 +29,7 @@ public partial class Popup_AddGames : UserControl
     public async Task OnOpen()
     {
         this.IsVisible = true;
-        CloseFolderView();
+
     }
 
-    public void RequestFolderView(FileManager.ImportEntry_Folder folder, Indexer_Folder ui)
-    {
-        cont_ImportView.IsVisible = false;
-        cont_FolderView.IsVisible = true;
-        cont_FolderView.RequestFolderView(folder, ui);
-    }
-
-    public void CloseFolderView()
-    {
-        cont_ImportView.IsVisible = true;
-        cont_FolderView.IsVisible = false;
-    }
 }

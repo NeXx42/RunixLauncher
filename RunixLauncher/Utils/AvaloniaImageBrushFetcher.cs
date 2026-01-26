@@ -10,7 +10,7 @@ using GameLibrary.DB.Tables;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Interfaces;
 
-namespace GameLibrary.AvaloniaUI.Utils;
+namespace RunixLauncher.Utils;
 
 public class AvaloniaImageBrushFetcher : IImageFetcher
 {

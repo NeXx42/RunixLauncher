@@ -1,7 +1,7 @@
 ﻿using System;
 using Avalonia;
 
-namespace GameLibrary.AvaloniaUI;
+namespace RunixLauncher;
 
 class Program
 {

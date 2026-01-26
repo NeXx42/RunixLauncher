@@ -5,7 +5,7 @@ using Avalonia.Markup.Xaml;
 using GameLibrary.Logic.Settings;
 using GameLibrary.Logic.Settings.UI;
 
-namespace GameLibrary.AvaloniaUI.Controls.Settings;
+namespace RunixLauncher.Controls.Settings;
 
 public partial class Control_Settings_Title : UserControl, ISettingControl
 {

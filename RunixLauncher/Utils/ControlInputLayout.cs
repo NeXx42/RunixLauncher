@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Avalonia.Controls;
 
-namespace GameLibrary.AvaloniaUI.Utils;
+namespace RunixLauncher.Utils;
 
 public class ControlInputLayout
 {

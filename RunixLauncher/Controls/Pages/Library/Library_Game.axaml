@@ -1,8 +1,8 @@
 <UserControl xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="290" d:DesignHeight="257" x:Class="GameLibrary.AvaloniaUI.Controls.Pages.Library.Library_Game"
-    xmlns:Tag="clr-namespace:GameLibrary.AvaloniaUI.Controls.Pages.Library" Background="Transparent" ClipToBounds="False">
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="290" d:DesignHeight="257" x:Class="RunixLauncher.Controls.Pages.Library.Library_Game"
+    xmlns:Tag="clr-namespace:RunixLauncher.Controls.Pages.Library" Background="Transparent" ClipToBounds="False">
 
     <Border BorderThickness="2" Background="#0f1419" CornerRadius="10" BoxShadow="0 0 5 0 black" x:Name="ctrl">
         <Border.Styles>

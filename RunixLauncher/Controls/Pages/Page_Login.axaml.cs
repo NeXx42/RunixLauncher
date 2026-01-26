@@ -5,7 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using GameLibrary.Logic;
 
-namespace GameLibrary.AvaloniaUI.Controls.Pages;
+namespace RunixLauncher.Controls.Pages;
 
 public partial class Page_Login : UserControl
 {

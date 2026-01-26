@@ -4,7 +4,7 @@ using Avalonia.Markup.Xaml;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Objects.Tags;
 
-namespace GameLibrary.AvaloniaUI.Controls.Pages.Library;
+namespace RunixLauncher.Controls.Pages.Library;
 
 public partial class Library_TagUnselectable : UserControl
 {

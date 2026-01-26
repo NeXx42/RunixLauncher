@@ -5,14 +5,14 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
-using GameLibrary.AvaloniaUI.Controls.Pages;
-using GameLibrary.AvaloniaUI.Helpers;
-using GameLibrary.AvaloniaUI.Utils;
 using GameLibrary.Controller;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Enums;
+using RunixLauncher.Controls.Pages;
+using RunixLauncher.Helpers;
+using RunixLauncher.Utils;
 
-namespace GameLibrary.AvaloniaUI;
+namespace RunixLauncher;
 
 public partial class MainWindow : Window, IControllerInputCallback
 {

@@ -5,12 +5,12 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using DynamicData;
-using GameLibrary.AvaloniaUI.Helpers;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Database.Tables;
 using GameLibrary.Logic.Objects;
+using RunixLauncher.Helpers;
 
-namespace GameLibrary.AvaloniaUI.Controls.Modals;
+namespace RunixLauncher.Controls.Modals;
 
 public partial class Modal_Settings_Runner : UserControl
 {

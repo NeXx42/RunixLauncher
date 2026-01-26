@@ -10,7 +10,7 @@ using GameLibrary.Controller;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Objects;
 
-namespace GameLibrary.AvaloniaUI.Controls.Pages.Library;
+namespace RunixLauncher.Controls.Pages.Library;
 
 public partial class LibraryPage_Grid : LibraryPageBase
 {

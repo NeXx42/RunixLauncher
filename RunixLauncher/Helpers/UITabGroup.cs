@@ -2,9 +2,9 @@ using System;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
-using GameLibrary.AvaloniaUI.Controls;
+using RunixLauncher.Controls;
 
-namespace GameLibrary.AvaloniaUI.Helpers;
+namespace RunixLauncher.Helpers;
 
 public class UITabGroup
 {

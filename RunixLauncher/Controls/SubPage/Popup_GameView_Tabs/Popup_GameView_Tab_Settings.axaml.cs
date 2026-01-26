@@ -10,7 +10,7 @@ using GameLibrary.Logic;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.Objects;
 
-namespace GameLibrary.AvaloniaUI.Controls.SubPages.Popup_GameView_Tabs;
+namespace RunixLauncher.Controls.SubPages.Popup_GameView_Tabs;
 
 public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 {

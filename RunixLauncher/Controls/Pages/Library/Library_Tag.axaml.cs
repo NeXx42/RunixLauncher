@@ -7,7 +7,7 @@ using Avalonia.Media;
 using GameLibrary.DB.Tables;
 using GameLibrary.Logic.Objects.Tags;
 
-namespace GameLibrary.AvaloniaUI.Controls.Pages.Library;
+namespace RunixLauncher.Controls.Pages.Library;
 
 public partial class Library_Tag : UserControl
 {

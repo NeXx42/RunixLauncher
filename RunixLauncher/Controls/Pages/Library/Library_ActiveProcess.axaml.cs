@@ -4,7 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using GameLibrary.Logic;
 
-namespace GameLibrary.AvaloniaUI.Controls.Pages.Library;
+namespace RunixLauncher.Controls.Pages.Library;
 
 public partial class Library_ActiveProcess : UserControl
 {

@@ -8,14 +8,14 @@ using Avalonia.Animation.Easings;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
-using GameLibrary.AvaloniaUI.Utils;
 using GameLibrary.Controller;
 using GameLibrary.DB.Tables;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Objects;
 using GameLibrary.Logic.Objects.Tags;
+using RunixLauncher.Utils;
 
-namespace GameLibrary.AvaloniaUI.Controls.Pages.Library;
+namespace RunixLauncher.Controls.Pages.Library;
 
 public partial class Library_Game : UserControl, IControlChild
 {

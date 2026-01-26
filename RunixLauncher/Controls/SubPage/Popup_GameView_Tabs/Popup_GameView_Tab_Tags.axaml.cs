@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using GameLibrary.AvaloniaUI.Controls.Pages.Library;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Objects;
 using GameLibrary.Logic.Objects.Tags;
+using RunixLauncher.Controls.Pages.Library;
 
-namespace GameLibrary.AvaloniaUI.Controls.SubPages.Popup_GameView_Tabs;
+namespace RunixLauncher.Controls.SubPages.Popup_GameView_Tabs;
 
 public partial class Popup_GameView_Tab_Tags : Popup_GameView_TabBase
 {

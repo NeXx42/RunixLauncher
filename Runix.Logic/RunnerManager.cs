@@ -24,13 +24,14 @@ public static class RunnerManager
 
     public static bool IsIdentifierRunning(string dir) => activeGames.ContainsKey(dir);
 
+    public static string[] GetAcceptableTypes() => ["exe", "lnk", "AppImage", "bat"];
     public static bool IsUniversallyAcceptedExecutableFormat(string path)
     {
-        return path.EndsWith(".exe", StringComparison.CurrentCultureIgnoreCase) ||
-            path.EndsWith(".lnk", StringComparison.CurrentCultureIgnoreCase) ||
-            path.EndsWith(".AppImage", StringComparison.CurrentCultureIgnoreCase) ||
-            path.EndsWith(".bat", StringComparison.CurrentCultureIgnoreCase);
+        string ext = Path.GetExtension(path).Remove(0, 1);
+        return GetAcceptableTypes().Any(x => x.Equals(ext, StringComparison.CurrentCultureIgnoreCase));
     }
+
+
 
     public static async Task Init()
     {
@@ -75,6 +76,8 @@ public static class RunnerManager
 
             await selectedRunner.SetupRunner();
             LaunchArguments launchArguments = await selectedRunner.InitRunDetails(launchRequest);
+            launchArguments.whiteListedDirs.AddRange(launchRequest.extraWhitelist ?? []);
+
             await HandleEmbeds(launchRequest.gameId, launchArguments, selectedRunner);
 
             launchArguments.gameId = gameDto?.gameId;
@@ -369,6 +372,7 @@ public static class RunnerManager
 
         public string path;
         public string? customExecutable;
+        public string[]? extraWhitelist;
 
         public ConfigProvider<Game_Config>? gameConfig;
     }

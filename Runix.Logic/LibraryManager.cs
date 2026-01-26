@@ -36,13 +36,17 @@ namespace GameLibrary.Logic
         }
 
 
-        public static async Task ImportGames(List<FileManager.IImportEntry> availableImports, int? libraryId)
+        public static async Task<List<string>> ImportGames(Dictionary<string, FileManager.IImportEntry?> availableImports, int? libraryId)
         {
             bool useGuidFolderNames = ConfigHandler.configProvider!.GetBoolean(ConfigKeys.Import_GUIDFolderNames, true);
+            List<string> successfulGames = new List<string>();
 
-            for (int i = availableImports.Count - 1; i >= 0; i--)
+            foreach (KeyValuePair<string, FileManager.IImportEntry?> importEntry in availableImports)
             {
-                FileManager.IImportEntry folder = availableImports[i];
+                if (importEntry.Value == null)
+                    continue;
+
+                FileManager.IImportEntry folder = importEntry.Value;
 
                 if (string.IsNullOrEmpty(folder.getBinaryPath))
                     continue;
@@ -80,8 +84,11 @@ namespace GameLibrary.Logic
                 }
 
                 await Database_Manager.InsertItem(newGame);
-                availableImports.RemoveAt(i);
+                successfulGames.Add(importEntry.Key);
             }
+
+            onGameDeletion?.Invoke();
+            return successfulGames;
         }
 
         public static int GetMaxPages(int limit) => (int)Math.Ceiling(filteredGameCount / (float)limit) - 1;

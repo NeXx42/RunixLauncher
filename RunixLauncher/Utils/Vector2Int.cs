@@ -1,4 +1,4 @@
-namespace GameLibrary.AvaloniaUI.Utils;
+namespace RunixLauncher.Utils;
 
 public class Vector2Int
 {

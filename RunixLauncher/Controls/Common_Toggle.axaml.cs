@@ -5,7 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using GameLibrary.Logic.Helpers;
 
-namespace GameLibrary.AvaloniaUI.Controls;
+namespace RunixLauncher.Controls;
 
 public partial class Common_Toggle : UserControl
 {

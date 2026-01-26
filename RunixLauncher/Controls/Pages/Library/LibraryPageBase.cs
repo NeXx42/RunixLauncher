@@ -6,12 +6,12 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
-using GameLibrary.AvaloniaUI.Utils;
 using GameLibrary.Controller;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Objects;
+using RunixLauncher.Utils;
 
-namespace GameLibrary.AvaloniaUI.Controls.Pages.Library;
+namespace RunixLauncher.Controls.Pages.Library;
 
 public abstract class LibraryPageBase : UserControl, IControlChild
 {

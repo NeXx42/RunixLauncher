@@ -102,6 +102,9 @@ public static class DependencyManager
     public static async Task OpenExceptionDialog(string header, Exception e) // replace with actual dialog
         => await uiLinker!.OpenYesNoModal(header, $"{e.Message}\n\n{e.StackTrace}");
 
+    public static async Task<int?> OpenMultiModal(string header, string[] options)
+        => await uiLinker!.OpenMultiSelectModal(header, options);
+
 
     public static async Task<string[]?> OpenFoldersDialog(string title)
         => await uiLinker!.OpenFoldersDialog(title);

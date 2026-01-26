@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using GameLibrary.Controller;
 
-namespace GameLibrary.AvaloniaUI.Utils;
+namespace RunixLauncher.Utils;
 
 public interface IControlChild
 {

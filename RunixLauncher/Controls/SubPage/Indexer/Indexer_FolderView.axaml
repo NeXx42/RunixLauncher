@@ -1,29 +1,25 @@
 <UserControl xmlns="https://github.com/avaloniaui"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="GameLibrary.AvaloniaUI.Controls.SubPage.Indexer.Indexer_FolderView"
-  xmlns:Common="clr-namespace:GameLibrary.AvaloniaUI.Controls">
-  <Grid>
-    <StackPanel x:Name="cont_FolderView" Spacing="20">
-      <StackPanel Orientation="Horizontal" Height="40" VerticalAlignment="Top" x:Name="cont_FolderView_URI">
-
-      </StackPanel>
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="RunixLauncher.Controls.SubPage.Indexer.Indexer_FolderView"
+  xmlns:local="clr-namespace:RunixLauncher.Controls.SubPage.Indexer" x:DataType="local:Indexer_FolderViewModel"
+  xmlns:Common="clr-namespace:RunixLauncher.Controls">
+  <Border Background="#0a0e13" CornerRadius="10" BorderBrush="{DynamicResource bg_Border}" BorderThickness="1">
+    <Grid>
       <ScrollViewer>
-        <StackPanel Background="Red" x:Name="cont_FolderView_Entries" Spacing="5">
-        </StackPanel>
+        <TreeView x:Name="folderStructure" ItemsSource="{Binding Nodes}">
+          <TreeView.ItemTemplate>
+            <TreeDataTemplate x:DataType="local:Indexer_FolderViewModel_Node" ItemsSource="{Binding SubNodes}">
+              <TextBlock Text="{Binding Title}" />
+            </TreeDataTemplate>
+          </TreeView.ItemTemplate>
+        </TreeView>
       </ScrollViewer>
-    </StackPanel>
 
-
-    <Border VerticalAlignment="Bottom" BorderBrush="#21262b" BorderThickness="0 1 0 0">
-      <Grid>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" x:Name="cont_FolderView_BTNS">
-          <Common:Common_Button Margin="5" x:Name="btn_FolderView_Close" Height="40" Width="200" Label="Close" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-          <Common:Common_Button Margin="5" x:Name="btn_Generic" Height="40" Width="200" Label="" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-          <Common:Common_Button Margin="5" x:Name="btn_Launch" Height="40" Width="200" Label="Launch" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        </StackPanel>
-      </Grid>
-
-    </Border>
-  </Grid>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Spacing="5" Margin="15">
+        <Common:Common_Button x:Name="btn_Action2" Height="30" Width="150" Label="Run" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <Common:Common_Button x:Name="btn_Action" Height="30" Width="150" Label="Select" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="positive"/>
+      </StackPanel>
+    </Grid>
+  </Border>
 </UserControl>

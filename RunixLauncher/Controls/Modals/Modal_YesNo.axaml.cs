@@ -4,7 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace GameLibrary.AvaloniaUI.Controls.Modals;
+namespace RunixLauncher.Controls.Modals;
 
 public partial class Modal_YesNo : UserControl
 {

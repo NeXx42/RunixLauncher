@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using GameLibrary.AvaloniaUI.Helpers;
 using GameLibrary.Logic;
+using RunixLauncher.Helpers;
 
-namespace GameLibrary.AvaloniaUI;
+namespace RunixLauncher;
 
 public partial class App : Application
 {
@@ -42,7 +42,7 @@ public partial class App : Application
         // don't want this to loop endlessly loop for some reason
         try
         {
-            await DependencyManager.OpenYesNoModal("Unhandled exception", $"{exception.Message}\n\n{exception.StackTrace}").ConfigureAwait(true);
+            await DependencyManager.OpenYesNoModal("Unhandled exception", $"{exception.Message}\n\n{exception.StackTrace}");
         }
         catch { }
     }

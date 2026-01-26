@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using GameLibrary.AvaloniaUI.Controls.Pages.Library;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Helpers;
 using GameLibrary.Logic.Objects.Tags;
+using RunixLauncher.Controls.Pages.Library;
 
-namespace GameLibrary.AvaloniaUI.Controls.SubPage;
+namespace RunixLauncher.Controls.SubPage;
 
 public partial class Popup_TagManager : UserControl
 {

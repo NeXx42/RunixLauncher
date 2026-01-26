@@ -3,12 +3,12 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
-using GameLibrary.AvaloniaUI.Helpers;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Settings;
 using GameLibrary.Logic.Settings.UI;
+using RunixLauncher.Helpers;
 
-namespace GameLibrary.AvaloniaUI.Controls.Settings;
+namespace RunixLauncher.Controls.Settings;
 
 public partial class Control_Settings_DirectorySelector : UserControl, ISettingControl
 {

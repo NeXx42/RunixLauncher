@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace GameLibrary.AvaloniaUI.Controls.Settings;
+namespace RunixLauncher.Controls.Settings;
 
 public interface ISettingControl
 {

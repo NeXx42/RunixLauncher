@@ -3,15 +3,15 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
-using GameLibrary.AvaloniaUI.Controls.Settings;
-using GameLibrary.AvaloniaUI.Helpers;
-using GameLibrary.AvaloniaUI.Utils;
 using GameLibrary.Controller;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Settings;
 using GameLibrary.Logic.Settings.UI;
+using RunixLauncher.Controls.Settings;
+using RunixLauncher.Helpers;
+using RunixLauncher.Utils;
 
-namespace GameLibrary.AvaloniaUI.Controls.SubPage;
+namespace RunixLauncher.Controls.SubPage;
 
 public partial class Popup_Settings : UserControl, IControlChild
 {
