@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using GameLibrary.AvaloniaUI.Controls.SubPage;
@@ -23,7 +24,7 @@ public abstract class Popup_GameView_TabBase : UserControl
                 this.groups[i].Setup(this, i);
         }
 
-        public async Task OpenFresh()
+        public async Task OpenFresh(CancellationToken token)
         {
             int temp = selectedGroup ?? 0;
             selectedGroup = null;

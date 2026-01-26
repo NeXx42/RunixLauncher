@@ -37,11 +37,8 @@ public partial class Popup_GameView_Tab_Tags : Popup_GameView_TabBase
 
         protected override async Task OpenWithGame(GameDto? game, bool isNewGame)
         {
-            if (isNewGame)
-            {
-                await CheckForNewTags();
-                await RedrawSelectedTags(game!);
-            }
+            await CheckForNewTags();
+            await RedrawSelectedTags(game!);
         }
 
         public async Task CheckForNewTags()
@@ -63,10 +60,10 @@ public partial class Popup_GameView_Tab_Tags : Popup_GameView_TabBase
             {
                 Library_Tag tagUI = new Library_Tag();
 
-                if (tag is TagDto_Managed)
+                if (tag is TagDto_Managed managedTag)
                 {
                     tagUI.Draw(tag, null);
-                    tagUI.Toggle(true);
+                    tagUI.Toggle(managedTag.DoesFitGame(inspectingGame));
                 }
                 else
                 {

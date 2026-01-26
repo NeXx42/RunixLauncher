@@ -61,12 +61,8 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
             }
 
             DrawRunners(game!);
-
-            if (isNewGame)
-            {
-                DrawBinaries(game!);
-                await UpdateSupportedSettings();
-            }
+            DrawBinaries(game!);
+            await UpdateSupportedSettings();
 
             foreach (ConfigChangerBase config in configOptions)
                 await config.Load(game!);

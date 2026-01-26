@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -48,6 +49,7 @@ public abstract class LibraryPageBase : UserControl, IControlChild
     public abstract Panel getGameChild { get; }
     public abstract int getNumberOfItemsPerColumn { get; }
 
+    private CancellationTokenSource? pageLoadTaskToken;
 
     public LibraryPageBase(Page_Library library)
     {
@@ -60,6 +62,9 @@ public abstract class LibraryPageBase : UserControl, IControlChild
 
     public virtual async Task DrawGames()
     {
+        await (pageLoadTaskToken?.CancelAsync() ?? Task.CompletedTask);
+        pageLoadTaskToken = new CancellationTokenSource();
+
         library.ToggleMenu(false);
 
         foreach (Library_Game ui in cacheUI)
@@ -69,7 +74,7 @@ public abstract class LibraryPageBase : UserControl, IControlChild
         }
 
         await Dispatcher.UIThread.InvokeAsync(() => { });
-        int[] games = await LibraryManager.GetGameList(GetGameFilter());
+        int[] games = await LibraryManager.GetGameList(GetGameFilter(), pageLoadTaskToken.Token);
 
         activeUI.Clear();
 
@@ -94,6 +99,7 @@ public abstract class LibraryPageBase : UserControl, IControlChild
         }
 
         hoveredGame = null;
+        pageLoadTaskToken = null;
     }
 
     public abstract void ResetLayout();

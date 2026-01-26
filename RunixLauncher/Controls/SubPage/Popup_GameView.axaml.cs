@@ -1,27 +1,14 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Platform;
-using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Media;
-using Avalonia.Media.Immutable;
 using Avalonia.Threading;
-using GameLibrary.AvaloniaUI.Controls.Pages.Library;
 using GameLibrary.AvaloniaUI.Controls.SubPages.Popup_GameView_Tabs;
-using GameLibrary.AvaloniaUI.Helpers;
 using GameLibrary.AvaloniaUI.Utils;
 using GameLibrary.Controller;
-using GameLibrary.DB.Tables;
 using GameLibrary.Logic;
-using GameLibrary.Logic.Enums;
-using GameLibrary.Logic.Helpers;
 using GameLibrary.Logic.Objects;
-using GameLibrary.Logic.Objects.Tags;
 
 namespace GameLibrary.AvaloniaUI.Controls.SubPage;
 
@@ -29,6 +16,8 @@ public partial class Popup_GameView : UserControl, IControlChild
 {
     public GameDto? inspectingGame { private set; get; }
     private Popup_GameView_TabBase.TabGroup tabs;
+
+    private CancellationTokenSource? gameViewTaskToken;
 
     public Popup_GameView()
     {
@@ -54,19 +43,24 @@ public partial class Popup_GameView : UserControl, IControlChild
 
     public async Task Draw(GameDto game)
     {
+        await (gameViewTaskToken?.CancelAsync() ?? Task.CompletedTask);
+        gameViewTaskToken = new CancellationTokenSource();
+
+        if (inspectingGame != game)
+        {
+            img_bg.Source = null;
+        }
+
         inspectingGame = game;
-        img_bg.Source = null;
-
-        UpdateRunningGameStatus(game.getAbsoluteBinaryLocation, RunnerManager.IsIdentifierRunning(game.gameName));
-
         lbl_Title.Content = game.gameName;
         lbl_LastPlayed.Content = $"Last played {game.GetLastPlayedFormatted()}";
 
+        UpdateRunningGameStatus(game.getAbsoluteBinaryLocation, RunnerManager.IsIdentifierRunning(game.gameName));
         DrawWarnings();
 
         await Dispatcher.UIThread.InvokeAsync(() => { });
         await ImageManager.GetGameImage<ImageBrush>(game, UpdateGameIcon);
-        await tabs.OpenFresh();
+        await tabs.OpenFresh(gameViewTaskToken.Token);
     }
 
     private void DrawWarnings()

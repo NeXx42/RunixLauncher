@@ -98,9 +98,9 @@ namespace GameLibrary.Logic
         }
         public static GameDto? TryGetCachedGame(int gameId) => activeGameList[gameId];
 
-        public static async Task<int[]> GetGameList(GameFilterRequest filterRequest)
+        public static async Task<int[]> GetGameList(GameFilterRequest filterRequest, CancellationToken cancellationToken)
         {
-            (int gameId, int count)[] res = await Database_Manager.GetItemsGeneric(filterRequest.ConstructSQL(), DeserializeDatabaseRequest);
+            (int gameId, int count)[] res = await Database_Manager.GetItemsGeneric(filterRequest.ConstructSQL(), DeserializeDatabaseRequest, cancellationToken);
             filteredGameCount = res.Length > 0 ? res[0].count : 0;
 
             foreach ((int gameId, int _) in res)
