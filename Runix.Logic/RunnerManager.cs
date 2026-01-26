@@ -299,7 +299,7 @@ public static class RunnerManager
             cachedRunners.Remove(existing);
         }
 
-        cachedDefaultRunnerId = runnerDbs.OrderBy(x => x.runnerId).First().runnerId;
+        cachedDefaultRunnerId = runnerDbs.Length > 0 ? runnerDbs.OrderBy(x => x.runnerId).First().runnerId : 0;
     }
 
     public static async Task<RunnerDto> GetRunnerProfile(dbo_Runner? runnerDb)

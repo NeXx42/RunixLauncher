@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using GameLibrary.Logic;
 using GameLibrary.Logic.Helpers;
 
 namespace Runix.Logic.Helpers;
@@ -77,8 +78,8 @@ public static class GithubVersionHelper
             if (asset == null)
                 throw new Exception("Failed to find asset");
 
-            await DownloadFile(asset.Value.GetProperty("browser_download_url").GetString()!, $"{binaryFolder}.tar.xz");
-            await ExtractFile($"{binaryFolder}.tar.xz", binaryFolder);
+            await DependencyManager.OpenLoadingModal(false, async () => await DownloadFile(asset.Value.GetProperty("browser_download_url").GetString()!, $"{binaryFolder}.tar.xz"));
+            await DependencyManager.OpenLoadingModal(false, async () => await ExtractFile($"{binaryFolder}.tar.xz", binaryFolder));
 
             File.Delete($"{binaryFolder}.tar.xz");
         }

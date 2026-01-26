@@ -72,5 +72,5 @@ public class RunnerDto_umu : RunnerDto_Wine
         return files.Select(x => Path.GetFileName(x)).ToArray();
     }
 
-    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(prefixRoot, string.Empty, path, this);
+    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(Path.Combine(prefixRoot, WineHelper.SHARED_PREFIX_NAME), path, this);
 }

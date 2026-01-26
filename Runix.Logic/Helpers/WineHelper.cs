@@ -19,11 +19,8 @@ public static class WineHelper
         }
     }
 
-    public static async Task SharePrefixDataFolders(string prefixFolder, string prefixName, string sharedLocation, RunnerDto runner)
+    public static async Task SharePrefixDataFolders(string prefixFolder, string sharedLocation, RunnerDto runner)
     {
-        prefixName = string.IsNullOrEmpty(prefixName) ? SHARED_PREFIX_NAME : prefixName;
-        prefixFolder = Path.Combine(prefixFolder, prefixName);
-
         if (!Directory.Exists(prefixFolder))
             throw new Exception("Profile hasnt been ran yet");
 
@@ -37,15 +34,26 @@ public static class WineHelper
         void HandleUser(string usrPath)
         {
             string usrName = Path.GetFileName(usrPath)!;
+            usrName = usrName.Equals("Public") ? usrName : "user";
 
             // ensure share directory is correct
-            string shareRoot = Path.Combine(sharedLocation, usrName).CreateDirectoryIfNotExists();
-            string shareDocuments = Path.Combine(shareRoot, "Documents").CreateDirectoryIfNotExists();
+            string shareRoot = Path.Combine(sharedLocation, usrName);
 
-            Path.Combine(shareRoot, "AppData").CreateDirectoryIfNotExists();
-            string shareLocal = Path.Combine(shareRoot, "AppData", "Local").CreateDirectoryIfNotExists();
-            string shareRoaming = Path.Combine(shareRoot, "AppData", "Roaming").CreateDirectoryIfNotExists();
-            string shareLocalLow = Path.Combine(shareRoot, "AppData", "LocalLow").CreateDirectoryIfNotExists();
+            string shareDocuments = Path.Combine(shareRoot, "Documents");
+            string shareLocal = Path.Combine(shareRoot, "AppData", "Local");
+            string shareRoaming = Path.Combine(shareRoot, "AppData", "Roaming");
+            string shareLocalLow = Path.Combine(shareRoot, "AppData", "LocalLow");
+
+            if (!Directory.Exists(shareRoot))
+            {
+                shareRoot.CreateDirectoryIfNotExists();
+                shareDocuments.CreateDirectoryIfNotExists();
+
+                Path.Combine(shareRoot, "AppData").CreateDirectoryIfNotExists();
+                shareLocal.CreateDirectoryIfNotExists();
+                shareRoaming.CreateDirectoryIfNotExists();
+                shareLocalLow.CreateDirectoryIfNotExists();
+            }
 
             HandleSymlink(Path.Combine(usrPath, "Documents"), shareDocuments);
             HandleSymlink(Path.Combine(usrPath, "AppData", "Local"), shareLocal);
@@ -54,9 +62,13 @@ public static class WineHelper
 
             void HandleSymlink(string prefixLoc, string sharedLoc)
             {
-                prefixLoc.CreateDirectoryIfNotExists(); // in case future games need this and it doesn't currently exist
+                if (File.Exists(prefixLoc))
+                    File.Delete(prefixLoc);
 
+                // want to make sure that the parent folders exist
+                prefixLoc.CreateDirectoryIfNotExists();
                 Directory.Delete(prefixLoc, true);
+
                 Directory.CreateSymbolicLink(prefixLoc, sharedLoc);
             }
         }

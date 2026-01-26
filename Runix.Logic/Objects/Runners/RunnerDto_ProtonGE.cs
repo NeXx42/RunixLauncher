@@ -56,10 +56,12 @@ public class RunnerDto_ProtonGE : RunnerDto
         res.whiteListedDirs.Add(winePrefix);
         res.whiteListedDirs.Add(binaryRoot);
 
+        Path.Combine(winePrefix, "pfx").CreateDirectoryIfNotExists();
+
         res.environmentArguments.Add("LD_LIBRARY_PATH", $"{Path.Combine(binaryRoot, "files", "lib")}:$LD_LIBRARY_PATH");
         res.environmentArguments.Add("STEAM_COMPAT_DATA_PATH", winePrefix);
-        res.environmentArguments.Add("WINEPREFIX", "$STEAM_COMPAT_DATA_PATH/pfx");
-        res.environmentArguments.Add("STEAM_COMPAT_CLIENT_INSTALL_PATH", "$HOME/.steam/steam");
+        res.environmentArguments.Add("WINEPREFIX", Path.Combine(winePrefix, "pfx"));
+        res.environmentArguments.Add("STEAM_COMPAT_CLIENT_INSTALL_PATH", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".steam/steam"));
 
 
         AddLogging(res, game.gameConfig?.GetEnum(Game_Config.General_LoggingLevel, LoggingLevel.Off) ?? LoggingLevel.Off);
@@ -92,5 +94,5 @@ public class RunnerDto_ProtonGE : RunnerDto
         args.environmentArguments.Add("WINEDEBUG", logString);
     }
 
-    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(prefixRoot, string.Empty, path, this);
+    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(Path.Combine(prefixRoot, WineHelper.SHARED_PREFIX_NAME, "pfx"), path, this);
 }
