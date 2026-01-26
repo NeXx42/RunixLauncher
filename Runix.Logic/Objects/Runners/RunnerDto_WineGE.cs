@@ -32,7 +32,7 @@ public class RunnerDto_WineGE : RunnerDto_Wine
     {
         if (!Directory.Exists(binaryFolder))
         {
-            await GithubVersionHelper.InstallWine(binaryFolder, GITHUB_NAME, version);
+            await GithubVersionHelper.InstallWine(binaryFolder, GITHUB_NAME, version, (a) => a.GetProperty("content_type").GetString()?.Equals("application/x-xz") ?? false);
         }
     }
 

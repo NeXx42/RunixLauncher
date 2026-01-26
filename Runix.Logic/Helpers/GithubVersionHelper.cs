@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using GameLibrary.Logic.Helpers;
 
 namespace Runix.Logic.Helpers;
 
@@ -13,7 +14,7 @@ public static class GithubVersionHelper
     public static async Task<(long id, JsonElement json)[]> GetVersionData(string githubName)
     {
         const int pageSize = 25;
-        const int maxPageSearches = 1;
+        const int maxPageSearches = 10;
 
         using (HttpClient client = new HttpClient())
         {
@@ -56,72 +57,54 @@ public static class GithubVersionHelper
         }
     }
 
-    public static async Task<JsonElement[]> TryFindAssetsFromTag(string githubName, string tagName)
+    public static async Task InstallWine(string binaryFolder, string githubName, string version, Func<JsonElement, bool> AssesSelector)
     {
-        int? selectedVersion = null;
-        (long, JsonElement json)[] releases = await GetVersionData(githubName);
+        binaryFolder.CreateDirectoryIfNotExists();
 
-        for (int i = 0; i < releases.Length; i++)
+        using (HttpClient client = new HttpClient())
         {
-            if (releases[i].json.GetProperty("tag_name").GetString() == tagName)
-            {
-                selectedVersion = i;
-                break;
-            }
+            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0");
+            client.DefaultRequestHeaders.Add("Accept", "text/json");
+
+            string url = $"https://api.github.com/repos/{githubName}/releases/tags/{version}";
+            HttpResponseMessage res = await client.GetAsync(url);
+
+            var json = await res.Content.ReadAsStringAsync();
+            JsonDocument doc = JsonDocument.Parse(json);
+
+            JsonElement? asset = doc.RootElement.GetProperty("assets").EnumerateArray().FirstOrDefault(AssesSelector);
+
+            if (asset == null)
+                throw new Exception("Failed to find asset");
+
+            await DownloadFile(asset.Value.GetProperty("browser_download_url").GetString()!, $"{binaryFolder}.tar.xz");
+            await ExtractFile($"{binaryFolder}.tar.xz", binaryFolder);
+
+            File.Delete($"{binaryFolder}.tar.xz");
         }
-
-        if (selectedVersion == null)
-            throw new Exception("Couldn't match version with tag");
-
-
-        return releases[selectedVersion.Value].json.GetProperty("assets").EnumerateArray().ToArray();
-    }
-
-    public static async Task InstallWine(string binaryFolder, string githubName, string version)
-    {
-        JsonElement[] assets = await GithubVersionHelper.TryFindAssetsFromTag(githubName, version);
-
-        if (assets.Length == 0)
-        {
-            throw new Exception("Failed to find install for tag");
-        }
-
-        string url = GetUrlForWine(assets);
-
-        await DownloadFile(url, $"{binaryFolder}.tar.xz");
-        await ExtractFile($"{binaryFolder}.tar.xz", binaryFolder);
-
-        File.Delete($"{binaryFolder}.tar.xz");
-    }
-
-    public static string GetUrlForWine(JsonElement[] assets)
-    {
-        foreach (JsonElement asset in assets)
-        {
-            if (asset.GetProperty("content_type").GetString() == "application/x-xz")
-            {
-                return asset.GetProperty("browser_download_url").GetString()!;
-            }
-        }
-
-        throw new Exception("Failed to find asset to download");
     }
 
     public static async Task DownloadFile(string url, string outputFile)
     {
-        if (!File.Exists(outputFile)) // maybe clear
+        try
         {
-            using HttpClient client = new HttpClient();
-            using HttpResponseMessage res = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-
-            res.EnsureSuccessStatusCode();
-
-
-            using (Stream contentStream = await res.Content.ReadAsStreamAsync())
-            using (FileStream filestream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+            if (!File.Exists(outputFile)) // maybe clear
             {
-                await contentStream.CopyToAsync(filestream);
+                using HttpClient client = new HttpClient();
+                using HttpResponseMessage res = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+
+                res.EnsureSuccessStatusCode();
+
+                using (Stream contentStream = await res.Content.ReadAsStreamAsync())
+                using (FileStream filestream = new FileStream(outputFile, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                {
+                    await contentStream.CopyToAsync(filestream);
+                }
             }
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Failed to download file, {e.Message}");
         }
     }
 

@@ -37,7 +37,7 @@ public class RunnerDto_ProtonGE : RunnerDto
     {
         if (!Directory.Exists(binaryFolder))
         {
-            await GithubVersionHelper.InstallWine(binaryFolder, GITHUB_NAME, version);
+            await GithubVersionHelper.InstallWine(binaryFolder, GITHUB_NAME, version, (a) => a.GetProperty("content_type").GetString()?.Equals("application/gzip") ?? false);
         }
     }
 
