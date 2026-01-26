@@ -92,45 +92,5 @@ public class RunnerDto_Wine : RunnerDto
         }), null).WaitForExitAsync();
     }
 
-    public override async Task SharePrefixDocuments(string path)
-    {
-        string prefixFolder = Path.Combine(prefixRoot, "shared");
-
-        if (!Directory.Exists(prefixFolder))
-            throw new Exception("Profile hasnt been ran yet");
-
-        string[] users = Directory.GetDirectories(Path.Combine(prefixFolder, "drive_c", "users"));
-
-        foreach (string usr in users)
-            HandleUser(usr);
-
-        await globalRunnerValues.SaveValue(RunnerConfigValues.Wine_SharedDocuments, path);
-
-        void HandleUser(string usrPath)
-        {
-            string usrName = Path.GetFileName(usrPath)!;
-
-            // ensure share directory is correct
-            string shareRoot = Path.Combine(path, usrName).CreateDirectoryIfNotExists();
-            string shareDocuments = Path.Combine(shareRoot, "Documents").CreateDirectoryIfNotExists();
-
-            Path.Combine(shareRoot, "AppData").CreateDirectoryIfNotExists();
-            string shareLocal = Path.Combine(shareRoot, "AppData", "Local").CreateDirectoryIfNotExists();
-            string shareRoaming = Path.Combine(shareRoot, "AppData", "Roaming").CreateDirectoryIfNotExists();
-            string shareLocalLow = Path.Combine(shareRoot, "AppData", "LocalLow").CreateDirectoryIfNotExists();
-
-            HandleSymlink(Path.Combine(usrPath, "Documents"), shareDocuments);
-            HandleSymlink(Path.Combine(usrPath, "AppData", "Local"), shareLocal);
-            HandleSymlink(Path.Combine(usrPath, "AppData", "Roaming"), shareRoaming);
-            HandleSymlink(Path.Combine(usrPath, "AppData", "LocalLow"), shareLocalLow);
-
-            void HandleSymlink(string prefixLoc, string sharedLoc)
-            {
-                prefixLoc.CreateDirectoryIfNotExists(); // in case future games need this and it doesn't currently exist
-
-                Directory.Delete(prefixLoc, true);
-                Directory.CreateSymbolicLink(prefixLoc, sharedLoc);
-            }
-        }
-    }
+    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(prefixRoot, string.Empty, path, this);
 }

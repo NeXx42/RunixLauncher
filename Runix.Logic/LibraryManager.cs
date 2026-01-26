@@ -194,5 +194,18 @@ namespace GameLibrary.Logic
             await Database_Manager.InsertItem(games);
             onGameDeletion?.Invoke();
         }
+
+        public static async Task ClearRunner(int runnerId)
+        {
+            // really should do in a single db call, but its not too big of an issue
+
+            foreach (GameDto game in activeGameList.Values)
+            {
+                if (game.runnerId == runnerId)
+                {
+                    await game.ChangeRunnerId(null);
+                }
+            }
+        }
     }
 }

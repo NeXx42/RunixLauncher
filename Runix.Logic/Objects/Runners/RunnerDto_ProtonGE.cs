@@ -91,4 +91,6 @@ public class RunnerDto_ProtonGE : RunnerDto
 
         args.environmentArguments.Add("WINEDEBUG", logString);
     }
+
+    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(prefixRoot, string.Empty, path, this);
 }

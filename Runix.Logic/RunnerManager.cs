@@ -275,7 +275,7 @@ public static class RunnerManager
         };
 
         await Database_Manager.InsertItem(profile);
-
+        await RecacheRunners();
     }
 
     public static async Task RecacheRunners()
@@ -333,8 +333,11 @@ public static class RunnerManager
                 return false;
         }
 
+        await LibraryManager.ClearRunner(id);
+
         await Database_Manager.Delete<dbo_RunnerConfig>(SQLFilter.Equal(nameof(dbo_RunnerConfig.runnerId), id));
         await Database_Manager.Delete<dbo_Runner>(SQLFilter.Equal(nameof(dbo_Runner.runnerId), id));
+
 
         dbo_Game temp = new dbo_Game()
         {
