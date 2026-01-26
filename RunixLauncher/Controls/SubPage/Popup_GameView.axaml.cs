@@ -55,7 +55,7 @@ public partial class Popup_GameView : UserControl, IControlChild
         lbl_Title.Content = game.gameName;
         lbl_LastPlayed.Content = $"Last played {game.GetLastPlayedFormatted()}";
 
-        UpdateRunningGameStatus(game.getAbsoluteBinaryLocation, RunnerManager.IsIdentifierRunning(game.gameName));
+        UpdateRunningGameStatus(game.gameName, RunnerManager.IsIdentifierRunning(game.gameName));
         DrawWarnings();
 
         await Dispatcher.UIThread.InvokeAsync(() => { });
