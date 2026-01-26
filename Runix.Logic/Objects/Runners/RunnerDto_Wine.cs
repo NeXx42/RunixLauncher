@@ -3,6 +3,7 @@ using GameLibrary.Logic.Database.Tables;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.GameRunners;
 using GameLibrary.Logic.Helpers;
+using Runix.Logic.Helpers;
 
 namespace GameLibrary.Logic.Objects;
 
@@ -31,8 +32,8 @@ public class RunnerDto_Wine : RunnerDto
 
     public override async Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)
     {
-        string prefixName = "shared";
         RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = GetWineExecutable(game.customExecutable ?? "wine64") };
+        WineHelper.GetPrefixName(prefixRoot, game, out string winePrefix);
 
         if (game.gameConfig?.GetBoolean(Game_Config.Wine_ConsoleLaunched, false) ?? false)
         {
@@ -44,33 +45,13 @@ public class RunnerDto_Wine : RunnerDto
             res.arguments.AddLast("/desktop=Game,800x600");
         }
 
-        if (game.gameConfig?.GetBoolean(Game_Config.Wine_IsolatedPrefix, false) ?? false)
-        {
-            prefixName = game.path;
-            prefixName = prefixName.Replace("!", string.Empty);
-            prefixName = prefixName.Replace(",", string.Empty);
-            prefixName = prefixName.Replace(" ", string.Empty);
-            prefixName = prefixName.Replace("_", string.Empty);
-            prefixName = prefixName.Replace("'", string.Empty);
-            prefixName = prefixName.Replace("/", "_");
-
-            // from this i can later split on _ and get just the "folder name" or close enough
-        }
-
         AddDefaultArgumentsToInit(ref game, ref res);
 
-        if (game.gameConfig?.GetBoolean(Enums.Game_Config.Wine_Windowed, false) ?? false)
-        {
-            res.arguments.AddLast("-windowed");
-            res.arguments.AddLast("-window");
-            res.arguments.AddLast("-w");
-        }
-
         res.whiteListedDirs.Add(Path.GetDirectoryName(game.path)!);
-        res.whiteListedDirs.Add(Path.Combine(prefixRoot, prefixName));
+        res.whiteListedDirs.Add(winePrefix);
         res.whiteListedDirs.Add(rootLoc);
 
-        res.environmentArguments.Add("WINEPREFIX", Path.Combine(prefixRoot, prefixName));
+        res.environmentArguments.Add("WINEPREFIX", winePrefix);
 
         AddLogging(res, game.gameConfig?.GetEnum(Game_Config.General_LoggingLevel, LoggingLevel.Off) ?? LoggingLevel.Off);
         return res;

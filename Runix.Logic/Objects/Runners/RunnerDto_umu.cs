@@ -1,6 +1,8 @@
 using GameLibrary.Logic.Database.Tables;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.GameRunners;
+using GameLibrary.Logic.Helpers;
+using Runix.Logic.Helpers;
 
 namespace GameLibrary.Logic.Objects;
 
@@ -15,12 +17,7 @@ public class RunnerDto_umu : RunnerDto_Wine
     public RunnerDto_umu(dbo_Runner runner, dbo_RunnerConfig[] configValues) : base(runner, configValues)
     {
         version = runnerVersion;
-
-        GameRunnerHelperMethods.EnsureDirectoryExists(rootLoc);
-
-        prefixLoc = Path.Combine(rootLoc, "prefixes", "shared");
-
-        GameRunnerHelperMethods.EnsureDirectoryExists(prefixLoc);
+        prefixLoc = Path.Combine(rootLoc, "prefixes").CreateDirectoryIfNotExists();
     }
 
     public override Task SetupRunner() => Task.CompletedTask;
@@ -28,6 +25,9 @@ public class RunnerDto_umu : RunnerDto_Wine
     public override Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)
     {
         RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = "umu-run" };
+        WineHelper.GetPrefixName(prefixRoot, game, out string winePrefix);
+
+        string protonPath = Path.Combine(getRuntimeLocationRoot, version);
 
         if (game.path.EndsWith(".bat"))
         {
@@ -37,24 +37,18 @@ public class RunnerDto_umu : RunnerDto_Wine
 
         AddDefaultArgumentsToInit(ref game, ref res);
 
-        if (game.gameConfig?.GetBoolean(Enums.Game_Config.Wine_Windowed, false) ?? false)
-        {
-            res.arguments.AddLast("-windowed");
-            res.arguments.AddLast("-window");
-            res.arguments.AddLast("-w");
-        }
-
-        res.environmentArguments.Add("WINEPREFIX", prefixLoc);
-        res.environmentArguments.Add("STEAM_COMPAT_TOOL_PATHS", getRuntimeLocationRoot);
-        res.environmentArguments.Add("STEAM_COMPAT_TOOL", version);
+        res.environmentArguments.Add("WINEPREFIX", winePrefix);
+        res.environmentArguments.Add("PROTONPATH", protonPath);
+        res.environmentArguments.Add("STEAM_RUNTIME", "1");
+        res.environmentArguments.Add("GAMEID", "0");
 
         res.environmentArguments.Add("UMU_LOG", "debug");
 
         string homeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
         res.whiteListedDirs = [
-            prefixLoc,
-            getRuntimeLocationRoot,
+            protonPath,
+            winePrefix,
             Path.GetDirectoryName(game.path)!,
             Path.Combine(homeDir, ".local/share/umu"),
             Path.Combine(homeDir, ".cache", "mesa_shader_cache"),

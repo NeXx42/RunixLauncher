@@ -43,7 +43,7 @@ public class RunnerDto_ProtonGE : RunnerDto
 
     public override Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)
     {
-        string prefixName = "shared";
+        WineHelper.GetPrefixName(prefixRoot, game, out string winePrefix);
         string binaryRoot = Directory.GetDirectories(binaryFolder).First();
 
         RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = Path.Combine(binaryRoot, "proton") };
@@ -53,12 +53,11 @@ public class RunnerDto_ProtonGE : RunnerDto
         AddDefaultArgumentsToInit(ref game, ref res);
 
         res.whiteListedDirs.Add(Path.GetDirectoryName(game.path)!);
-        res.whiteListedDirs.Add(Path.Combine(prefixRoot, prefixName));
-        res.whiteListedDirs.Add(rootLoc);
+        res.whiteListedDirs.Add(winePrefix);
         res.whiteListedDirs.Add(binaryRoot);
 
         res.environmentArguments.Add("LD_LIBRARY_PATH", $"{Path.Combine(binaryRoot, "files", "lib")}:$LD_LIBRARY_PATH");
-        res.environmentArguments.Add("STEAM_COMPAT_DATA_PATH", Path.Combine(prefixRoot, prefixName));
+        res.environmentArguments.Add("STEAM_COMPAT_DATA_PATH", winePrefix);
         res.environmentArguments.Add("WINEPREFIX", "$STEAM_COMPAT_DATA_PATH/pfx");
         res.environmentArguments.Add("STEAM_COMPAT_CLIENT_INSTALL_PATH", "$HOME/.steam/steam");
 

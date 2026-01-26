@@ -140,6 +140,13 @@ public class RunnerDto
             foreach (string arg in args)
                 res.arguments.AddLast(arg);
         }
+
+        if (game.gameConfig?.GetBoolean(Enums.Game_Config.Wine_Windowed, false) ?? false)
+        {
+            res.arguments.AddLast("-windowed");
+            res.arguments.AddLast("-window");
+            res.arguments.AddLast("-w");
+        }
     }
 
     // Launching
