@@ -104,7 +104,7 @@ public class UILinker : IUILinker
         if (res.Count == 0)
             return null;
 
-        return res.Select(x => x.Path.AbsolutePath).ToArray();
+        return res.Select(x => x.Path.LocalPath).ToArray();
     }
 
     public async Task<string?> OpenFolderDialog(string title)
@@ -130,7 +130,7 @@ public class UILinker : IUILinker
         if (res.Count == 0)
             return null;
 
-        return res.Select(x => x.Path.AbsolutePath).ToArray();
+        return res.Select(x => x.Path.LocalPath).ToArray();
     }
 
     public async Task<string?> OpenFileDialog(string title, string[] allowedTypes)

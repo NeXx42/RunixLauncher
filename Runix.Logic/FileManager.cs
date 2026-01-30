@@ -111,6 +111,7 @@ namespace GameLibrary.Logic
             return extension.Equals(".7z", StringComparison.InvariantCultureIgnoreCase) ||
                 extension.Equals(".rar", StringComparison.InvariantCultureIgnoreCase) ||
                 extension.Equals(".zip", StringComparison.InvariantCultureIgnoreCase) ||
+                extension.Equals(".bin", StringComparison.InvariantCultureIgnoreCase) ||
                 extension.Equals(".iso", StringComparison.InvariantCultureIgnoreCase);
         }
 

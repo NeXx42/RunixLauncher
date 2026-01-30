@@ -29,7 +29,7 @@ namespace GameLibrary.Logic
             await FindLibraries();
         }
 
-        private static async Task FindLibraries()
+        public static async Task FindLibraries()
         {
             dbo_Libraries[] libraries = await Database_Manager.GetItems<dbo_Libraries>();
             cachedLibraries = libraries.ToDictionary(x => x.libaryId, x => new LibraryDto(x));
@@ -177,6 +177,8 @@ namespace GameLibrary.Logic
             {
                 rootPath = path
             });
+
+            await FindLibraries();
         }
 
         public static async Task CreateTag(string tagName)
@@ -188,8 +190,7 @@ namespace GameLibrary.Logic
         }
 
         public static string GetLibraryRoute(GameDto game) => game.libraryId == null ? string.Empty : cachedLibraries[game.libraryId.Value].root;
-
-        public static LibraryDto[] GetLibraries() => cachedLibraries.Values.ToArray();
+        public static LibraryDto[] GetLibraries() => cachedLibraries.Values.Where(x => !x.externalType.HasValue).ToArray();
 
         public static void InvokeGameDetailsUpdate(int gameId)
         {

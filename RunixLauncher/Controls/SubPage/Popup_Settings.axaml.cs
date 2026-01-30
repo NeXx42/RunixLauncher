@@ -7,6 +7,8 @@ using GameLibrary.Controller;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Settings;
 using GameLibrary.Logic.Settings.UI;
+using Runix.Logic.Settings;
+using Runix.Logic.Settings.UI;
 using RunixLauncher.Controls.Settings;
 using RunixLauncher.Helpers;
 using RunixLauncher.Utils;
@@ -84,6 +86,7 @@ public partial class Popup_Settings : UserControl, IControlChild
                 case SettingsUI_Dropdown settingsUI_Dropdown: return new Control_Settings_Dropdown().Draw(setting, settingsUI_Dropdown);
 
                 case SettingsUI_Runners settingsUI_Runners: return new Control_Settings_Runners().Draw(setting, settingsUI_Runners);
+                case SettingsUI_Libraries settingsUI_Libraries: return new Control_Settings_Libraries().Draw(setting, settingsUI_Libraries);
                 case SettingsUI_DefaultFilter settingsUI_DefaultFilter: return new Control_Settings_DefaultFilter(setting);
             }
 

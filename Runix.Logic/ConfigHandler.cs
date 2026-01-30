@@ -13,6 +13,7 @@ using GameLibrary.Logic.Helpers;
 using GameLibrary.Logic.Settings;
 using GameLibrary.Logic.Settings.UI;
 using Logic.db;
+using Runix.Logic.Settings;
 
 namespace GameLibrary.Logic
 {
@@ -70,6 +71,8 @@ namespace GameLibrary.Logic
                     "Libraries",
                     [
                         new Setting_Title("Libraries", 0, SettingOSCompatibility.Universal),
+                        new Setting_Libraries(),
+
                         new Setting_Title("Integration", 0, SettingOSCompatibility.Universal),
                         new Setting_SteamIntegration(),
                     ]
