@@ -73,6 +73,8 @@ public partial class Indexer_Selected : UserControl
 
         if (IsSelectionInvalid(file, out string path))
             return;
+
+        AddNewImport(path, new Indexer_Import_Folder(path));
     }
 
     private async Task HandleFile()

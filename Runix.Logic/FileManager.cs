@@ -317,5 +317,24 @@ namespace GameLibrary.Logic
             public ImportEntry_Binary(string loc) => binaryLocation = loc;
 
         }
+
+        public class ImportEntry_Folder : IImportEntry
+        {
+            public string folderPath;
+
+            public int selectedBinary;
+            public string[] binaries;
+
+            public string getPotentialName => Path.GetFileName(folderPath);
+
+            public string getBinaryPath => Path.Combine(folderPath, binaries[selectedBinary]);
+            public string? getBinaryFolder => folderPath;
+
+            public ImportEntry_Folder(string folder)
+            {
+                folderPath = folder.EndsWith("/") ? folder.Substring(0, folder.Length - 1) : folder;
+                binaries = Directory.GetFiles(folder).Where(RunnerManager.IsUniversallyAcceptedExecutableFormat).Select(x => Path.GetFileName(x)).ToArray();
+            }
+        }
     }
 }
