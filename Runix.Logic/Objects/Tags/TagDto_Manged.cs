@@ -24,7 +24,7 @@ public class TagDto_Managed : TagDto
 
     public override bool canToggle => false;
 
-    public bool DoesFitGame(GameDto game)
+    public override bool DoesFitGame(GameDto game)
     {
         switch (type)
         {

@@ -26,7 +26,7 @@ public partial class Popup_GameView_Tab_Tags : Popup_GameView_TabBase
     internal class Tab_Tags : Tab
     {
         private new Popup_GameView_Tab_Tags element;
-        private Dictionary<int, Library_Tag> allTags = new Dictionary<int, Library_Tag>();
+        private Dictionary<TagDto, Library_Tag> allTags = new Dictionary<TagDto, Library_Tag>();
 
         public Tab_Tags(Popup_GameView_Tab_Tags element, Common_ButtonToggle btn) : base(element, btn)
         {
@@ -60,18 +60,10 @@ public partial class Popup_GameView_Tab_Tags : Popup_GameView_TabBase
             {
                 Library_Tag tagUI = new Library_Tag();
 
-                if (tag is TagDto_Managed managedTag)
-                {
-                    tagUI.Draw(tag, null);
-                    tagUI.Toggle(managedTag.DoesFitGame(inspectingGame));
-                }
-                else
-                {
-                    tagUI.Draw(tag, HandleTagToggle);
-                }
+                tagUI.Draw(tag, HandleTagToggle);
 
                 element.cont_AllTags.Children.Add(tagUI);
-                allTags.Add(tag.id, tagUI);
+                allTags.Add(tag, tagUI);
             }
         }
 
@@ -86,14 +78,8 @@ public partial class Popup_GameView_Tab_Tags : Popup_GameView_TabBase
 
         private async Task RedrawSelectedTags(GameDto game)
         {
-            foreach (KeyValuePair<int, Library_Tag> tag in allTags)
-            {
-                if (tag.Key < 0)
-                    continue;
-
-                tag.Value.Margin = new Thickness(0, 0, 0, 5);
-                tag.Value.Toggle(game?.tags.Contains(tag.Key) ?? false);
-            }
+            foreach (KeyValuePair<TagDto, Library_Tag> tag in allTags)
+                tag.Value.Toggle(tag.Key.DoesFitGame(game));
         }
     }
 }
