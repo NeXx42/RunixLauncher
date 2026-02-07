@@ -2,6 +2,8 @@ namespace GameLibrary.Logic.Enums;
 
 public enum Game_Config
 {
+    Library_Id,
+
     General_LocaleEmulation,
     General_LoggingLevel,
 

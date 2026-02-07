@@ -189,7 +189,7 @@ namespace GameLibrary.Logic
             });
         }
 
-        public static string GetLibraryRoute(GameDto game) => game.libraryId == null ? string.Empty : cachedLibraries[game.libraryId.Value].root;
+        public static string GetLibraryRoute(int? libraryId) => libraryId == null ? string.Empty : cachedLibraries[libraryId.Value].root;
         public static LibraryDto[] GetLibraries() => cachedLibraries.Values.Where(x => !x.externalType.HasValue).ToArray();
 
         public static void InvokeGameDetailsUpdate(int gameId)

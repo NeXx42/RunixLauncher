@@ -52,12 +52,12 @@ namespace GameLibrary.Logic
 
         public static async Task<bool> MoveGameToItsLibrary(dbo_Game game, string binaryAbsolutePath, string libraryRootLocation)
         {
-            string destination = Path.Combine(libraryRootLocation, game.gameFolder);
+            string destination = Path.Combine();
             string existingFolderPath = Path.GetDirectoryName(binaryAbsolutePath)!;
 
             if (Directory.Exists(destination))
             {
-                if (await DependencyManager.OpenYesNoModal("Delete?", $"A directory already exsits at\n'{destination}'\n\nDo you want to delete it?"))
+                if (await DependencyManager.OpenYesNoModal("Delete?", $"A directory already exists at\n'{destination}'\n\nDo you want to delete it?"))
                 {
                     Directory.Delete(destination, true);
                 }
@@ -67,13 +67,21 @@ namespace GameLibrary.Logic
                 }
             }
 
+            return await MoveFolder(existingFolderPath, libraryRootLocation, game.gameFolder);
+        }
+
+        public static async Task<bool> MoveFolder(string absoluteFolder, string newAbsoluteParent, string? newFolderName = "")
+        {
+            newFolderName = string.IsNullOrEmpty(newFolderName) ? Path.GetFileName(absoluteFolder)! : newFolderName;
+            string fullTarget = Path.Combine(newAbsoluteParent, newFolderName);
+
             try
             {
-                Directory.Move(existingFolderPath, destination);
+                Directory.Move(absoluteFolder, fullTarget);
             }
             catch (IOException ex) when (ex.Message.Contains("Invalid cross-device link"))
             {
-                await CopyFiles(existingFolderPath, destination);
+                await CopyFiles(absoluteFolder, fullTarget);
             }
             catch (Exception e)
             {

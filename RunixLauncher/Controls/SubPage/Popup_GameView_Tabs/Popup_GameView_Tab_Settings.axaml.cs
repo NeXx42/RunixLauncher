@@ -29,7 +29,9 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
     {
         private new Popup_GameView_Tab_Settings element;
 
-        private List<RunnerDto>? possibleRunners;
+        private LibraryDto[]? possibleLibraries;
+        private RunnerDto[]? possibleRunners;
+
         private ConfigChangerBase[] configOptions;
 
         public Tab_LaunchSettings(Popup_GameView_Tab_Settings element, Common_ButtonToggle btn) : base(element, btn)
@@ -41,6 +43,8 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
         protected override void InternalSetup(TabGroup master)
         {
             configOptions = [
+                // running settings
+
                 new ConfigChanger_Toggle(element.inp_Emulate, Game_Config.General_LocaleEmulation, () => inspectingGame),
                 new ConfigChanger_Dropdown(element.inp_CaptureLogs, Game_Config.General_LoggingLevel, Enum.GetNames<LoggingLevel>(), () => inspectingGame),
                 new ConfigChanger_InputField(element.inp_Arguments, Game_Config.General_Arguments, () => inspectingGame),
@@ -60,6 +64,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
                 return;
             }
 
+            DrawLibraries(game!);
             DrawRunners(game!);
             DrawBinaries(game!);
             await UpdateSupportedSettings();
@@ -68,16 +73,54 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
                 await config.Load(game!);
         }
 
+        private void DrawLibraries(GameDto game)
+        {
+            possibleLibraries = LibraryManager.GetLibraries();
+
+            element.inp_Library_Library.Setup((string[])["None", .. possibleLibraries.Select(x => x.getName)], 0, OnUpdate);
+            CorrectSelectedLib();
+
+            async Task OnUpdate()
+            {
+                LibraryDto? desiredLib = element.inp_Library_Library.selectedIndex == 0 ? null : possibleLibraries[element.inp_Library_Library.selectedIndex - 1];
+                string msg = desiredLib == null ? "Are you sure you want to unlink this game from a library?"
+                                                : $"Are you sure you want to move this game to the following library?\n{desiredLib.root}";
+
+                await DependencyManager.OpenYesNoModalAsync("Change Library", msg, () => game.ChangeLibrary(desiredLib), "Moving");
+                CorrectSelectedLib();
+            }
+
+            void CorrectSelectedLib()
+            {
+                int currentLib = game.libraryId.HasValue ? possibleLibraries.Select(x => x.libraryId).ToList().IndexOf(game.libraryId.Value) + 1 : 0;
+                element.inp_Library_Library.SilentlyChangeValue(currentLib);
+            }
+        }
+
         private void DrawRunners(GameDto game)
         {
-            possibleRunners = RunnerManager.GetRunnerProfiles().ToList();
-            string firstProfile = possibleRunners.Count > 0 ? possibleRunners[0].runnerName : "INVALID";
+            possibleRunners = RunnerManager.GetRunnerProfiles();
+            string firstProfile = possibleRunners.Length > 0 ? possibleRunners[0].runnerName : "INVALID";
 
             string[] profileOptions = [$"Default ({firstProfile})", .. possibleRunners!.Select(x => x.runnerName)!.ToArray()];
             int selectedProfile = possibleRunners.Select(x => x.runnerId).ToList().IndexOf(game.runnerId ?? -1);
 
             element.inp_WineProfile.IsVisible = true;
             element.inp_WineProfile.Setup(profileOptions, selectedProfile >= 0 ? (selectedProfile + 1) : 0, HandleWineProfileChange);
+
+            async Task HandleWineProfileChange()
+            {
+                int? newProfileId = null;
+                int selectedIndex = element.inp_WineProfile.selectedIndex;
+
+                if (selectedIndex != 0) // default profile
+                {
+                    newProfileId = possibleRunners![selectedIndex - 1].runnerId;
+                }
+
+                await inspectingGame!.ChangeRunnerId(newProfileId);
+                await UpdateSupportedSettings();
+            }
         }
 
         private void DrawBinaries(GameDto game)
@@ -93,21 +136,8 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
             {
                 (element.inp_binary.Parent as Control)!.IsVisible = false;
             }
-        }
 
-        private async Task HandleBinaryChange() => await inspectingGame!.ChangeBinaryLocation(element.inp_binary.selectedValue?.ToString());
-        private async Task HandleWineProfileChange()
-        {
-            int? newProfileId = null;
-            int selectedIndex = element.inp_WineProfile.selectedIndex;
-
-            if (selectedIndex != 0) // default profile
-            {
-                newProfileId = possibleRunners![selectedIndex - 1].runnerId;
-            }
-
-            await inspectingGame!.ChangeRunnerId(newProfileId);
-            await UpdateSupportedSettings();
+            async Task HandleBinaryChange() => await inspectingGame!.ChangeBinaryLocation(element.inp_binary.selectedValue?.ToString());
         }
 
         private async Task UpdateSupportedSettings()

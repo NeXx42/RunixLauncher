@@ -31,7 +31,7 @@ public abstract class GameDto
 
     public RunnerDto.RunnerType? runnerType { protected set; get; }
 
-    public virtual string getAbsoluteFolderLocation => Path.Combine(LibraryManager.GetLibraryRoute(this), folderPath);
+    public virtual string getAbsoluteFolderLocation => Path.Combine(LibraryManager.GetLibraryRoute(libraryId), folderPath);
     public virtual string getAbsoluteLogFile => $"{getAbsoluteBinaryLocation}.log";
 
     protected virtual string getAbsoluteIconPath => Path.Combine(getAbsoluteFolderLocation, iconPath ?? "");
@@ -229,6 +229,25 @@ public abstract class GameDto
 
     public virtual (string msg, Func<Task> resolution)[] GetWarnings() => Array.Empty<(string, Func<Task>)>();
 
+    public async Task ChangeLibrary(LibraryDto? newLib)
+    {
+        if (newLib == null)
+        {
+            folderPath = getAbsoluteFolderLocation;
+            libraryId = null;
+
+            await UpdateDatabaseEntry(nameof(dbo_Game.libraryId), nameof(dbo_Game.gameFolder));
+            return;
+        }
+
+        string newFolderName = Path.GetFileName(folderPath);
+        await FileManager.MoveFolder(getAbsoluteFolderLocation, newLib.root, newFolderName);
+
+        folderPath = newFolderName;
+        libraryId = newLib.libraryId;
+
+        await UpdateDatabaseEntry(nameof(dbo_Game.libraryId), nameof(dbo_Game.gameFolder));
+    }
 
     // required behaviour    
 

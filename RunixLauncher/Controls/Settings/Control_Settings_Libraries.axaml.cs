@@ -18,28 +18,23 @@ public partial class Control_Settings_Libraries : UserControl, ISettingControl
 {
     private SettingBase? setting;
 
-    private Border[]? profileUIS;
-    private LibraryDto[]? existingProfiles;
+    private LibraryUI[]? elements;
 
-    private ImmutableSolidColorBrush selectedBrush;
-    private ImmutableSolidColorBrush unselectedBrush;
+    private static ImmutableSolidColorBrush? selectedBrush;
+    private static ImmutableSolidColorBrush? unselectedBrush;
 
     private int? selectedProfile
     {
         set
         {
             if (m_selectedProfile.HasValue)
-            {
-                profileUIS![m_selectedProfile.Value].Background = unselectedBrush;
-            }
+                elements![m_selectedProfile.Value].ToggleSelection(false);
 
             m_selectedProfile = value;
             btn_Add.Label = value.HasValue ? "Edit" : "Add";
 
             if (m_selectedProfile.HasValue)
-            {
-                profileUIS![m_selectedProfile.Value].Background = selectedBrush;
-            }
+                elements![m_selectedProfile.Value].ToggleSelection(true);
         }
         get => m_selectedProfile;
     }
@@ -67,39 +62,13 @@ public partial class Control_Settings_Libraries : UserControl, ISettingControl
     {
         selectedProfile = null;
 
-        existingProfiles = await setting!.LoadSetting<LibraryDto[]>(null!);
-        profileUIS = new Border[existingProfiles?.Length ?? 0];
+        LibraryDto[] libs = await setting!.LoadSetting<LibraryDto[]>([]);
+        elements = new LibraryUI[libs.Length];
 
         container.Children.Clear();
 
-        if (existingProfiles != null)
-        {
-            for (int i = 0; i < existingProfiles.Length; i++)
-            {
-                DrawProfile(i);
-            }
-        }
-    }
-
-    private void DrawProfile(int uiIndex)
-    {
-        Border grid = new Border();
-
-        grid.CornerRadius = new CornerRadius(2);
-        grid.Height = 30;
-        grid.HorizontalAlignment = HorizontalAlignment.Stretch;
-        grid.Background = unselectedBrush;
-
-        Label l = new Label();
-        l.Content = existingProfiles![uiIndex].root;
-        l.VerticalAlignment = VerticalAlignment.Center;
-        l.Margin = new Thickness(5);
-
-        grid.Child = l;
-        grid.PointerPressed += (_, __) => SelectProfile(uiIndex);
-
-        container.Children.Add(grid);
-        profileUIS![uiIndex] = grid;
+        for (int i = 0; i < elements.Length; i++)
+            elements[i] = new LibraryUI(i, libs[i], container, this);
     }
 
     private void SelectProfile(int profileId)
@@ -116,7 +85,15 @@ public partial class Control_Settings_Libraries : UserControl, ISettingControl
     private async Task OpenEditMenu()
     {
         if (selectedProfile.HasValue)
+        {
+            string? alias = await DependencyManager.OpenStringInputModal("New Alias");
+
+            if (string.IsNullOrEmpty(alias))
+                return;
+
+            await elements![selectedProfile.Value].RenameAlias(alias);
             return;
+        }
 
         if (await DependencyManager.OpenConfirmationAsync("Select Root", "Select a folder that will be the basis of the library.", ("Select Folder", HandleModal, "Selecting")) == -1)
             return;
@@ -135,6 +112,56 @@ public partial class Control_Settings_Libraries : UserControl, ISettingControl
 
     private async Task DeleteSelectedProfile()
     {
+        if (!selectedProfile.HasValue)
+            return;
 
+
+    }
+
+
+    private struct LibraryUI
+    {
+        public readonly LibraryDto lib;
+
+        public readonly Border border;
+        public readonly Label label;
+
+        public LibraryUI(int index, LibraryDto lib, StackPanel container, Control_Settings_Libraries master)
+        {
+            this.lib = lib;
+
+            border = new Border();
+
+            border.CornerRadius = new CornerRadius(2);
+            border.Height = 30;
+            border.HorizontalAlignment = HorizontalAlignment.Stretch;
+            border.Background = unselectedBrush;
+
+            label = new Label();
+            label.VerticalAlignment = VerticalAlignment.Center;
+            label.Margin = new Thickness(5);
+
+            border.Child = label;
+            border.PointerPressed += (_, __) => master.SelectProfile(index);
+
+            container.Children.Add(border);
+            Redraw();
+        }
+
+        public void Redraw()
+        {
+            label.Content = $"[{lib.alias}] - {lib.root}";
+        }
+
+        public void ToggleSelection(bool to)
+        {
+            border.Background = to ? Control_Settings_Libraries.selectedBrush : Control_Settings_Libraries.unselectedBrush;
+        }
+
+        public async Task RenameAlias(string to)
+        {
+            await lib.UpdateAlias(to);
+            Redraw();
+        }
     }
 }
