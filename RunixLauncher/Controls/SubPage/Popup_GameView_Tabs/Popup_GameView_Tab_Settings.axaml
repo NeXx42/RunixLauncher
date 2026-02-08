@@ -3,72 +3,81 @@
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="RunixLauncher.Controls.SubPages.Popup_GameView_Tabs.Popup_GameView_Tab_Settings"
   xmlns:common="clr-namespace:RunixLauncher.Controls">
-  <StackPanel Orientation="Vertical">
+  <Grid ColumnDefinitions="150 20 *">
+    <StackPanel Orientation="Vertical" Grid.Column="0" Spacing="5">
+      <common:Common_ButtonToggle x:Name="tabBtn_General" Label="General"/>
+      <common:Common_ButtonToggle x:Name="tabBtn_Launching" Label="Launching"/>
+    </StackPanel>
 
-    <StackPanel>
-      <Label FontSize="18" Content="General" />
-      <StackPanel x:Name="tab_Settings_Libraries" Margin="10 0" Spacing="5">
-        <Grid ColumnDefinitions="150, 300">
+    <StackPanel Grid.Column="2">
+      <Label FontSize="18" Content="General" x:Name="lbl_Header" />
+
+      <!-- Management Settings -->
+
+      <StackPanel x:Name="tab_General" Margin="10 0" Spacing="5" IsVisible="True">
+        <Grid ColumnDefinitions="150, *">
           <Label Content="Library" VerticalAlignment="Center"/>
           <common:Common_Dropdown x:Name="inp_Library_Library" Grid.Column="1"/>
         </Grid>
-      </StackPanel>
-    </StackPanel>
 
-    <StackPanel>
-      <Label FontSize="18" Content="General" />
-      <StackPanel x:Name="tab_Settings_General" Margin="10 0" Spacing="5">
-        <Grid ColumnDefinitions="150, 300">
-          <Label Content="Locale Emulation" VerticalAlignment="Center"/>
-          <common:Common_Toggle x:Name="inp_Emulate" Grid.Column="1"/>
-        </Grid>
-
-        <Grid ColumnDefinitions="150, 300">
+        <Grid ColumnDefinitions="150, *">
           <Label Content="Logging Level" VerticalAlignment="Center"/>
           <common:Common_Dropdown x:Name="inp_CaptureLogs" Grid.Column="1"/>
         </Grid>
-
-        <Grid ColumnDefinitions="150, *">
-          <Label Content="Arguments" VerticalAlignment="Center"/>
-          <common:Common_InputField x:Name="inp_Arguments" Grid.Column="1"/>
-        </Grid>
       </StackPanel>
 
-      <Label FontSize="18" Content="Runner Settings" Margin="0 15 0 0" />
-      <StackPanel x:Name="tab_Settings_Wine" Margin="10 0" Spacing="5">
-        <Grid ColumnDefinitions="150, 300">
-          <Label Content="Runner" VerticalAlignment="Center"/>
-          <common:Common_Dropdown x:Name="inp_WineProfile" Grid.Column="1"/>
-        </Grid>
+      <!-- Launch Settings -->
 
-        <Grid ColumnDefinitions="150, 300">
-          <Label Content="Binary" VerticalAlignment="Center"/>
-          <common:Common_Dropdown x:Name="inp_binary" Grid.Column="1"/>
-        </Grid>
+      <StackPanel x:Name="tab_LaunchSettings">
+        <StackPanel Margin="10 0" Spacing="5" IsVisible="True">
+          <Grid ColumnDefinitions="150, *">
+            <Label Content="Locale Emulation" VerticalAlignment="Center"/>
+            <common:Common_Toggle x:Name="inp_Emulate" Grid.Column="1"/>
+          </Grid>
 
-        <Grid ColumnDefinitions="150, 300">
-          <Label Content="Start Windowed" VerticalAlignment="Center"/>
-          <common:Common_Toggle x:Name="inp_Wine_Windowed" Grid.Column="1"/>
-        </Grid>
+          <Grid ColumnDefinitions="150, *">
+            <Label Content="Arguments" VerticalAlignment="Center"/>
+            <common:Common_InputField x:Name="inp_Arguments" Grid.Column="1"/>
+          </Grid>
+        </StackPanel>
 
-        <Grid ColumnDefinitions="150, 300">
-          <Label Content="Virtual Wine desktop" VerticalAlignment="Center"/>
-          <common:Common_Toggle x:Name="inp_Wine_VirtualDesktop" Grid.Column="1"/>
-        </Grid>
+        <!-- Profile -->
 
-        <Grid ColumnDefinitions="150, 300">
-          <Label Content="Isolate Prefix" VerticalAlignment="Center"/>
-          <common:Common_Toggle x:Name="inp_IsolatePrefix" Grid.Column="1"/>
-        </Grid>
+        <Label FontSize="18" Content="Profile Settings" Margin="0 20 0 0" />
+        <StackPanel Margin="10 0" Spacing="5" IsVisible="True">
+          <Grid ColumnDefinitions="150, *">
+            <Label Content="Runner" VerticalAlignment="Center"/>
+            <common:Common_Dropdown x:Name="inp_WineProfile" Grid.Column="1"/>
+          </Grid>
 
-        <Grid ColumnDefinitions="150, 300">
-          <Label Content="Launch from console" VerticalAlignment="Center"/>
-          <common:Common_Toggle x:Name="inp_Wine_LaunchAsConsole" Grid.Column="1"/>
-        </Grid>
+          <Grid ColumnDefinitions="150, *">
+            <Label Content="Binary" VerticalAlignment="Center"/>
+            <common:Common_Dropdown x:Name="inp_binary" Grid.Column="1"/>
+          </Grid>
 
+          <Grid ColumnDefinitions="150, *">
+            <Label Content="Start Windowed" VerticalAlignment="Center"/>
+            <common:Common_Toggle x:Name="inp_Wine_Windowed" Grid.Column="1"/>
+          </Grid>
+
+          <Grid ColumnDefinitions="150, *">
+            <Label Content="Virtual Wine desktop" VerticalAlignment="Center"/>
+            <common:Common_Toggle x:Name="inp_Wine_VirtualDesktop" Grid.Column="1"/>
+          </Grid>
+
+          <Grid ColumnDefinitions="150, 300">
+            <Label Content="Isolate Prefix" VerticalAlignment="Center"/>
+            <common:Common_Toggle x:Name="inp_IsolatePrefix" Grid.Column="1"/>
+          </Grid>
+
+          <Grid ColumnDefinitions="150, *">
+            <Label Content="Launch from console" VerticalAlignment="Center"/>
+            <common:Common_Toggle x:Name="inp_Wine_LaunchAsConsole" Grid.Column="1"/>
+          </Grid>
+        </StackPanel>
       </StackPanel>
+
+
     </StackPanel>
-
-
-  </StackPanel>
+  </Grid>
 </UserControl>

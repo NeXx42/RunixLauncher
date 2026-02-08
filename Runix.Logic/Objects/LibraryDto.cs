@@ -9,7 +9,7 @@ public class LibraryDto
 {
     public readonly int libraryId;
 
-    public string alias { protected set; get; }
+    public string? alias { protected set; get; }
     public string root { protected set; get; }
 
     public Library_ExternalProviders? externalType { protected set; get; }
@@ -20,6 +20,8 @@ public class LibraryDto
     {
         libraryId = lib.libaryId;
         root = lib.rootPath;
+        alias = lib.alias;
+
         externalType = lib.libraryExternalType.HasValue ? (Library_ExternalProviders)lib.libraryExternalType : null;
     }
 

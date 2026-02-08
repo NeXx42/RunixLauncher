@@ -9,14 +9,24 @@ using Avalonia.Markup.Xaml;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.Objects;
+using RunixLauncher.Helpers;
 
 namespace RunixLauncher.Controls.SubPages.Popup_GameView_Tabs;
 
 public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 {
+    private UITabGroup tabGroup;
+
     public Popup_GameView_Tab_Settings()
     {
         InitializeComponent();
+
+        tabGroup = new UITabGroup(
+            new UITabGroup_GroupToggleButton(tab_General, tabBtn_General),
+            new UITabGroup_GroupToggleButton(tab_LaunchSettings, tabBtn_Launching)
+        );
+
+        _ = tabGroup.ChangeSelection(0);
     }
 
     public override Tab CreateGroup(Common_ButtonToggle btn, Panel parent)

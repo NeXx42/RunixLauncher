@@ -231,6 +231,8 @@ public abstract class GameDto
 
     public async Task ChangeLibrary(LibraryDto? newLib)
     {
+        await Task.Delay(10);
+
         if (newLib == null)
         {
             folderPath = getAbsoluteFolderLocation;
