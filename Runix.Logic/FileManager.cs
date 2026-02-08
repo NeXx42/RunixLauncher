@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -153,14 +154,7 @@ namespace GameLibrary.Logic
 
                 using var archive = ArchiveFactory.Open(archivePath, readerOptions);
 
-                switch (extension)
-                {
-                    case ".7z": return await ExtractFile_7z(archive, extractedFolderName, progress, cancellationToken);
-                    case ".iso": return await ExtractFile_7z(archive, extractedFolderName, progress, cancellationToken);
-                    case ".rar": return await ExtractFile_Rar(archive, archivePath, readerOptions.Password, extractedFolderName, progress, cancellationToken);
-
-                    default: return await ExtractFile_Basic(archive, extractedFolderName, progress, cancellationToken);
-                }
+                return await ExtractFile_Generic(archive, archivePath, readerOptions.Password, extractedFolderName, progress, cancellationToken);
             }
             catch (CryptographicException)
             {
@@ -191,36 +185,10 @@ namespace GameLibrary.Logic
             }
         }
 
-
-        private static async Task<string?> ExtractFile_7z(IArchive archive, string extractFolderName, Progress<double> progress, CancellationToken cancellationToken)
+        private static async Task<string?> ExtractFile_Generic(IArchive archive, string archivePath, string? password, string extractFolderName, Progress<double> progress, CancellationToken cancellationToken)
         {
-            await Task.Run(() =>
-            {
-                foreach (var entry in archive.Entries)
-                {
-                    if (entry.IsDirectory)
-                        continue;
-
-                    entry.WriteToDirectory(
-                        extractFolderName,
-                        new ExtractionOptions
-                        {
-                            ExtractFullPath = true,
-                            Overwrite = true
-                        });
-                }
-            }, cancellationToken);
-
-            return extractFolderName;
-        }
-
-        private static async Task<string?> ExtractFile_Rar(IArchive archive, string archivePath, string? password, string extractFolderName, Progress<double> progress, CancellationToken cancellationToken)
-        {
-            if (string.IsNullOrEmpty(password))
-                return await ExtractFile_Basic(archive, extractFolderName, progress, cancellationToken);
-
             ProcessStartInfo info = new ProcessStartInfo();
-            info.FileName = "unrar";
+            info.FileName = "7z";
 
             info.RedirectStandardError = true;
             info.RedirectStandardOutput = true;
@@ -228,12 +196,15 @@ namespace GameLibrary.Logic
             info.CreateNoWindow = true;
 
             info.ArgumentList.Add("x");
-            info.ArgumentList.Add("-o+");
-
-            info.ArgumentList.Add($"-p{password}");
-
             info.ArgumentList.Add(archivePath);
-            info.ArgumentList.Add(extractFolderName);
+
+            info.ArgumentList.Add($"-o{extractFolderName}");
+
+            if (!string.IsNullOrEmpty(password))
+                info.ArgumentList.Add($"-p{password}");
+
+            info.ArgumentList.Add("-y");
+            info.ArgumentList.Add("-bsp1"); // for when i can figure out capturing percentages
 
             Process p = new Process();
             p.StartInfo = info;
@@ -248,29 +219,6 @@ namespace GameLibrary.Logic
 
             return extractFolderName;
         }
-
-        private static async Task<string?> ExtractFile_Basic(IArchive archive, string extractFolderName, Progress<double> progress, CancellationToken cancellationToken)
-        {
-            await Task.Run(() =>
-            {
-                foreach (var entry in archive.Entries)
-                {
-                    if (entry.IsDirectory)
-                        continue;
-
-                    entry.WriteToDirectory(
-                        extractFolderName,
-                        new ExtractionOptions
-                        {
-                            ExtractFullPath = true,
-                            Overwrite = true
-                        });
-                }
-            }, cancellationToken);
-
-            return extractFolderName;
-        }
-
 
         public interface IImportEntry
         {
