@@ -110,7 +110,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
         private void DrawRunners(GameDto game)
         {
             possibleRunners = RunnerManager.GetRunnerProfiles();
-            string firstProfile = possibleRunners.Length > 0 ? possibleRunners[0].runnerName : "INVALID";
+            string firstProfile = possibleRunners.FirstOrDefault(x => x.isDefault)?.runnerName ?? "NO DEFAULT";
 
             string[] profileOptions = [$"Default ({firstProfile})", .. possibleRunners!.Select(x => x.runnerName)!.ToArray()];
             int selectedProfile = possibleRunners.Select(x => x.runnerId).ToList().IndexOf(game.runnerId ?? -1);

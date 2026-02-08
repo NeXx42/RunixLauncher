@@ -9,7 +9,7 @@ public class GameDto_Custom : GameDto
 {
     public GameDto_Custom(dbo_Game game, dbo_GameTag[] tags, dbo_GameConfig[] config) : base(game, tags, config)
     {
-        runnerType = RunnerManager.GetRunnerProfile(game.runnerId).runnerType;
+        runnerType = RunnerManager.GetRunnerProfile(game.runnerId)?.runnerType ?? RunnerDto.RunnerType.None;
     }
 
     public override async Task Launch()
@@ -44,7 +44,7 @@ public class GameDto_Custom : GameDto
     public override async Task ChangeRunnerId(int? runnerId)
     {
         this.runnerId = runnerId;
-        runnerType = RunnerManager.GetRunnerProfile(runnerId).runnerType; // ....
+        runnerType = RunnerManager.GetRunnerProfile(runnerId)?.runnerType; // ....
 
         await UpdateDatabaseEntry(nameof(dbo_Game.runnerId));
     }
@@ -121,6 +121,11 @@ public class GameDto_Custom : GameDto
 
     private async Task MakeAppImageExecutable()
     {
-        File.SetUnixFileMode(getAbsoluteBinaryLocation, new FileInfo(getAbsoluteBinaryLocation).UnixFileMode | UnixFileMode.UserExecute);
+        if (ConfigHandler.isOnLinux)
+        {
+#pragma warning disable CA1416 // Validate platform compatibility
+            File.SetUnixFileMode(getAbsoluteBinaryLocation, new FileInfo(getAbsoluteBinaryLocation).UnixFileMode | UnixFileMode.UserExecute);
+#pragma warning restore CA1416 // Validate platform compatibility
+        }
     }
 }

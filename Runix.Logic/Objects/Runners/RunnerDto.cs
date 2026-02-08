@@ -36,6 +36,8 @@ public class RunnerDto
     public string runnerRoot { set; get; }
     public string runnerVersion { set; get; }
 
+    public bool isDefault { set; get; }
+
     public ConfigProvider<RunnerConfigValues> globalRunnerValues { private set; get; }
 
     public RunnerDto(dbo_Runner runner, dbo_RunnerConfig[] configValues)
@@ -47,6 +49,8 @@ public class RunnerDto
 
         this.runnerRoot = runner.runnerRoot;
         this.runnerVersion = runner.runnerVersion;
+
+        this.isDefault = runner.isDefault ?? false;
 
         globalRunnerValues = new ConfigProvider<RunnerConfigValues>(configValues.Select(x => (x.settingKey, x.settingValue)), SaveConfigValue, DeleteConfigValue);
     }
@@ -148,6 +152,8 @@ public class RunnerDto
             res.arguments.AddLast("-w");
         }
     }
+
+    public void SetIsDefault(bool to) => isDefault = to;
 
     // Launching
 

@@ -16,7 +16,7 @@ public static class RunnerManager
 {
     private static SemaphoreSlim _mutex = new SemaphoreSlim(1, 1);
 
-    private static int cachedDefaultRunnerId;
+    private static int? cachedDefaultRunnerId;
     private static Dictionary<int, RunnerDto> cachedRunners = new Dictionary<int, RunnerDto>();
     private static Dictionary<string, ActiveProcess> activeGames = new Dictionary<string, ActiveProcess>();
 
@@ -55,11 +55,11 @@ public static class RunnerManager
 
         try
         {
-            RunnerDto selectedRunner = GetRunnerProfile(launchRequest.runnerId);
+            RunnerDto? selectedRunner = GetRunnerProfile(launchRequest.runnerId);
 
             if (selectedRunner == null)
             {
-                throw new Exception($"Couldn't find runner in the database. used id {launchRequest.runnerId ?? -1}");
+                throw new Exception($"Couldn't find runner in the database. used id {launchRequest.runnerId ?? cachedDefaultRunnerId}");
             }
 
             if (launchRequest.gameId.HasValue && !File.Exists(launchRequest.path))
@@ -129,7 +129,10 @@ public static class RunnerManager
             return;
         }
 
-        RunnerDto runnerDto = GetRunnerProfile(runnerId);
+        RunnerDto? runnerDto = GetRunnerProfile(runnerId);
+
+        if (runnerDto == null)
+            throw new Exception("No runner found");
 
         await runnerDto.SetupRunner();
         LaunchArguments req = await runnerDto.InitRunDetails(new LaunchRequest() { identifier = process, runnerId = runnerId, customExecutable = process });
@@ -274,7 +277,9 @@ public static class RunnerManager
             runnerName = title,
             runnerRoot = path,
             runnerType = typeId,
-            runnerVersion = version
+            runnerVersion = version,
+
+            isDefault = !cachedDefaultRunnerId.HasValue
         };
 
         await Database_Manager.InsertItem(profile);
@@ -302,7 +307,7 @@ public static class RunnerManager
             cachedRunners.Remove(existing);
         }
 
-        cachedDefaultRunnerId = runnerDbs.Length > 0 ? runnerDbs.OrderBy(x => x.runnerId).First().runnerId : 0;
+        cachedDefaultRunnerId = runnerDbs.FirstOrDefault(x => x.isDefault == true)?.runnerId;
     }
 
     public static async Task<RunnerDto> GetRunnerProfile(dbo_Runner? runnerDb)
@@ -316,7 +321,7 @@ public static class RunnerManager
         return RunnerDto.Create(runnerDb, globalConfig);
     }
 
-    public static RunnerDto GetRunnerProfile(int? id) => cachedRunners[id ?? cachedDefaultRunnerId];
+    public static RunnerDto? GetRunnerProfile(int? id) => id.HasValue || cachedDefaultRunnerId.HasValue ? cachedRunners[id ?? cachedDefaultRunnerId!.Value] : null;
     public static RunnerDto[] GetRunnerProfiles() => cachedRunners.Values.ToArray();
 
     public static async Task<int> GetGameCountForRunner(int runnerId)
@@ -357,6 +362,16 @@ public static class RunnerManager
         return true;
     }
 
+    public static async Task SetDefaultRunner(int runnerId)
+    {
+        string sql = $"UPDATE {dbo_Runner.tableName} SET {nameof(dbo_Runner.isDefault)} = case when {nameof(dbo_Runner.runnerId)} = {runnerId} then 1 else null end";
+        await Database_Manager.ExecuteSQLNonQuery(sql, CancellationToken.None);
+
+        cachedDefaultRunnerId = runnerId;
+
+        foreach (RunnerDto runner in cachedRunners.Values)
+            runner.SetIsDefault(runner.runnerId == runnerId);
+    }
 
 
     // data

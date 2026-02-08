@@ -12,18 +12,14 @@ using GameLibrary.Logic.Objects;
 using GameLibrary.Logic.Settings;
 using GameLibrary.Logic.Settings.UI;
 using RunixLauncher.Controls.Modals;
+using RunixLauncher.Helpers;
 
 namespace RunixLauncher.Controls.Settings;
 
 public partial class Control_Settings_Runners : UserControl, ISettingControl
 {
     private SettingBase? setting;
-
-    private Border[]? profileUIS;
-    private RunnerDto[]? existingProfiles;
-
-    private ImmutableSolidColorBrush selectedBrush;
-    private ImmutableSolidColorBrush unselectedBrush;
+    private RunnerUI[]? profiles;
 
     private int? selectedProfile
     {
@@ -31,7 +27,7 @@ public partial class Control_Settings_Runners : UserControl, ISettingControl
         {
             if (m_selectedProfile.HasValue)
             {
-                profileUIS![m_selectedProfile.Value].Background = unselectedBrush;
+                profiles![m_selectedProfile.Value].Toggle(false);
                 btn_Default.IsVisible = false;
             }
 
@@ -40,7 +36,7 @@ public partial class Control_Settings_Runners : UserControl, ISettingControl
 
             if (m_selectedProfile.HasValue)
             {
-                profileUIS![m_selectedProfile.Value].Background = selectedBrush;
+                profiles![m_selectedProfile.Value].Toggle(true);
                 btn_Default.IsVisible = true;
             }
         }
@@ -51,9 +47,6 @@ public partial class Control_Settings_Runners : UserControl, ISettingControl
     public Control_Settings_Runners()
     {
         InitializeComponent();
-
-        selectedBrush = new ImmutableSolidColorBrush(Color.FromRgb(0, 0, 0));
-        unselectedBrush = new ImmutableSolidColorBrush(Color.FromArgb(0, 0, 0, 0));
 
         selectedProfile = null;
         btn_Add.RegisterClick(OpenEditMenu);
@@ -74,39 +67,19 @@ public partial class Control_Settings_Runners : UserControl, ISettingControl
     {
         selectedProfile = null;
 
-        existingProfiles = await setting!.LoadSetting<RunnerDto[]>(null!);
-        profileUIS = new Border[existingProfiles?.Length ?? 0];
+        RunnerDto[] runners = await setting!.LoadSetting<RunnerDto[]>([]);
+        profiles = new RunnerUI[runners.Length];
 
         container.Children.Clear();
 
-        if (existingProfiles != null)
-        {
-            for (int i = 0; i < existingProfiles.Length; i++)
-            {
-                DrawProfile(i);
-            }
-        }
+        for (int i = 0; i < runners.Length; i++)
+            profiles[i] = new RunnerUI(i, runners[i], container, this);
     }
 
-    private void DrawProfile(int uiIndex)
+    private void SoftRefresh()
     {
-        Border grid = new Border();
-
-        grid.CornerRadius = new CornerRadius(2);
-        grid.Height = 30;
-        grid.HorizontalAlignment = HorizontalAlignment.Stretch;
-        grid.Background = unselectedBrush;
-
-        Label l = new Label();
-        l.Content = existingProfiles![uiIndex].runnerName;
-        l.VerticalAlignment = VerticalAlignment.Center;
-        l.Margin = new Thickness(5);
-
-        grid.Child = l;
-        grid.PointerPressed += (_, __) => SelectProfile(uiIndex);
-
-        container.Children.Add(grid);
-        profileUIS![uiIndex] = grid;
+        foreach (RunnerUI ui in profiles!)
+            ui.RedrawName();
     }
 
     private void SelectProfile(int profileId)
@@ -126,7 +99,8 @@ public partial class Control_Settings_Runners : UserControl, ISettingControl
 
         async Task HandleModal(Modal_Settings_Runner modal)
         {
-            await modal.HandleOpen(selectedProfile.HasValue ? existingProfiles![selectedProfile.Value].runnerId : null);
+            await modal.HandleOpen(selectedProfile.HasValue ? profiles![selectedProfile.Value].runner.runnerId : null);
+            SoftRefresh();
         }
     }
 
@@ -135,7 +109,8 @@ public partial class Control_Settings_Runners : UserControl, ISettingControl
         if (!selectedProfile.HasValue)
             return;
 
-        //await LibraryHandler.UpdateDefaultWineProfile(existingProfiles![selectedProfile.Value].id);
+        await RunnerManager.SetDefaultRunner(profiles![selectedProfile.Value].runner.runnerId);
+        SoftRefresh();
     }
 
     private async Task DeleteSelectedProfile()
@@ -143,7 +118,7 @@ public partial class Control_Settings_Runners : UserControl, ISettingControl
         if (!selectedProfile.HasValue)
             return;
 
-        RunnerDto runner = existingProfiles![selectedProfile.Value];
+        RunnerDto runner = profiles![selectedProfile.Value].runner;
         int gamesAffected = await RunnerManager.GetGameCountForRunner(runner.runnerId);
 
         await DependencyManager.OpenConfirmationAsync($"Delete the runner {runner.runnerName}?",
@@ -156,4 +131,48 @@ public partial class Control_Settings_Runners : UserControl, ISettingControl
                 await LoadValue(); // causes duplicate recache on the runner profiles, but whatever. should be fast (makes sense the deletion logic actually does the recache not the settings ui)
         }
     }
+
+    struct RunnerUI
+    {
+        public RunnerDto runner;
+
+        public Border ui;
+        public Label label;
+
+
+        public RunnerUI(int id, RunnerDto runner, StackPanel container, Control_Settings_Runners master)
+        {
+            this.runner = runner;
+
+            ui = new Border();
+
+            ui.CornerRadius = new CornerRadius(2);
+            ui.Height = 30;
+            ui.HorizontalAlignment = HorizontalAlignment.Stretch;
+
+            label = new Label();
+
+            label.VerticalAlignment = VerticalAlignment.Center;
+            label.Margin = new Thickness(5);
+
+            ui.Child = label;
+            ui.PointerPressed += (_, __) => master.SelectProfile(id);
+
+            container.Children.Add(ui);
+
+            RedrawName();
+            Toggle(false);
+        }
+
+        public void RedrawName()
+        {
+            label.Content = $"{(runner.isDefault ? "* " : "")} {runner.runnerName}";
+        }
+
+        public void Toggle(bool to)
+        {
+            ui.Background = to ? CommonColours.SettingsList_selectedBrush : CommonColours.SettingsList_unselectedBrush;
+        }
+    }
+
 }

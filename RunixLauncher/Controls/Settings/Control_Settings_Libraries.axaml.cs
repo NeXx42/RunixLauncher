@@ -11,6 +11,7 @@ using GameLibrary.Logic.Objects;
 using GameLibrary.Logic.Settings;
 using Runix.Logic.Settings.UI;
 using RunixLauncher.Controls.Modals;
+using RunixLauncher.Helpers;
 
 namespace RunixLauncher.Controls.Settings;
 
@@ -19,9 +20,6 @@ public partial class Control_Settings_Libraries : UserControl, ISettingControl
     private SettingBase? setting;
 
     private LibraryUI[]? elements;
-
-    private static ImmutableSolidColorBrush? selectedBrush;
-    private static ImmutableSolidColorBrush? unselectedBrush;
 
     private int? selectedProfile
     {
@@ -43,9 +41,6 @@ public partial class Control_Settings_Libraries : UserControl, ISettingControl
     public Control_Settings_Libraries()
     {
         InitializeComponent();
-
-        selectedBrush = new ImmutableSolidColorBrush(Color.FromRgb(0, 0, 0));
-        unselectedBrush = new ImmutableSolidColorBrush(Color.FromArgb(0, 0, 0, 0));
 
         selectedProfile = null;
         btn_Add.RegisterClick(OpenEditMenu);
@@ -135,7 +130,6 @@ public partial class Control_Settings_Libraries : UserControl, ISettingControl
             border.CornerRadius = new CornerRadius(2);
             border.Height = 30;
             border.HorizontalAlignment = HorizontalAlignment.Stretch;
-            border.Background = unselectedBrush;
 
             label = new Label();
             label.VerticalAlignment = VerticalAlignment.Center;
@@ -145,7 +139,9 @@ public partial class Control_Settings_Libraries : UserControl, ISettingControl
             border.PointerPressed += (_, __) => master.SelectProfile(index);
 
             container.Children.Add(border);
+
             Redraw();
+            ToggleSelection(false);
         }
 
         public void Redraw()
@@ -155,7 +151,7 @@ public partial class Control_Settings_Libraries : UserControl, ISettingControl
 
         public void ToggleSelection(bool to)
         {
-            border.Background = to ? Control_Settings_Libraries.selectedBrush : Control_Settings_Libraries.unselectedBrush;
+            border.Background = to ? CommonColours.SettingsList_selectedBrush : CommonColours.SettingsList_unselectedBrush;
         }
 
         public async Task RenameAlias(string to)
