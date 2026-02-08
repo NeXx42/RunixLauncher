@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Input.Platform;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
@@ -39,5 +41,28 @@ public class AvaloniaImageBrushFetcher : IImageFetcher
         });
 
         return brush;
+    }
+
+    public async Task<string?> GetImageFromClipboard(float delayS)
+    {
+        if (delayS > 0)
+        {
+            await Task.Delay((int)Math.Round(delayS * 1000));
+        }
+
+        if (MainWindow.instance?.Clipboard == null)
+            return string.Empty;
+
+        Bitmap? img = await MainWindow.instance.Clipboard.TryGetBitmapAsync();
+
+        if (img == null)
+            return string.Empty;
+
+        string tempPath = $"/tmp/{Guid.NewGuid()}";
+
+        await using FileStream fs = File.OpenWrite(tempPath);
+        img.Save(fs);
+
+        return tempPath;
     }
 }

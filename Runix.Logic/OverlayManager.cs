@@ -25,6 +25,7 @@ public static class OverlayManager
             {
                 // maybe worth changing this to just hide the overlay in the ui if not found
 
+                Console.WriteLine("Overlay doesn't exist");
                 return;
                 //throw new Exception("GTK overlay not found");
             }
@@ -58,8 +59,17 @@ public static class OverlayManager
 
             if (line?.StartsWith(GTK_OVERLAY_RETURN_IDENTIFIER) ?? false)
             {
-                string path = line.Remove(0, GTK_OVERLAY_RETURN_IDENTIFIER.Length);
-                await FileManager.UpdateGameIcon(gameId, new Uri(path));
+                string? path = line.Remove(0, GTK_OVERLAY_RETURN_IDENTIFIER.Length);
+
+                if (path.Equals("CLIPBOARD") || true)
+                {
+                    path = await ImageManager.GetImageFromClipboard(5);
+                }
+
+                if (File.Exists(path))
+                {
+                    await FileManager.UpdateGameIcon(gameId, new Uri(path));
+                }
 
                 p.Kill();
                 break;

@@ -116,6 +116,8 @@ public static class ImageManager
         }
     }
 
+    public static async Task<string?> GetImageFromClipboard(float delayS) => await fetcher!.GetImageFromClipboard(delayS);
+
     private struct ImageFetchRequest
     {
         public GameDto game;

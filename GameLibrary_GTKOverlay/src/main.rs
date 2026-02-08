@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use gtk::{gdk_pixbuf::Pixbuf, prelude::*};
+use gtk::{prelude::*};
 use zbus::zvariant::{OwnedValue, OwnedObjectPath};
 use zbus::blocking::{Connection, Proxy};
 
@@ -68,16 +68,11 @@ fn init_wayland(window: &gtk::ApplicationWindow) {
 }
 
 fn init_ubuntu(window: &gtk::ApplicationWindow) {
-    window.set_type_hint(gtk::gdk::WindowTypeHint::Dialog);
+    window.set_type_hint(gtk::gdk::WindowTypeHint::Dock);
     window.set_keep_above(true);
     window.connect_realize(|w| {
-        w.move_(10, 10);
+        w.move_(0, 0);
     });
-}
-
-fn get_screenshot_from_clipboard() -> Option<Pixbuf> {
-    let clipboard = gtk::Clipboard::get(&gtk::gdk::SELECTION_CLIPBOARD);
-    clipboard.wait_for_image()
 }
 
 fn screenshot_process(_window: &gtk::ApplicationWindow, is_gnome: bool) {
@@ -99,15 +94,7 @@ fn screenshot_process(_window: &gtk::ApplicationWindow, is_gnome: bool) {
         proxy.call("Screenshot", &("", options)).unwrap();
 
     if is_gnome {
-        std::thread::sleep(std::time::Duration::from_secs(2));
-
-        if let Some(pixbuf) = get_screenshot_from_clipboard() {
-            let path = "/tmp/screenshot.png";
-            pixbuf.savev(path, "png", &[]).unwrap();
-            println!("GTKOVERLAY_RETURNPATH: {}", path);
-        } else {
-            eprintln!("No image in clipboard");
-        }
+        println!("GTKOVERLAY_RETURNPATH:CLIPBOARD");
     } else {
         let handle_path = _handle_path.to_string();
         

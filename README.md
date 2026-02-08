@@ -14,6 +14,11 @@ Requires
 * .Net
 * Rust
 
+* Overlay 
+```sh
+sudo apt install libgtk-layer-shell0
+```
+
 ## Installation
 1. Clone
 ```sh
