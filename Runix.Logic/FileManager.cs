@@ -321,7 +321,7 @@ namespace GameLibrary.Logic
             public string? extractedFolder;
             public string? selectedBinary;
 
-            public string getPotentialName => Path.GetFileName(getBinaryPath)!;
+            public string getPotentialName => Path.GetFileName(getBinaryFolder)!;
             public string getBinaryPath => selectedBinary!;
 
             public string? getBinaryFolder => Path.GetDirectoryName(getBinaryPath);
