@@ -22,6 +22,17 @@ public class RunnerDto_umu : RunnerDto_Wine
 
     public override Task SetupRunner() => Task.CompletedTask;
 
+    public override string GetWineConfigurationToolName(RunnerManager.SpecialLaunchRequest req)
+    {
+        switch (req)
+        {
+            case RunnerManager.SpecialLaunchRequest.WineConfig: return "winecfg";
+            case RunnerManager.SpecialLaunchRequest.WineCMD: return "cmd";
+        }
+
+        return string.Empty;
+    }
+
     public override Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)
     {
         RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = "umu-run" };

@@ -52,6 +52,13 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 
         protected override void InternalSetup(TabGroup master)
         {
+            RunnerDto.RunnerType[] wineRunnerTypes = [
+                RunnerDto.RunnerType.Wine,
+                RunnerDto.RunnerType.Wine_GE,
+                RunnerDto.RunnerType.Proton_GE,
+                RunnerDto.RunnerType.umu_Launcher
+            ];
+
             configOptions = [
                 // running settings
 
@@ -59,10 +66,10 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
                 new ConfigChanger_Dropdown(element.inp_CaptureLogs, Game_Config.General_LoggingLevel, Enum.GetNames<LoggingLevel>(), () => inspectingGame),
                 new ConfigChanger_InputField(element.inp_Arguments, Game_Config.General_Arguments, () => inspectingGame),
 
-                new ConfigChanger_Toggle(element.inp_Wine_Windowed, Game_Config.Wine_Windowed, () => inspectingGame, RunnerDto.RunnerType.Wine, RunnerDto.RunnerType.Wine_GE, RunnerDto.RunnerType.Proton_GE, RunnerDto.RunnerType.umu_Launcher),
-                new ConfigChanger_Toggle(element.inp_IsolatePrefix, Game_Config.Wine_IsolatedPrefix, () => inspectingGame, RunnerDto.RunnerType.Wine, RunnerDto.RunnerType.Wine_GE, RunnerDto.RunnerType.Proton_GE, RunnerDto.RunnerType.umu_Launcher),
-                new ConfigChanger_Toggle(element.inp_Wine_VirtualDesktop, Game_Config.Wine_ExplorerLaunch, () => inspectingGame, RunnerDto.RunnerType.Wine, RunnerDto.RunnerType.Wine_GE),
-                new ConfigChanger_Toggle(element.inp_Wine_LaunchAsConsole, Game_Config.Wine_ConsoleLaunched, () => inspectingGame, RunnerDto.RunnerType.Wine, RunnerDto.RunnerType.Wine_GE),
+                new ConfigChanger_Toggle(element.inp_Wine_Windowed, Game_Config.Wine_Windowed, () => inspectingGame, wineRunnerTypes),
+                new ConfigChanger_Toggle(element.inp_IsolatePrefix, Game_Config.Wine_IsolatedPrefix, () => inspectingGame, wineRunnerTypes),
+                new ConfigChanger_Toggle(element.inp_Wine_VirtualDesktop, Game_Config.Wine_ExplorerLaunch, () => inspectingGame, wineRunnerTypes),
+                new ConfigChanger_Toggle(element.inp_Wine_LaunchAsConsole, Game_Config.Wine_ConsoleLaunched, () => inspectingGame, wineRunnerTypes),
             ];
         }
 

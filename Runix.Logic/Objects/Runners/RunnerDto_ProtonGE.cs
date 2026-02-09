@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.Text.Json;
 using GameLibrary.Logic.Database.Tables;
 using GameLibrary.Logic.Enums;
@@ -39,6 +40,17 @@ public class RunnerDto_ProtonGE : RunnerDto
         {
             await GithubVersionHelper.InstallWine(binaryFolder, GITHUB_NAME, version, (a) => a.GetProperty("content_type").GetString()?.Equals("application/gzip") ?? false);
         }
+    }
+
+    public override string GetWineConfigurationToolName(RunnerManager.SpecialLaunchRequest req)
+    {
+        switch (req)
+        {
+            case RunnerManager.SpecialLaunchRequest.WineConfig: return "winecfg";
+            case RunnerManager.SpecialLaunchRequest.WineCMD: return "cmd";
+        }
+
+        return string.Empty;
     }
 
     public override Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)

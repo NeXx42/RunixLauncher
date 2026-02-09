@@ -127,11 +127,11 @@ public static class RunnerManager
     }
 
 
-    public static async Task RunWineTricks(int runnerId, string process, string? subprocess)
+    public static async Task RunWineTricks(int runnerId, SpecialLaunchRequest request)
     {
-        if (IsIdentifierRunning($"{runnerId}_{process}"))
+        if (IsIdentifierRunning($"{runnerId}_{request}"))
         {
-            await DependencyManager.OpenYesNoModal("Already running", $"{process} is already running, close before trying again");
+            await DependencyManager.OpenYesNoModal("Already running", $"{request} is already running, close before trying again");
             return;
         }
 
@@ -141,10 +141,13 @@ public static class RunnerManager
             throw new Exception("No runner found");
 
         await runnerDto.SetupRunner();
-        LaunchArguments req = await runnerDto.InitRunDetails(new LaunchRequest() { identifier = process, runnerId = runnerId, customExecutable = process });
-
-        if (!string.IsNullOrEmpty(subprocess))
-            req.arguments.AddFirst(subprocess);
+        LaunchArguments req = await runnerDto.InitRunDetails(new LaunchRequest()
+        {
+            identifier = request.ToString(),
+            runnerId = runnerId,
+            customExecutable = request,
+            path = runnerDto.GetWineConfigurationToolName(request)
+        });
 
         req.loggingLevel = LoggingLevel.Off;
         ExecuteRunRequest(req, null);
@@ -200,14 +203,25 @@ public static class RunnerManager
         if (req.loggingLevel == LoggingLevel.Off)
             logFile = null;
 
-        ProcessStartInfo info = new ProcessStartInfo();
-        info.FileName = req.command;
+        ProcessStartInfo info = new ProcessStartInfo
+        {
+            FileName = req.command,
+            WorkingDirectory = req.workingDirectory,
 
-        info.UseShellExecute = false;
-        info.RedirectStandardError = true;
-        info.RedirectStandardOutput = true;
-        info.RedirectStandardInput = true;
-        info.ErrorDialog = true;
+            UseShellExecute = false,
+            RedirectStandardError = true,
+            RedirectStandardOutput = true,
+            RedirectStandardInput = true,
+            ErrorDialog = true
+        };
+
+        // default required environment variables
+        TryAddEnvironmentVariable("HOME");
+        TryAddEnvironmentVariable("DISPLAY");
+        TryAddEnvironmentVariable("WAYLAND_DISPLAY");
+        TryAddEnvironmentVariable("XDG_RUNTIME_DIR");
+        TryAddEnvironmentVariable("DBUS_SESSION_BUS_ADDRESS");
+        TryAddEnvironmentVariable("PULSE_SERVER");
 
         foreach (var arg in req.arguments)
         {
@@ -217,11 +231,12 @@ public static class RunnerManager
             info.ArgumentList.Add(arg);
         }
 
+
         foreach (var arg in req.environmentArguments)
         {
             try
             {
-                info.EnvironmentVariables.Add(arg.Key, arg.Value);
+                info.EnvironmentVariables[arg.Key] = arg.Value;
             }
             catch (Exception e)
             {
@@ -229,9 +244,11 @@ public static class RunnerManager
             }
         }
 
-        Process process = new Process();
-        process.StartInfo = info;
-        process.EnableRaisingEvents = true;
+        Process process = new Process
+        {
+            StartInfo = info,
+            EnableRaisingEvents = true
+        };
 
         if (!string.IsNullOrEmpty(req.identifier))
         {
@@ -245,6 +262,17 @@ public static class RunnerManager
         }
 
         return process;
+
+        void TryAddEnvironmentVariable(string name)
+        {
+            if (req.environmentArguments.ContainsKey(name))
+                return;
+
+            string? inherited = Environment.GetEnvironmentVariable(name);
+
+            if (!string.IsNullOrEmpty(inherited))
+                req.environmentArguments.Add(name, inherited);
+        }
     }
 
 
@@ -382,7 +410,13 @@ public static class RunnerManager
 
     // data
 
-
+    public enum SpecialLaunchRequest
+    {
+        None,
+        WineConfig,
+        WineTricks,
+        WineCMD
+    }
 
     public struct LaunchRequest
     {
@@ -392,7 +426,7 @@ public static class RunnerManager
         public int? runnerId;
 
         public string path;
-        public string? customExecutable;
+        public SpecialLaunchRequest? customExecutable;
         public string[]? extraWhitelist;
 
         public ConfigProvider<Game_Config>? gameConfig;
@@ -408,6 +442,8 @@ public static class RunnerManager
         public List<string> whiteListedDirs = new List<string>();
 
         public required string command;
+        public string? workingDirectory;
+
         public LinkedList<string> arguments = new LinkedList<string>();
         public Dictionary<string, string> environmentArguments = new Dictionary<string, string>();
     }

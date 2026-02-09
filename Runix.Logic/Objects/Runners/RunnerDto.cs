@@ -8,6 +8,8 @@ namespace GameLibrary.Logic.Objects;
 
 public class RunnerDto
 {
+    private static Dictionary<int, string[]?> cachedVersion = new Dictionary<int, string[]?>();
+
     public enum RunnerType
     {
         None = -1,
@@ -106,15 +108,21 @@ public class RunnerDto
 
     public static async Task<string[]?> GetVersionsForRunnerTypes(int typeId)
     {
+        if (cachedVersion.ContainsKey(typeId))
+            return cachedVersion[typeId];
+
+        string[]? result = null;
+
         switch ((RunnerType)typeId)
         {
-            case RunnerType.Wine: return await RunnerDto_Wine.GetRunnerVersions();
-            case RunnerType.Wine_GE: return await RunnerDto_WineGE.GetRunnerVersions();
-            case RunnerType.umu_Launcher: return await RunnerDto_umu.GetRunnerVersions();
-            case RunnerType.Proton_GE: return await RunnerDto_ProtonGE.GetRunnerVersions();
+            case RunnerType.Wine: result = await RunnerDto_Wine.GetRunnerVersions(); break;
+            case RunnerType.Wine_GE: result = await RunnerDto_WineGE.GetRunnerVersions(); break;
+            case RunnerType.umu_Launcher: result = await RunnerDto_umu.GetRunnerVersions(); break;
+            case RunnerType.Proton_GE: result = await RunnerDto_ProtonGE.GetRunnerVersions(); break;
         }
 
-        return null;
+        cachedVersion.Add(typeId, result);
+        return result;
     }
 
     // logic
@@ -135,7 +143,30 @@ public class RunnerDto
 
     protected void AddDefaultArgumentsToInit(ref RunnerManager.LaunchRequest game, ref RunnerManager.LaunchArguments res)
     {
-        res.arguments.AddLast(game.path);
+        if (File.Exists(game.path))
+        {
+            res.workingDirectory = Path.GetDirectoryName(game.path);
+        }
+
+        if (game.gameConfig?.GetBoolean(Game_Config.Wine_ConsoleLaunched, false) ?? false)
+        {
+            string windowsPath = $"Z:/{game.path.Replace("\\", " / ")}";
+
+            res.arguments.AddLast("cmd");
+            res.arguments.AddLast("/c");
+            res.arguments.AddLast($"\"cd {Path.GetDirectoryName(windowsPath)} && {Path.GetFileName(windowsPath)} \"");
+        }
+        else
+        {
+            if (game.gameConfig?.GetBoolean(Game_Config.Wine_ExplorerLaunch, false) ?? false)
+            {
+                res.arguments.AddLast("explorer");
+                res.arguments.AddLast("/desktop=Game,800x600");
+            }
+
+            res.arguments.AddLast(game.path);
+        }
+
 
         if (game.gameConfig?.TryGetValue(Game_Config.General_Arguments, out string customArgs) ?? false)
         {
@@ -154,6 +185,7 @@ public class RunnerDto
     }
 
     public void SetIsDefault(bool to) => isDefault = to;
+    public virtual string GetWineConfigurationToolName(RunnerManager.SpecialLaunchRequest req) => string.Empty;
 
     // Launching
 

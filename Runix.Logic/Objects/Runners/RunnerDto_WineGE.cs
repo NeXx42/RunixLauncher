@@ -17,8 +17,13 @@ public class RunnerDto_WineGE : RunnerDto_Wine
     protected string? binaryPath;
 
     protected string getWineLib => Path.Combine(Directory.GetDirectories(binaryFolder).First(), "lib");
-    protected override string GetWineExecutable(string processName) => Path.Combine(Directory.GetDirectories(binaryFolder).First(), "bin", processName);
+    protected override string GetWineExecutable(RunnerManager.SpecialLaunchRequest? processName)
+    {
+        if (processName == RunnerManager.SpecialLaunchRequest.WineTricks)
+            return "winetricks";
 
+        return Path.Combine(Directory.GetDirectories(binaryFolder).First(), "bin", "wine64");
+    }
 
     public RunnerDto_WineGE(dbo_Runner runner, dbo_RunnerConfig[] configValues) : base(runner, configValues)
     {

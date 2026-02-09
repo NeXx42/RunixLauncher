@@ -185,7 +185,7 @@ public partial class Modal_Settings_Runner : UserControl
         if (!await EnsureExistingProfile())
             return;
 
-        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, "wine", "winecfg");
+        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, RunnerManager.SpecialLaunchRequest.WineConfig);
     }
 
     private async Task OpenWineTricks()
@@ -193,7 +193,7 @@ public partial class Modal_Settings_Runner : UserControl
         if (!await EnsureExistingProfile())
             return;
 
-        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, "winetricks", string.Empty);
+        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, RunnerManager.SpecialLaunchRequest.WineTricks);
     }
 
     private async Task OpenWineCmd()
@@ -201,7 +201,7 @@ public partial class Modal_Settings_Runner : UserControl
         if (!await EnsureExistingProfile())
             return;
 
-        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, "wineconsole", string.Empty);
+        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, RunnerManager.SpecialLaunchRequest.WineCMD);
     }
 
     private async Task ShareDocuments(bool val)

@@ -17,8 +17,27 @@ public class RunnerDto_Wine : RunnerDto
     public static Task<string[]?> GetRunnerVersions() => Task.FromResult<string[]?>(null);
 
 
-    protected virtual string GetWineExecutable(string processName) => processName;
+    protected virtual string GetWineExecutable(RunnerManager.SpecialLaunchRequest? launchRequest)
+    {
+        if (launchRequest == RunnerManager.SpecialLaunchRequest.WineTricks)
+            return "winetricks";
+
+        return "wine";
+    }
+
+    public override string GetWineConfigurationToolName(RunnerManager.SpecialLaunchRequest req)
+    {
+        switch (req)
+        {
+            case RunnerManager.SpecialLaunchRequest.WineConfig: return "winecfg";
+            case RunnerManager.SpecialLaunchRequest.WineCMD: return "cmd";
+        }
+
+        return string.Empty;
+    }
+
     protected override string[] GetAcceptableExtensions() => ["exe", "bat"];
+
 
     public RunnerDto_Wine(dbo_Runner runner, dbo_RunnerConfig[] configValues) : base(runner, configValues)
     {
@@ -32,18 +51,8 @@ public class RunnerDto_Wine : RunnerDto
 
     public override async Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)
     {
-        RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = GetWineExecutable(game.customExecutable ?? "wine64") };
+        RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = GetWineExecutable(game.customExecutable) };
         WineHelper.GetPrefixName(prefixRoot, game, out string winePrefix);
-
-        if (game.gameConfig?.GetBoolean(Game_Config.Wine_ConsoleLaunched, false) ?? false)
-        {
-            res.command = GetWineExecutable("wineconsole");
-        }
-        else if (game.gameConfig?.GetBoolean(Game_Config.Wine_ExplorerLaunch, false) ?? false)
-        {
-            res.arguments.AddLast("explorer");
-            res.arguments.AddLast("/desktop=Game,800x600");
-        }
 
         AddDefaultArgumentsToInit(ref game, ref res);
 
