@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO.IsolatedStorage;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using CSharpSqliteORM;
 using GameLibrary.DB.Tables;
 using GameLibrary.Logic.Database.Tables;
@@ -27,7 +28,12 @@ public static class RunnerManager
     public static string[] GetAcceptableTypes() => ["exe", "lnk", "AppImage", "bat"];
     public static bool IsUniversallyAcceptedExecutableFormat(string path)
     {
-        string ext = Path.GetExtension(path).Remove(0, 1);
+        string ext = Path.GetExtension(path);
+
+        if (string.IsNullOrEmpty(ext))
+            return false;
+
+        ext = ext.Remove(0, 1);
         return GetAcceptableTypes().Any(x => x.Equals(ext, StringComparison.CurrentCultureIgnoreCase));
     }
 

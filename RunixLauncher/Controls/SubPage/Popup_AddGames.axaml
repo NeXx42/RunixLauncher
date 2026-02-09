@@ -6,14 +6,39 @@
   xmlns:Common="clr-namespace:RunixLauncher.Controls">
   <Border Background="#0a0e13" CornerRadius="10,10,0,0" BorderBrush="{DynamicResource bg_Border}" BorderThickness="1">
     <Grid>
-      <Grid.RowDefinitions>
-        <RowDefinition Height="80"/>
-        <RowDefinition Height="*"/>
-      </Grid.RowDefinitions>
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="80"/>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-      <Label Grid.Row="0" Content="Indexer" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="30" Margin="20"/>
+        <Label Grid.Row="0" Content="Indexer" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="30" Margin="20"/>
 
-      <Comps:Indexer_Selected Grid.Row="1" x:Name="cont_ImportView" />
+        <StackPanel x:Name="cont_FoundGames" Margin="10,100,10,100" VerticalAlignment="Top" Spacing="5">
+        </StackPanel>
+
+        <!-- Controls -->
+
+        <Border VerticalAlignment="Bottom" BorderBrush="#21262b" BorderThickness="0 1 0 0" Grid.Row="2">
+          <Grid Margin="15">
+            <StackPanel Orientation="Horizontal" x:Name="cont_ImportView_BTNS" HorizontalAlignment="Left" Spacing="5">
+              <Common:Common_Button x:Name="btn_Add" Height="30" Width="150" Label="Add" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Spacing="5">
+              <Common:Common_Dropdown x:Name="inp_Library" Width="400"/>
+              <Common:Common_Button x:Name="btn_Import" Height="30" Width="150" Label="Import" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="positive"/>
+            </StackPanel>
+          </Grid>
+
+        </Border>
+
+      </Grid>
+
+      <Border Background="#7d000000" x:Name="cont_FileBrowser">
+        <Comps:Indexer_FolderView Margin="20 50 20 20" x:Name="FileBrowser"/>
+      </Border>
     </Grid>
   </Border>
 </UserControl>

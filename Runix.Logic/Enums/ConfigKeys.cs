@@ -23,4 +23,6 @@ public enum ConfigKeys
     Appearance_ImageInterpolation,
 
     Input_ControllerSupport,
+
+    Misc_LastArchivePassword
 }

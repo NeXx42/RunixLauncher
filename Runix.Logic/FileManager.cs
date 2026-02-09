@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection.Metadata;
+using System.Text.RegularExpressions;
 using System.Windows;
 using CSharpSqliteORM;
 using GameLibrary.DB;
@@ -84,10 +85,6 @@ namespace GameLibrary.Logic
             {
                 await CopyFiles(absoluteFolder, fullTarget);
             }
-            catch (Exception e)
-            {
-                throw e;
-            }
 
             return true;
         }
@@ -125,7 +122,7 @@ namespace GameLibrary.Logic
         }
 
 
-        public static async Task<string?> RequestExtract(string archivePath, Progress<double> progress, CancellationToken cancellationToken)
+        public static async Task<string?> RequestExtract(string archivePath, IProgress<int> progress, CancellationToken cancellationToken)
         {
             if (!File.Exists(archivePath) || !IsZip(archivePath))
             {
@@ -136,7 +133,11 @@ namespace GameLibrary.Logic
 
             if (IsArchiveEncrypted(archivePath))
             {
-                readerOptions.Password = await DependencyManager.OpenStringInputModal("Archive Password") ?? string.Empty;
+                string? lastPassword = ConfigHandler.configProvider?.GetValue(Enums.ConfigKeys.Misc_LastArchivePassword);
+                readerOptions.Password = await DependencyManager.OpenStringInputModal("Archive Password", lastPassword) ?? string.Empty;
+
+                if (lastPassword != readerOptions.Password)
+                    await (ConfigHandler.configProvider?.SaveValue(Enums.ConfigKeys.Misc_LastArchivePassword, readerOptions.Password) ?? Task.CompletedTask);
             }
 
             await _concurrentUnzipSlim.WaitAsync(cancellationToken);
@@ -154,7 +155,11 @@ namespace GameLibrary.Logic
 
                 using var archive = ArchiveFactory.Open(archivePath, readerOptions);
 
-                return await ExtractFile_Generic(archive, archivePath, readerOptions.Password, extractedFolderName, progress, cancellationToken);
+                switch (extension)
+                {
+                    case ".rar": return await ExtractFile_Rar(archivePath, readerOptions.Password, extractedFolderName, progress, cancellationToken);
+                    default: return await ExtractFile_Generic(archivePath, readerOptions.Password, extractedFolderName, progress, cancellationToken);
+                }
             }
             catch (CryptographicException)
             {
@@ -185,7 +190,40 @@ namespace GameLibrary.Logic
             }
         }
 
-        private static async Task<string?> ExtractFile_Generic(IArchive archive, string archivePath, string? password, string extractFolderName, Progress<double> progress, CancellationToken cancellationToken)
+        private static async Task<string?> ExtractFile_Rar(string archivePath, string? password, string extractFolderName, IProgress<int> progress, CancellationToken cancellationToken)
+        {
+            ProcessStartInfo info = new ProcessStartInfo();
+            info.FileName = "unrar";
+
+            info.RedirectStandardError = true;
+            info.RedirectStandardOutput = true;
+            info.UseShellExecute = false;
+            info.CreateNoWindow = true;
+
+            info.ArgumentList.Add("x");
+            info.ArgumentList.Add("-o+");
+
+            if (!string.IsNullOrEmpty(password))
+                info.ArgumentList.Add($"-p{password}");
+
+            info.ArgumentList.Add(archivePath);
+            info.ArgumentList.Add(extractFolderName);
+
+            Process p = new Process();
+            p.StartInfo = info;
+
+            p.Start();
+            await ReadProgressOfExtraction(p, progress, cancellationToken);
+
+            if (p.ExitCode != 0)
+            {
+                throw new Exception(await p.StandardError.ReadToEndAsync());
+            }
+
+            return extractFolderName;
+        }
+
+        private static async Task<string?> ExtractFile_Generic(string archivePath, string? password, string extractFolderName, IProgress<int> progress, CancellationToken cancellationToken)
         {
             ProcessStartInfo info = new ProcessStartInfo();
             info.FileName = "7z";
@@ -210,14 +248,61 @@ namespace GameLibrary.Logic
             p.StartInfo = info;
 
             p.Start();
-            await p.WaitForExitAsync();
+            await ReadProgressOfExtraction(p, progress, cancellationToken);
 
             if (p.ExitCode != 0)
             {
-                throw new Exception("Failed to extract");
+                throw new Exception(await p.StandardError.ReadToEndAsync());
             }
 
             return extractFolderName;
+        }
+
+        private static Task ReadProgressOfExtraction(Process p, IProgress<int> progress, CancellationToken cancellationToken)
+        {
+            int charNumber;
+            const int newLineCharNumber = '\b';
+
+            string line = string.Empty;
+
+            TaskCompletionSource task = new TaskCompletionSource();
+
+            Task.Run(() =>
+            {
+                while (!p.HasExited)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        p.Kill();
+                        return;
+                    }
+
+                    while ((charNumber = p.StandardOutput.Read()) != -1)
+                    {
+                        if (charNumber == newLineCharNumber)
+                        {
+                            string percentageText = line.Replace(" ", "");
+                            Match match = Regex.Match(percentageText, @"^(\d+)%");
+
+                            if (match.Success)
+                            {
+                                int percentage = int.Parse(match.Groups[1].Value);
+                                progress.Report(percentage);
+                            }
+
+                            line = string.Empty;
+                        }
+                        else
+                        {
+                            line += (char)charNumber;
+                        }
+                    }
+                }
+
+                task.SetResult();
+            });
+
+            return task.Task;
         }
 
         public interface IImportEntry
@@ -236,7 +321,7 @@ namespace GameLibrary.Logic
             public string? extractedFolder;
             public string? selectedBinary;
 
-            public string getPotentialName => Path.GetFileName(extractedFolder)!;
+            public string getPotentialName => Path.GetFileName(getBinaryPath)!;
             public string getBinaryPath => selectedBinary!;
 
             public string? getBinaryFolder => Path.GetDirectoryName(getBinaryPath);

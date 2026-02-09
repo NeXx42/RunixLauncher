@@ -41,6 +41,23 @@ namespace RunixLauncher.Controls
             }
         }
 
+        public void RegisterClick(Func<IProgress<int>, Task> callback)
+        {
+            this.callback += ExtensionMethods.WrapTaskInExceptionHandler(HandleUpdateAsync);
+
+            async Task HandleUpdateAsync()
+            {
+                Dispatcher.UIThread.Post(() => SetValue(LabelProperty!, "0%"));
+
+                await callback(new Progress<int>((int perc) =>
+                {
+                    Dispatcher.UIThread.Post(() => SetValue(LabelProperty!, $"{perc}%"));
+                }));
+
+                Dispatcher.UIThread.Post(() => SetValue(LabelProperty!, defaultMessage));
+            }
+        }
+
         public void RegisterClick(Func<Task> callback, string? asyncMessage = "")
         {
             this.callback += ExtensionMethods.WrapTaskInExceptionHandler(HandleUpdateAsync);

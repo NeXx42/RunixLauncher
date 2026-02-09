@@ -4,22 +4,45 @@
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="RunixLauncher.Controls.SubPage.Indexer.Indexer_FolderView"
   xmlns:local="clr-namespace:RunixLauncher.Controls.SubPage.Indexer" x:DataType="local:Indexer_FolderViewModel"
   xmlns:Common="clr-namespace:RunixLauncher.Controls">
-  <Border Background="#0a0e13" CornerRadius="10" BorderBrush="{DynamicResource bg_Border}" BorderThickness="1">
-    <Grid>
-      <ScrollViewer>
-        <TreeView x:Name="folderStructure" ItemsSource="{Binding Nodes}">
-          <TreeView.ItemTemplate>
-            <TreeDataTemplate x:DataType="local:Indexer_FolderViewModel_Node" ItemsSource="{Binding SubNodes}">
-              <TextBlock Text="{Binding Title}" />
-            </TreeDataTemplate>
-          </TreeView.ItemTemplate>
-        </TreeView>
-      </ScrollViewer>
+  <Grid>
+    <Border Background="#0a0e13" CornerRadius="10" BorderBrush="{DynamicResource bg_Border}" BorderThickness="1">
+      <Grid>
+        <Grid Margin="5 5 5 50">
+          <ScrollViewer>
+            <TreeView x:Name="folderStructure" ItemsSource="{Binding Nodes}">
+              <TreeView.ItemTemplate>
+                <TreeDataTemplate x:DataType="local:Indexer_FolderViewModel_Node" ItemsSource="{Binding SubNodes}">
+                  <TextBlock Text="{Binding Title}" />
+                </TreeDataTemplate>
+              </TreeView.ItemTemplate>
+            </TreeView>
+          </ScrollViewer>
+        </Grid>
 
-      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Spacing="5" Margin="15">
-        <Common:Common_Button x:Name="btn_Action2" Height="30" Width="150" Label="Run" HorizontalAlignment="Center" VerticalAlignment="Center" />
-        <Common:Common_Button x:Name="btn_Action" Height="30" Width="150" Label="Select" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="positive"/>
-      </StackPanel>
-    </Grid>
-  </Border>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Bottom" Spacing="5" Margin="15">
+          <Common:Common_Button x:Name="btn_Close" Height="30" Width="150" Label="Close" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Spacing="5" Margin="15">
+          <Common:Common_Button x:Name="btn_Action2" Height="30" Width="150" Label="Run" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          <Common:Common_Button x:Name="btn_Action" Height="30" Width="150" Label="Select" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="positive"/>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Border Background="#7d000000" x:Name="cont_Progress">
+      <Border Background="#0a0e13" CornerRadius="10" BorderBrush="{DynamicResource bg_Border}" BorderThickness="1" Width="350" Height="75">
+        <Grid Margin="5">
+          <Label Content="Extracting" HorizontalAlignment="Center"/>
+
+          <Grid Height="25" Margin="5" ColumnDefinitions="* 5 100" VerticalAlignment="Bottom">
+            <ProgressBar VerticalAlignment="Stretch" Grid.Column="0" Minimum="0" Maximum="100" Value="0" ShowProgressText="True" x:Name="inp_ProgressBar"/>
+            <Common:Common_Button x:Name="btn_Progress_Cancel" Grid.Column="2" Label="Cancel" Classes="negative"/>
+          </Grid>
+        </Grid>
+      </Border>
+    </Border>
+
+  </Grid>
 </UserControl>

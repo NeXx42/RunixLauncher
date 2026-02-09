@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Objects;
 
@@ -15,11 +16,17 @@ namespace RunixLauncher.Controls.SubPage.Indexer;
 
 public partial class Indexer_FolderView : UserControl
 {
+    enum SelectedFileType
+    {
+        None,
+        Executable,
+        Archive
+    }
+
     private string? rootFolder;
+    private (string file, SelectedFileType type)? selectedFile;
 
-    private Action? actionCallback;
-    private Action? action2Callback;
-
+    private CancellationTokenSource? extractionCancellation;
     private Action<string>? binarySelection;
 
     public Indexer_FolderView()
@@ -29,8 +36,12 @@ public partial class Indexer_FolderView : UserControl
         folderStructure.SelectionMode = SelectionMode.Toggle;
         folderStructure.SelectionChanged += (_, __) => HandleFolderSelection();
 
-        btn_Action.RegisterClick(() => actionCallback?.Invoke());
-        btn_Action2.RegisterClick(() => action2Callback?.Invoke());
+        btn_Action.RegisterClick(ActionCallback1, "Working");
+        btn_Action2.RegisterClick(ActionCallback2, "Working");
+        btn_Progress_Cancel.RegisterClick(CancelExtraction, "Cancelling");
+        btn_Close.RegisterClick(() => binarySelection?.Invoke(string.Empty));
+
+        cont_Progress.IsVisible = false;
     }
 
     public void Explore(string root, Action<string>? binarySelection)
@@ -51,8 +62,12 @@ public partial class Indexer_FolderView : UserControl
             extension = Path.GetExtension(selectedItem.fullPath);
         }
 
+        btn_Action.IsVisible = false;
+        btn_Action2.IsVisible = false;
 
-        switch (extension)
+        selectedFile = null;
+
+        switch (extension.ToLower())
         {
             case ".exe":
             case ".appimage":
@@ -62,8 +77,7 @@ public partial class Indexer_FolderView : UserControl
                 btn_Action.Label = "Select";
                 btn_Action2.Label = "Launch";
 
-                actionCallback = () => SelectBinary(selectedItem!.fullPath);
-                action2Callback = () => _ = LaunchBinary(selectedItem!.fullPath);
+                selectedFile = (selectedItem!.fullPath, SelectedFileType.Executable);
                 break;
 
             case ".7z":
@@ -74,24 +88,40 @@ public partial class Indexer_FolderView : UserControl
                 btn_Action.IsVisible = true;
                 btn_Action.Label = "Extract";
 
-                actionCallback = () => _ = ExtractArchive(selectedItem!.fullPath);
-                break;
-
-            default:
-                actionCallback = null;
-                action2Callback = null;
-
-
-                btn_Action.IsVisible = false;
-                btn_Action2.IsVisible = false;
+                selectedFile = (selectedItem!.fullPath, SelectedFileType.Archive);
                 break;
         }
     }
 
-    private void SelectBinary(string path)
+    private async Task ActionCallback1()
     {
-        this.IsVisible = false;
+        switch (selectedFile?.type ?? SelectedFileType.None)
+        {
+            case SelectedFileType.Executable:
+                await SelectBinary(selectedFile!.Value.file);
+                break;
+
+            case SelectedFileType.Archive:
+                await ExtractArchive(selectedFile!.Value.file);
+                break;
+        }
+    }
+
+    private async Task ActionCallback2()
+    {
+        switch (selectedFile?.type ?? SelectedFileType.None)
+        {
+            case SelectedFileType.Executable:
+                await LaunchBinary(selectedFile!.Value.file);
+                break;
+
+        }
+    }
+
+    private Task SelectBinary(string path)
+    {
         this.binarySelection?.Invoke(path);
+        return Task.CompletedTask;
     }
 
     private async Task LaunchBinary(string path)
@@ -114,9 +144,29 @@ public partial class Indexer_FolderView : UserControl
 
     private async Task ExtractArchive(string path)
     {
-        Progress<double> prog = new Progress<double>();
-        await FileManager.RequestExtract(path, prog, CancellationToken.None);
+        if (extractionCancellation != null)
+            await extractionCancellation.CancelAsync();
+
+        cont_Progress.IsVisible = true;
+
+        Progress<int> prog = new Progress<int>((int amount) =>
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                inp_ProgressBar.Value = amount;
+            });
+        });
+
+        extractionCancellation = new CancellationTokenSource();
+        await FileManager.RequestExtract(path, prog, extractionCancellation!.Token);
 
         Explore(rootFolder!, binarySelection);
+        cont_Progress.IsVisible = false;
+    }
+
+    private async Task CancelExtraction()
+    {
+        await (extractionCancellation?.CancelAsync() ?? Task.CompletedTask);
+        extractionCancellation = null;
     }
 }

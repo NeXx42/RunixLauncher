@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
@@ -14,13 +15,15 @@ public partial class Indexer_Import_Folder : UserControl, IIndexer_Import
         InitializeComponent();
     }
 
-    public Indexer_Import_Folder(string path)
+    public Indexer_Import_Folder(string path, Action onRemove)
     {
         bin = new FileManager.ImportEntry_Folder(path);
 
         InitializeComponent();
+
         lbl_Path.Content = bin.folderPath;
 
+        btn_Remove.RegisterClick(onRemove);
         inp_Binaries.Setup(bin.binaries, 0, UpdateSelectedBin);
     }
 

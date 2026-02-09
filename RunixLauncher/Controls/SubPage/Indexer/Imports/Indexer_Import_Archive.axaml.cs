@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using GameLibrary.Logic;
 
 namespace RunixLauncher.Controls.SubPage.Indexer.Imports;
@@ -14,16 +15,16 @@ public partial class Indexer_Import_Archive : UserControl, IIndexer_Import
     private FileManager.ImportEntry_Archive? archiveData;
 
     private CancellationTokenSource? extractToken;
-    private Func<Indexer_FolderView>? folderView;
+    private Popup_AddGames? master;
 
     public Indexer_Import_Archive()
     {
         InitializeComponent();
     }
 
-    public Indexer_Import_Archive(string file, Func<Indexer_FolderView> folderView)
+    public Indexer_Import_Archive(string file, Popup_AddGames master, Action onRemove)
     {
-        this.folderView = folderView;
+        this.master = master;
         archiveData = new FileManager.ImportEntry_Archive(file);
 
         InitializeComponent();
@@ -31,6 +32,8 @@ public partial class Indexer_Import_Archive : UserControl, IIndexer_Import
         lbl_Extract.Content = archiveData.archivePath;
         btn_Extract.RegisterClick(Extract, "Cancel");
         btn_Explore.RegisterClick(RequestFolderView, "exploring");
+
+        btn_Remove.RegisterClick(onRemove);
 
         RecheckExtract();
     }
@@ -52,10 +55,13 @@ public partial class Indexer_Import_Archive : UserControl, IIndexer_Import
             await extractToken.CancelAsync();
             return;
         }
-
         extractToken = new CancellationTokenSource();
+        Progress<int> progress = new Progress<int>((int per) =>
+        {
+            Dispatcher.UIThread.Post(() => inp_ProgressBar.Value = per);
+        });
 
-        Progress<double> progress = new Progress<double>();
+        inp_ProgressBar.IsVisible = true;
         archiveData!.extractedFolder = await FileManager.RequestExtract(archiveData!.archivePath, progress, extractToken.Token);
 
         RecheckExtract();
@@ -63,8 +69,12 @@ public partial class Indexer_Import_Archive : UserControl, IIndexer_Import
 
     private void RecheckExtract()
     {
+        inp_ProgressBar.IsVisible = false;
+
         btn_Extract.IsVisible = true;
         btn_Explore.IsVisible = false;
+
+        lbl_Folder.Content = string.Empty;
 
         if (File.Exists(archiveData!.selectedBinary))
         {
@@ -80,18 +90,20 @@ public partial class Indexer_Import_Archive : UserControl, IIndexer_Import
         {
             btn_Extract.IsVisible = false;
             btn_Explore.IsVisible = true;
-
-            lbl_Folder.Content = archiveData!.extractedFolder;
         }
     }
 
     private async Task RequestFolderView()
     {
-        var viewer = folderView!.Invoke();
-        viewer.Explore(archiveData!.extractedFolder!, Callback);
+        master!.OpenFolderView(archiveData!.extractedFolder!, Callback);
 
         void Callback(string path)
         {
+            master!.CloseFolderView();
+
+            if (string.IsNullOrEmpty(path))
+                return;
+
             archiveData.selectedBinary = path;
             RecheckExtract();
         }
