@@ -13,10 +13,10 @@ public class RunnerDto
     public enum RunnerType
     {
         None = -1,
-        AppImage = 0,
+        Native = 0,
         Wine = 1,
         Wine_GE = 2,
-        umu_Launcher = 3, // dont like, but currently use it
+        umu_Launcher = 3,
         Proton_GE = 4,
     }
 
@@ -134,6 +134,9 @@ public class RunnerDto
     {
         string[] allowed = GetAcceptableExtensions();
 
+        if (allowed.Length == 0)
+            return true;
+
         foreach (string extension in allowed)
             if (path.EndsWith($".{extension}", StringComparison.CurrentCultureIgnoreCase))
                 return true;
@@ -189,7 +192,7 @@ public class RunnerDto
 
     // Launching
 
-    protected virtual string[] GetAcceptableExtensions() => ["AppImage"];
+    protected virtual string[] GetAcceptableExtensions() => [];
 
     public virtual Task SetupRunner() => Task.CompletedTask;
 

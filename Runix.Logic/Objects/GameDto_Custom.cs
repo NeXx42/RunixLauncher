@@ -86,11 +86,14 @@ public class GameDto_Custom : GameDto
                     CreateFixer("Illegal Folder", "This will rename the folder to remove the illegal characters", ResolveFolderPath);
                 break;
 
-            case RunnerDto.RunnerType.AppImage:
-                UnixFileMode info = new FileInfo(getAbsoluteBinaryLocation).UnixFileMode;
+            case RunnerDto.RunnerType.Native:
+                if (ConfigHandler.isOnLinux)
+                {
+                    UnixFileMode info = new FileInfo(getAbsoluteBinaryLocation).UnixFileMode;
 
-                if (!info.HasFlag(UnixFileMode.UserExecute))
-                    CreateFixer("Not executable", "This file isnt marked as executable, Would you like to make it?", MakeAppImageExecutable);
+                    if (!info.HasFlag(UnixFileMode.UserExecute))
+                        CreateFixer("Not executable", "This file isnt marked as executable, Would you like to make it?", MakeAppImageExecutable);
+                }
 
                 break;
         }
