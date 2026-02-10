@@ -23,7 +23,8 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 
         tabGroup = new UITabGroup(
             new UITabGroup_GroupToggleButton(tab_General, tabBtn_General),
-            new UITabGroup_GroupToggleButton(tab_LaunchSettings, tabBtn_Launching)
+            new UITabGroup_GroupToggleButton(tab_LaunchSettings, tabBtn_Launching),
+            new UITabGroup_GroupToggleButton(tab_RunnerSettings, tabBtn_Runner)
         );
 
         _ = tabGroup.ChangeSelection(0);

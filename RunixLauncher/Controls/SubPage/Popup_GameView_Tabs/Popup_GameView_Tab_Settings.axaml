@@ -7,6 +7,7 @@
     <StackPanel Orientation="Vertical" Grid.Column="0" Spacing="5">
       <common:Common_ButtonToggle x:Name="tabBtn_General" Label="General"/>
       <common:Common_ButtonToggle x:Name="tabBtn_Launching" Label="Launching"/>
+      <common:Common_ButtonToggle x:Name="tabBtn_Runner" Label="Running"/>
     </StackPanel>
 
     <StackPanel Grid.Column="2">
@@ -29,6 +30,7 @@
       <!-- Launch Settings -->
 
       <StackPanel x:Name="tab_LaunchSettings">
+
         <StackPanel Margin="10 0" Spacing="5" IsVisible="True">
           <Grid ColumnDefinitions="150, *">
             <Label Content="Locale Emulation" VerticalAlignment="Center"/>
@@ -54,7 +56,24 @@
             <Label Content="Binary" VerticalAlignment="Center"/>
             <common:Common_Dropdown x:Name="inp_binary" Grid.Column="1"/>
           </Grid>
+        </StackPanel>
 
+      </StackPanel>
+
+      <!-- Runner Settings -->
+
+      <StackPanel x:Name="tab_RunnerSettings">
+        <!-- Profile -->
+        <StackPanel Margin="10 0" Spacing="5">
+          <Grid ColumnDefinitions="150, 300">
+            <Label Content="Isolate Prefix" VerticalAlignment="Center"/>
+            <common:Common_Toggle x:Name="inp_IsolatePrefix" Grid.Column="1"/>
+          </Grid>
+        </StackPanel>
+
+        <!-- Display -->
+        <Label FontSize="18" Content="Display" Margin="0 20 0 0" />
+        <StackPanel Margin="10 0" Spacing="5">
           <Grid ColumnDefinitions="150, *">
             <Label Content="Start Windowed" VerticalAlignment="Center"/>
             <common:Common_Toggle x:Name="inp_Wine_Windowed" Grid.Column="1"/>
@@ -64,17 +83,17 @@
             <Label Content="Virtual Wine desktop" VerticalAlignment="Center"/>
             <common:Common_Toggle x:Name="inp_Wine_VirtualDesktop" Grid.Column="1"/>
           </Grid>
+        </StackPanel>
 
-          <Grid ColumnDefinitions="150, 300">
-            <Label Content="Isolate Prefix" VerticalAlignment="Center"/>
-            <common:Common_Toggle x:Name="inp_IsolatePrefix" Grid.Column="1"/>
-          </Grid>
-
+        <!-- Display -->
+        <Label FontSize="18" Content="Compatibility" Margin="0 20 0 0" />
+        <StackPanel Margin="10 0" Spacing="5">
           <Grid ColumnDefinitions="150, *">
             <Label Content="Launch from console" VerticalAlignment="Center"/>
             <common:Common_Toggle x:Name="inp_Wine_LaunchAsConsole" Grid.Column="1"/>
           </Grid>
         </StackPanel>
+
       </StackPanel>
 
 
