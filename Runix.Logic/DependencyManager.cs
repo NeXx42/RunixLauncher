@@ -1,10 +1,14 @@
 using CSharpSqliteORM;
 using GameLibrary.Logic.Interfaces;
+using Runix.Structure.Interfaces.Repositories;
 
 namespace GameLibrary.Logic;
 
 public static class DependencyManager
 {
+    public static IGameRepository? gameRepo { get; private set; }
+    public static ILibraryRepository? libraryRepo { get; private set; }
+
     private static IUILinker? uiLinker;
 
     public const string APPLICATION_NAME = "MyLibraryApplication";
@@ -12,6 +16,10 @@ public static class DependencyManager
 
     public static string GetUserStorageFolder() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), APPLICATION_NAME);
     public static string? cachedDBLocation { get; private set; }
+
+
+    public static void RegisterGameRepo<T>() where T : IGameRepository => gameRepo = Activator.CreateInstance<T>();
+    public static void RegisterLibraryRepo<T>() where T : ILibraryRepository => libraryRepo = Activator.CreateInstance<T>();
 
 
     public static async Task PreSetup(IUILinker linker, IImageFetcher imageFetcher)

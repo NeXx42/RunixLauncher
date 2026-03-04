@@ -19,6 +19,22 @@ public class ConfigProvider<ENUMTYPE>
         handleSave = null;
     }
 
+    public ConfigProvider(Dictionary<string, string?> input, Func<string, string, Task> handleSave, Func<string, Task> handleDelete)
+    {
+        data = new Dictionary<ENUMTYPE, string?>();
+
+        foreach (KeyValuePair<string, string?> pair in input)
+        {
+            if (!Enum.TryParse(pair.Key, out ENUMTYPE id))
+                continue;
+
+            data.Add(id, pair.Value);
+        }
+
+        this.handleSave = handleSave;
+        this.handleDelete = handleDelete;
+    }
+
     public ConfigProvider(IEnumerable<(string, string?)> input, Func<string, string, Task> handleSave, Func<string, Task> handleDelete)
     {
         data = new Dictionary<ENUMTYPE, string?>();

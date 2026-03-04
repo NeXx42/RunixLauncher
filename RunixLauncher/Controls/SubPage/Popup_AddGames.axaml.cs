@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using GameLibrary.Logic;
@@ -36,7 +37,7 @@ public partial class Popup_AddGames : UserControl
         onReimportGames = onReimport;
     }
 
-    public async Task OnOpen()
+    public async Task OnOpen(CancellationToken cancellationToken)
     {
         this.IsVisible = true;
 

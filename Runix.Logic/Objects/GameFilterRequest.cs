@@ -38,7 +38,7 @@ public struct GameFilterRequest
     public bool orderDirection;
 
     public int page;
-    public int contentPerPage;
+    public int take;
 
     public string ConstructSQL()
     {
@@ -113,7 +113,6 @@ public struct GameFilterRequest
         }
 
         sql.Append(CreateOrderBy());
-        sql.Append(CreateLimit());
 
         string rawSql = sql.ToString();
         return rawSql;
@@ -132,11 +131,5 @@ public struct GameFilterRequest
 
         sql.Append(orderDirection ? " ASC" : " DESC");
         return sql;
-    }
-
-    private string CreateLimit()
-    {
-        int skip = contentPerPage * page;
-        return $" LIMIT {contentPerPage} OFFSET {skip};";
     }
 }

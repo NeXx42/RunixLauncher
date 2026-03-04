@@ -9,7 +9,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RunixLauncher", "RunixLaunc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runix.Input", "Runix.Input\Runix.Input.csproj", "{42BF9430-E486-4EB0-8A21-F3C03EFD3254}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runix.Database", "Runix.Database\CSharpSqliteORM.csproj", "{0605FAD4-45DA-41A2-92B6-5D294947495C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpSqliteORM", "Runix.Database\CSharpSqliteORM.csproj", "{0605FAD4-45DA-41A2-92B6-5D294947495C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runix.Structure", "Runix.Structure\Runix.Structure.csproj", "{01D277F9-928F-4E74-928F-F343D92120AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runix.DataAccess", "Runix.DataAccess\Runix.DataAccess.csproj", "{B21838AA-707E-4423-A0ED-CAFCA708A45F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +73,30 @@ Global
 		{0605FAD4-45DA-41A2-92B6-5D294947495C}.Release|x64.Build.0 = Release|Any CPU
 		{0605FAD4-45DA-41A2-92B6-5D294947495C}.Release|x86.ActiveCfg = Release|Any CPU
 		{0605FAD4-45DA-41A2-92B6-5D294947495C}.Release|x86.Build.0 = Release|Any CPU
+		{01D277F9-928F-4E74-928F-F343D92120AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01D277F9-928F-4E74-928F-F343D92120AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01D277F9-928F-4E74-928F-F343D92120AE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{01D277F9-928F-4E74-928F-F343D92120AE}.Debug|x64.Build.0 = Debug|Any CPU
+		{01D277F9-928F-4E74-928F-F343D92120AE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{01D277F9-928F-4E74-928F-F343D92120AE}.Debug|x86.Build.0 = Debug|Any CPU
+		{01D277F9-928F-4E74-928F-F343D92120AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01D277F9-928F-4E74-928F-F343D92120AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01D277F9-928F-4E74-928F-F343D92120AE}.Release|x64.ActiveCfg = Release|Any CPU
+		{01D277F9-928F-4E74-928F-F343D92120AE}.Release|x64.Build.0 = Release|Any CPU
+		{01D277F9-928F-4E74-928F-F343D92120AE}.Release|x86.ActiveCfg = Release|Any CPU
+		{01D277F9-928F-4E74-928F-F343D92120AE}.Release|x86.Build.0 = Release|Any CPU
+		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Debug|x64.Build.0 = Debug|Any CPU
+		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Debug|x86.Build.0 = Debug|Any CPU
+		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Release|x64.ActiveCfg = Release|Any CPU
+		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Release|x64.Build.0 = Release|Any CPU
+		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Release|x86.ActiveCfg = Release|Any CPU
+		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

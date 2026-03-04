@@ -13,6 +13,7 @@ using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.Objects;
 using GameLibrary.Logic.Objects.Tags;
 using RunixLauncher.Controls.Pages.Library;
+using RunixLauncher.Helpers;
 using RunixLauncher.Utils;
 
 namespace RunixLauncher.Controls.Pages;
@@ -29,6 +30,8 @@ public partial class Page_Library : UserControl, IControlChild
     private LibraryPageBase? gameList;
     private bool disableBackgroundImages;
 
+    private CancellationTokenSource? subPageCancellationToken;
+
     private Dictionary<string, Library_ActiveProcess> activeGameUI = new Dictionary<string, Library_ActiveProcess>();
 
     public Page_Library()
@@ -39,7 +42,7 @@ public partial class Page_Library : UserControl, IControlChild
             return;
 
         BindButtons();
-        ToggleMenu(false);
+        _ = ToggleMenu(false);
 
         _ = DrawEverything();
         _ = CreateGameList();
@@ -88,7 +91,7 @@ public partial class Page_Library : UserControl, IControlChild
         Settings.PointerPressed += (_, e) => e.Handled = true;
         TagEditor.PointerPressed += (_, e) => e.Handled = true;
 
-        cont_MenuView.PointerPressed += (_, __) => ToggleMenu(false);
+        cont_MenuView.PointerPressed += (_, __) => _ = ToggleMenu(false);
 
         btn_Tags.RegisterClick(OpenTagManager);
         btn_Indexer.RegisterClick(OpenIndexer);
@@ -148,22 +151,27 @@ public partial class Page_Library : UserControl, IControlChild
 
     public async Task ToggleGameView(int gameId)
     {
-        GameDto? game = LibraryManager.TryGetCachedGame(gameId);
+        Game? game = await LibraryManager.GetGame(gameId, CancellationToken.None);
 
         if (game == null)
         {
-            ToggleMenu(false);
+            await ToggleMenu(false);
             return;
         }
 
-        ToggleMenu(true);
+        await ToggleMenu(true);
         GameViewer.IsVisible = true;
 
-        await GameViewer.Draw(game);
+        await Task.WhenAll(
+            GameViewer.Draw(game, subPageCancellationToken?.Token ?? CancellationToken.None),
+            AnimationHelper.MoveUpAndFade(GameViewer, subPageCancellationToken?.Token ?? CancellationToken.None)
+        );
+
         openedMenu = GameViewer;
+
     }
 
-    public void ToggleMenu(bool to)
+    public async Task ToggleMenu(bool to)
     {
         openedMenu = null;
 
@@ -174,28 +182,43 @@ public partial class Page_Library : UserControl, IControlChild
         Settings.IsVisible = false;
         Indexer.IsVisible = false;
         TagEditor.IsVisible = false;
+
+        await (subPageCancellationToken?.CancelAsync() ?? Task.CompletedTask);
+        subPageCancellationToken = new CancellationTokenSource();
     }
 
     private async Task OpenIndexer()
     {
-        ToggleMenu(true);
+        await ToggleMenu(true);
         Indexer.IsVisible = false;
-        await Indexer.OnOpen();
+
+        await Task.WhenAll(
+            Indexer.OnOpen(subPageCancellationToken?.Token ?? CancellationToken.None),
+            AnimationHelper.MoveUpAndFade(Indexer, subPageCancellationToken?.Token ?? CancellationToken.None)
+        );
     }
     private async Task OpenSettings()
     {
-
-        ToggleMenu(true);
+        await ToggleMenu(true);
         Settings.IsVisible = true;
-        await Settings.OnOpen();
+
+        await Task.WhenAll(
+            Settings.OnOpen(subPageCancellationToken?.Token ?? CancellationToken.None),
+            AnimationHelper.MoveUpAndFade(Indexer, subPageCancellationToken?.Token ?? CancellationToken.None)
+        );
+
         openedMenu = Settings;
     }
 
     private async Task OpenTagManager()
     {
-        ToggleMenu(true);
+        await ToggleMenu(true);
         TagEditor.IsVisible = true;
-        await TagEditor.OnOpen();
+
+        await Task.WhenAll(
+            TagEditor.OnOpen(subPageCancellationToken?.Token ?? CancellationToken.None),
+            AnimationHelper.MoveUpAndFade(Indexer, subPageCancellationToken?.Token ?? CancellationToken.None)
+        );
     }
 
 
@@ -298,7 +321,7 @@ public partial class Page_Library : UserControl, IControlChild
             orderDirection = currentSortAscending,
             orderType = currentSort,
             page = page,
-            contentPerPage = contentPerPage
+            take = contentPerPage
         };
     }
 
@@ -332,7 +355,7 @@ public partial class Page_Library : UserControl, IControlChild
 
             if (close)
             {
-                ToggleMenu(false);
+                await ToggleMenu(false);
             }
 
             return false;

@@ -78,7 +78,7 @@ public static class RunnerManager
                 throw new Exception($"Invalid file for the runner - {launchRequest.path}");
             }
 
-            LibraryManager.TryGetCachedGame(launchRequest.gameId, out GameDto? gameDto);
+            Game? gameDto = await LibraryManager.GetGame(launchRequest.gameId, CancellationToken.None);
 
             await selectedRunner.SetupRunner();
             LaunchArguments launchArguments = await selectedRunner.InitRunDetails(launchRequest);
@@ -112,7 +112,7 @@ public static class RunnerManager
         }
     }
 
-    public static async Task RunSteamGame(GameDto_Steam game)
+    public static async Task RunSteamGame(Game_Steam game)
     {
         LaunchArguments dat = new LaunchArguments()
         {
@@ -163,7 +163,7 @@ public static class RunnerManager
 
         if (gameId.HasValue)
         {
-            GameDto? game = LibraryManager.TryGetCachedGame(gameId.Value);
+            Game? game = await LibraryManager.GetGame(gameId, CancellationToken.None);
 
             if (game != null)
             {
@@ -284,11 +284,13 @@ public static class RunnerManager
             activeGames[identifier].Dispose();
     }
 
-    public static async void OnExitProcess(string identifier)
+    public static async Task OnExitProcess(string identifier)
     {
         if (activeGames.TryGetValue(identifier, out ActiveProcess? process) && process != null)
         {
-            if (LibraryManager.TryGetCachedGame(process.getGameId, out GameDto? game) && game != null)
+            Game? game = await LibraryManager.GetGame(process.getGameId, CancellationToken.None);
+
+            if (game != null)
                 await game!.UpdatePlayTime(process.GetPlayMinutes());
 
             process?.Dispose();

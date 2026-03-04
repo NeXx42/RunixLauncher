@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Animation;
@@ -31,6 +32,8 @@ public partial class Library_Game : UserControl, IControlChild
 
     public Action<bool>? pointerStatusChange;
 
+    private CancellationTokenSource? loadToken;
+
     private ImageBrush? cachedImageBrush;
     private Action? onClick;
     private int? gameId;
@@ -53,11 +56,16 @@ public partial class Library_Game : UserControl, IControlChild
         gameId = null;
 
         img.Background = noBGBrush;
-        title.Text = "";
+        title.Text = "Loading";
 
         lbl_NoIcon.IsVisible = true;
         lbl_NoIcon.Text = "Loading";
         lbl_LastPlayed.Content = "";
+        lbl_TimePlayed.Content = "";
+
+        tag_1.IsVisible = true;
+        tag_2.IsVisible = true;
+        tag_3.IsVisible = true;
 
         ToggleHover(false);
     }
@@ -67,31 +75,36 @@ public partial class Library_Game : UserControl, IControlChild
         if (this.gameId == gameId)
             return;
 
+        DrawSkeleton();
+
+        await (loadToken?.CancelAsync() ?? Task.CompletedTask);
+        loadToken = new CancellationTokenSource();
+
         this.gameId = gameId;
-        await RedrawGameDetails(gameId);
+        Game? game = await LibraryManager.GetGame(gameId, loadToken.Token);
+
+        if (game == null)
+        {
+            this.IsVisible = false;
+            return;
+        }
+
+        RedrawGameDetails(game);
+        await ImageManager.GetGameImage<ImageBrush>(game, RedrawIcon);
+
+        loadToken = null;
 
         onClick = () => onLaunch?.Invoke(gameId);
     }
 
-    public async Task RedrawGameDetails(int gameId)
+    public void RedrawGameDetails(Game game)
     {
-        img.Background = noBGBrush;
-        lbl_NoIcon.Text = "Loading";
-        lbl_NoIcon.IsVisible = true;
-        lbl_LastPlayed.Content = "";
-
-        GameDto? game = LibraryManager.TryGetCachedGame(gameId);
-
-        if (game == null)
-            return;
-
         title.Text = game.gameName;
         lbl_NoIcon.Text = game.gameName;
         lbl_LastPlayed.Content = game.GetLastPlayedFormatted();
         lbl_TimePlayed.Content = game.GetTimePlayedFormatted();
 
         DrawTags(game);
-        await ImageManager.GetGameImage<ImageBrush>(game, RedrawIcon);
     }
 
     public void RedrawIcon(int gameId, ImageBrush? bitmapImg)
@@ -105,7 +118,7 @@ public partial class Library_Game : UserControl, IControlChild
         lbl_NoIcon.IsVisible = bitmapImg == null;
     }
 
-    private void DrawTags(GameDto game)
+    private void DrawTags(Game game)
     {
         TagDto[] tags = TagManager.GetTagsForAGame(game);
 

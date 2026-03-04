@@ -1,11 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="..\Runix.Database\CSharpSqliteORM.csproj" />
     <ProjectReference Include="..\Runix.Structure\Runix.Structure.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="SharpCompress" Version="0.42.1" />
-    <PackageReference Include="ValveKeyValue" Version="0.20.0.417" />
+    <ProjectReference Include="..\Runix.Database\CSharpSqliteORM.csproj" />
   </ItemGroup>
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 using System.Text;
 using CSharpSqliteORM;
 using GameLibrary.DB.Tables;
@@ -6,14 +7,15 @@ using GameLibrary.Logic.Database.Tables;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.Helpers;
 using Logic.db;
+using Runix.Structure.DTOs;
 
 namespace GameLibrary.Logic.Objects;
 
-public abstract class GameDto
+public abstract class Game
 {
     public readonly int gameId;
 
-    public string gameName { protected set; get; }
+    public string gameName { set; get; }
     public string folderPath { protected set; get; }
 
     public string? iconPath { protected set; get; }
@@ -50,7 +52,7 @@ public abstract class GameDto
         return true;
     }
 
-    public GameDto(dbo_Game game, dbo_GameTag[] tags, dbo_GameConfig[] config)
+    public Game(GameDTO game)
     {
         this.gameId = game.id;
         this.gameName = game.gameName;
@@ -64,11 +66,25 @@ public abstract class GameDto
 
         this.runnerId = game.runnerId;
         this.libraryId = game.libraryId;
-        this.status = (Game_Status)game.status;
+        this.status = game.status;
 
-        this.tags = tags.Select(x => x.TagId).ToHashSet();
-        this.config = new ConfigProvider<Game_Config>(config.Select(x => (x.configKey, x.configValue)), SaveConfig, DeleteConfig);
+        this.tags = game.tags;
+        this.config = new ConfigProvider<Game_Config>(game.config, SaveConfig, DeleteConfig);
     }
+
+    public GameDTO GetDTO() => new GameDTO()
+    {
+        id = gameId,
+        gameName = gameName,
+        iconPath = iconPath,
+        gameFolder = folderPath,
+        executablePath = binaryPath,
+        minsPlayed = minsPlayed,
+        lastPlayed = lastPlayed,
+        runnerId = runnerId,
+        libraryId = libraryId,
+        status = status
+    };
 
     protected async Task UpdateDatabaseEntry(params string[] columns)
     {
@@ -94,13 +110,6 @@ public abstract class GameDto
         LibraryManager.InvokeGameDetailsUpdate(gameId);
     }
 
-    public async Task Delete()
-    {
-        await Database_Manager.Delete<dbo_GameConfig>(SQLFilter.Equal(nameof(dbo_GameConfig.gameId), gameId));
-        await Database_Manager.Delete<dbo_GameTag>(SQLFilter.Equal(nameof(dbo_GameTag.GameId), gameId));
-        await Database_Manager.Delete<dbo_Game>(SQLFilter.Equal(nameof(dbo_Game.id), gameId));
-    }
-
     // Config
 
     private async Task SaveConfig(string key, string val)
@@ -121,12 +130,6 @@ public abstract class GameDto
     }
 
     // updating properties
-
-    public async Task UpdateGameName(string newName)
-    {
-        gameName = newName;
-        await UpdateDatabaseEntry(nameof(dbo_Game.gameName));
-    }
 
     public async Task UpdateGameIcon(string path)
     {

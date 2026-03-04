@@ -14,10 +14,8 @@ namespace RunixLauncher.Controls.SubPage;
 
 public partial class Popup_GameView : UserControl, IControlChild
 {
-    public GameDto? inspectingGame { private set; get; }
+    public Game? inspectingGame { private set; get; }
     private Popup_GameView_TabBase.TabGroup tabs;
-
-    private CancellationTokenSource? gameViewTaskToken;
 
     public Popup_GameView()
     {
@@ -41,11 +39,8 @@ public partial class Popup_GameView : UserControl, IControlChild
         RunnerManager.onGameStatusChange += (a, b) => HelperFunctions.WrapUIThread(() => UpdateRunningGameStatus(a, b));
     }
 
-    public async Task Draw(GameDto game)
+    public async Task Draw(Game game, CancellationToken cancellationToken)
     {
-        await (gameViewTaskToken?.CancelAsync() ?? Task.CompletedTask);
-        gameViewTaskToken = new CancellationTokenSource();
-
         if (inspectingGame != game)
         {
             img_bg.Source = null;
@@ -60,7 +55,7 @@ public partial class Popup_GameView : UserControl, IControlChild
 
         await Dispatcher.UIThread.InvokeAsync(() => { });
         await ImageManager.GetGameImage<ImageBrush>(game, UpdateGameIcon);
-        await tabs.OpenFresh(gameViewTaskToken.Token);
+        await tabs.OpenFresh(cancellationToken);
     }
 
     private void DrawWarnings()
@@ -131,7 +126,7 @@ public partial class Popup_GameView : UserControl, IControlChild
         string? res = await DependencyManager.OpenStringInputModal("Game Name", inspectingGame!.gameName);
 
         if (!string.IsNullOrEmpty(res))
-            await inspectingGame!.UpdateGameName(res);
+            await LibraryManager.UpdateGame_Name(inspectingGame, res);
     }
 
     private async Task RefreshSelectedGame(int gameId)
@@ -139,7 +134,7 @@ public partial class Popup_GameView : UserControl, IControlChild
         if (gameId != inspectingGame?.gameId)
             return;
 
-        await Draw(inspectingGame!);
+        await Draw(inspectingGame!, CancellationToken.None);
     }
 
     private void UpdateRunningGameStatus(string binary, bool to)

@@ -38,7 +38,7 @@ public static class ImageManager
             targetIconResolution = (int)Math.Round(Math.Pow(2, (8 - temp) + 3));
     }
 
-    public static async Task GetGameImage<T>(GameDto game, Action<int, T?> onFetch)
+    public static async Task GetGameImage<T>(Game game, Action<int, T?> onFetch)
     {
         if (cachedImages.TryGetValue(game.gameId, out object? res))
         {
@@ -120,7 +120,7 @@ public static class ImageManager
 
     private struct ImageFetchRequest
     {
-        public GameDto game;
+        public Game game;
         public FetchImageEvent callback;
     }
 }

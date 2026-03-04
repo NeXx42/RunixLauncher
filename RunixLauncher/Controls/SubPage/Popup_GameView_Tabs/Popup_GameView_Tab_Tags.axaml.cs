@@ -35,7 +35,7 @@ public partial class Popup_GameView_Tab_Tags : Popup_GameView_TabBase
 
         protected override void InternalSetup(TabGroup master) { }
 
-        protected override async Task OpenWithGame(GameDto? game, bool isNewGame)
+        protected override async Task OpenWithGame(Game? game, bool isNewGame)
         {
             await CheckForNewTags();
             await RedrawSelectedTags(game!);
@@ -76,7 +76,7 @@ public partial class Popup_GameView_Tab_Tags : Popup_GameView_TabBase
             await RedrawSelectedTags(inspectingGame);
         }
 
-        private async Task RedrawSelectedTags(GameDto game)
+        private async Task RedrawSelectedTags(Game game)
         {
             foreach (KeyValuePair<TagDto, Library_Tag> tag in allTags)
                 tag.Value.Toggle(tag.Key.DoesFitGame(game));

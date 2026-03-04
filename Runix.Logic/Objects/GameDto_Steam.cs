@@ -1,13 +1,14 @@
 using GameLibrary.DB.Tables;
 using GameLibrary.Logic.Database.Tables;
+using Runix.Structure.DTOs;
 
 namespace GameLibrary.Logic.Objects;
 
-public class GameDto_Steam : GameDto
+public class Game_Steam : Game
 {
     public long appId { private set; get; }
 
-    public GameDto_Steam(dbo_Game game, dbo_GameTag[] tags, dbo_GameConfig[] config) : base(game, tags, config)
+    public Game_Steam(GameDTO game) : base(game)
     {
         appId = long.Parse(game.executablePath!);
     }

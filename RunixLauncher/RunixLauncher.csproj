@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Runix.Logic\Runix.Logic.csproj" />
     <ProjectReference Include="..\Runix.Input\Runix.Input.csproj" />
+    <ProjectReference Include="..\Runix.DataAccess\Runix.DataAccess.csproj" />
   </ItemGroup>
   <!-- Overlay -->
   <ItemGroup Condition="'$(Configuration)' == 'Debug' And Exists('..\GameLibrary_GTKOverlay\target\debug\GameLibrary_GTKOverlay')">

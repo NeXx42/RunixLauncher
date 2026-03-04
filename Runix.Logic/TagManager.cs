@@ -78,7 +78,7 @@ public static class TagManager
         return managedTags.Union(unmanagedTags.Values).ToArray();
     }
 
-    public static TagDto[] GetTagsForAGame(GameDto game)
+    public static TagDto[] GetTagsForAGame(Game game)
     {
         List<TagDto> tags = new List<TagDto>();
 

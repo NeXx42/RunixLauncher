@@ -24,38 +24,27 @@ public partial class Modal_Loading : UserControl
 
         if (showLoading)
         {
-            lbl_Loading.Content = "Loading...";
+            lbl_Header.Content = "Loading";
+            lbl_Description.Text = "Loading...";
 
-            DateTime lastTime = DateTime.UtcNow;
-            double averageTaskLength = 0;
-            int tasksCompleted = 0;
+            inp_ProgressBar.Minimum = 0;
+            inp_ProgressBar.Maximum = tasks.Length - 1;
 
-            foreach (Func<Task> entry in tasks)
+            for (int i = 0; i < tasks.Length; i++)
             {
                 try
                 {
-                    await entry();
-
-                    tasksCompleted++;
-
-                    averageTaskLength = averageTaskLength + ((DateTime.UtcNow - lastTime).TotalSeconds - averageTaskLength) / tasksCompleted;
-                    lastTime = DateTime.UtcNow;
-
-                    float remainingPercentage = (float)Math.Round((tasksCompleted / (float)tasks.Length) * 100f);
-                    float remainingTime = (float)Math.Round(averageTaskLength * (tasks.Length - tasksCompleted));
-
-                    await Dispatcher.UIThread.InvokeAsync(() => lbl_Loading.Content = $"{remainingPercentage}% {remainingTime}");
+                    await tasks[i]();
+                    await Dispatcher.UIThread.InvokeAsync(() => inp_ProgressBar.Value = i);
                 }
                 catch (Exception e)
                 {
                     await DependencyManager.OpenExceptionDialog("", e);
                 }
-
             }
         }
         else
         {
-            lbl_Loading.Content = "Loading";
             await Task.WhenAll(tasks.Select(x => x()));
         }
     }

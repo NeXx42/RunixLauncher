@@ -15,6 +15,7 @@ public class LibraryDto
     public Library_ExternalProviders? externalType { protected set; get; }
 
     public string getName => string.IsNullOrEmpty(alias) ? root : alias;
+    public string getFullName => $"{(string.IsNullOrEmpty(alias) ? "" : $"[{alias}] ")}{root}";
 
     public LibraryDto(dbo_Libraries lib)
     {

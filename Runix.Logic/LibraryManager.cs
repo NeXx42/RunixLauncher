@@ -1,4 +1,5 @@
 ﻿using System.Data.SQLite;
+using System.Net.NetworkInformation;
 using System.Text;
 using CSharpSqliteORM;
 using GameLibrary.DB.Tables;
@@ -6,6 +7,8 @@ using GameLibrary.Logic.Database.Tables;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.Objects;
 using Logic.db;
+using Runix.Structure.DTOs;
+using Runix.Structure.Interfaces.Repositories;
 
 namespace GameLibrary.Logic
 {
@@ -15,12 +18,12 @@ namespace GameLibrary.Logic
         {
             Steam
         }
-
         public static Action? onGameDeletion;
         public static Action<int>? onGameDetailsUpdate;
 
         private static int filteredGameCount;
-        private static Dictionary<int, GameDto> activeGameList = new Dictionary<int, GameDto>();
+
+        private static Dictionary<int, Game?> cachedGames = new Dictionary<int, Game?>();
         private static Dictionary<int, LibraryDto> cachedLibraries = new Dictionary<int, LibraryDto>();
 
 
@@ -93,61 +96,58 @@ namespace GameLibrary.Logic
 
         public static int GetMaxPages(int limit) => (int)Math.Ceiling(filteredGameCount / (float)limit) - 1;
 
-
-        public static bool TryGetCachedGame(int? gameId, out GameDto? game)
-        {
-            game = null;
-
-            if (!gameId.HasValue)
-                return false;
-
-            return activeGameList.TryGetValue(gameId.Value, out game);
-        }
-        public static GameDto? TryGetCachedGame(int gameId) => activeGameList[gameId];
-
         public static async Task<int[]> GetGameList(GameFilterRequest filterRequest, CancellationToken cancellationToken)
         {
-            (int gameId, int count)[] res = await Database_Manager.GetItemsGeneric(filterRequest.ConstructSQL(), DeserializeDatabaseRequest, cancellationToken);
-            filteredGameCount = res.Length > 0 ? res[0].count : 0;
-
-            foreach ((int gameId, int _) in res)
-            {
-                if (!activeGameList.TryGetValue(gameId, out GameDto? gameObject))
-                    await LoadGame(gameId);
-            }
-
-            return res.Select(x => x.gameId).ToArray();
-
-            async Task<(int, int)> DeserializeDatabaseRequest(SQLiteDataReader reader)
-            {
-                return (Convert.ToInt32(reader["id"]), Convert.ToInt32(reader["total_count"]));
-            }
+            (int[] res, filteredGameCount) = await DependencyManager.gameRepo!.GameGameList(filterRequest.ConstructSQL(), filterRequest.page, filterRequest.take, cancellationToken);
+            return res;
         }
 
-        private static async Task LoadGame(int gameId)
+        public static async Task<Game?> GetGame(int? gameId, CancellationToken cancellationToken)
         {
-            GameDto? dto = null;
+            if (gameId.HasValue)
+                return await GetGame(gameId.Value, cancellationToken);
 
-            dbo_Game game = (await Database_Manager.GetItem<dbo_Game>(SQLFilter.Equal(nameof(dbo_Game.id), gameId)))!;
-            dbo_GameTag[] gameTags = await Database_Manager.GetItems<dbo_GameTag>(SQLFilter.Equal(nameof(dbo_GameTag.GameId), game.id));
-            dbo_GameConfig[] config = await Database_Manager.GetItems<dbo_GameConfig>(SQLFilter.Equal(nameof(dbo_GameConfig.gameId), game.id));
-
-            if (game.libraryId.HasValue && cachedLibraries.TryGetValue(game.libraryId.Value, out LibraryDto? lib) && lib != null)
-            {
-                switch (lib.externalType)
-                {
-                    case Library_ExternalProviders.Steam:
-                        dto = new GameDto_Steam(game, gameTags, config);
-                        break;
-                }
-            }
-
-            dto ??= new GameDto_Custom(game, gameTags, config);
-            activeGameList[game.id] = dto;
+            return null;
         }
 
+        public static async Task<Game?> GetGame(int gameId, CancellationToken cancellationToken)
+        {
+            if (cachedGames.TryGetValue(gameId, out Game? game))
+                return game;
 
-        public static async Task DeleteGame(GameDto game, bool removeFiles)
+            try
+            {
+                GameDTO? obj = await DependencyManager.gameRepo!.GetGame(gameId, cancellationToken);
+
+                if (obj == null)
+                {
+                    cachedGames[gameId] = null;
+                    return null;
+                }
+
+                if (obj.libraryId.HasValue && cachedLibraries.TryGetValue(obj.libraryId.Value, out LibraryDto? lib) && lib != null)
+                {
+                    switch (lib.externalType)
+                    {
+                        case Library_ExternalProviders.Steam:
+                            game = new Game_Steam(obj);
+                            break;
+                    }
+                }
+
+                game ??= new Game_Custom(obj);
+                cachedGames[gameId] = game;
+
+                return game;
+            }
+            catch (Exception e)
+            {
+                await DependencyManager.OpenExceptionDialog("Failed to load game", e);
+                return null;
+            }
+        }
+
+        public static async Task DeleteGame(Game game, bool removeFiles)
         {
             if (removeFiles)
             {
@@ -164,9 +164,9 @@ namespace GameLibrary.Logic
                 }
             }
 
-            await game.Delete();
+            await DependencyManager.gameRepo!.DeleteGame(game.gameId, CancellationToken.None);
+            cachedGames.Remove(game.gameId);
 
-            activeGameList.Remove(game.gameId);
             onGameDeletion?.Invoke();
         }
 
@@ -207,13 +207,39 @@ namespace GameLibrary.Logic
         {
             // really should do in a single db call, but its not too big of an issue
 
-            foreach (GameDto game in activeGameList.Values)
+            foreach (Game game in cachedGames.Values)
             {
                 if (game.runnerId == runnerId)
                 {
                     await game.ChangeRunnerId(null);
                 }
             }
+        }
+
+        public static async Task UpdateGame_Name(Game game, string to)
+        {
+            game.gameName = to;
+            await DependencyManager.gameRepo!.SaveGame(game.GetDTO(), CancellationToken.None);
+
+            onGameDetailsUpdate?.Invoke(game.gameId);
+        }
+
+        public static async Task<Game[]> GetGamesPerLibrary(int libraryId, CancellationToken token)
+        {
+            int[] games = await DependencyManager.libraryRepo!.GetLinkedGameNames(libraryId, token);
+            List<Game> relevantGames = new List<Game>();
+
+            foreach (int gameId in games)
+            {
+                Game? game = await GetGame(gameId, token);
+
+                if (game == null)
+                    continue;
+
+                relevantGames.Add(game);
+            }
+
+            return relevantGames.ToArray();
         }
     }
 }

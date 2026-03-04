@@ -74,9 +74,9 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
             ];
         }
 
-        protected override async Task OpenWithGame(GameDto? game, bool isNewGame)
+        protected override async Task OpenWithGame(Game? game, bool isNewGame)
         {
-            if (game is GameDto_Steam)
+            if (game is Game_Steam)
             {
                 element.IsVisible = false;
                 return;
@@ -91,7 +91,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
                 await config.Load(game!);
         }
 
-        private void DrawLibraries(GameDto game)
+        private void DrawLibraries(Game game)
         {
             possibleLibraries = LibraryManager.GetLibraries();
 
@@ -115,7 +115,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
             }
         }
 
-        private void DrawRunners(GameDto game)
+        private void DrawRunners(Game game)
         {
             possibleRunners = RunnerManager.GetRunnerProfiles();
             string firstProfile = possibleRunners.FirstOrDefault(x => x.isDefault)?.runnerName ?? "NO DEFAULT";
@@ -141,7 +141,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
             }
         }
 
-        private void DrawBinaries(GameDto game)
+        private void DrawBinaries(Game game)
         {
             (int? currentExecutable, string[] possibleBinaries)? options = game.GetPossibleBinaries();
 
@@ -174,12 +174,12 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
         internal abstract class ConfigChangerBase
         {
             protected Game_Config key;
-            protected Func<GameDto?> inspectingGameFetcher;
+            protected Func<Game?> inspectingGameFetcher;
 
             private RunnerDto.RunnerType[] supportedTypes;
             private Visual control;
 
-            public ConfigChangerBase(Visual group, Game_Config key, Func<GameDto?> getInspectingGame, RunnerDto.RunnerType[] supportedTypes)
+            public ConfigChangerBase(Visual group, Game_Config key, Func<Game?> getInspectingGame, RunnerDto.RunnerType[] supportedTypes)
             {
                 this.key = key;
                 this.inspectingGameFetcher = getInspectingGame;
@@ -188,7 +188,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
                 this.control = group;
             }
 
-            public abstract Task Load(GameDto game);
+            public abstract Task Load(Game game);
 
             public void HandleSupportedType(RunnerDto.RunnerType selectedType)
             {
@@ -201,14 +201,14 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
         {
             private Common_Toggle ui;
 
-            public ConfigChanger_Toggle(Common_Toggle ui, Game_Config key, Func<GameDto?> getInspectingGame, params RunnerDto.RunnerType[] supportedTypes)
+            public ConfigChanger_Toggle(Common_Toggle ui, Game_Config key, Func<Game?> getInspectingGame, params RunnerDto.RunnerType[] supportedTypes)
                 : base((Visual)ui.Parent!, key, getInspectingGame, supportedTypes)
             {
                 this.ui = ui;
                 this.ui.RegisterOnChange(SaveToggle);
             }
 
-            public override Task Load(GameDto game)
+            public override Task Load(Game game)
             {
                 ui.SilentSetValue(game.config.GetBoolean(key, false));
                 return Task.CompletedTask;
@@ -216,7 +216,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 
             private async Task SaveToggle(bool to)
             {
-                GameDto? game = inspectingGameFetcher();
+                Game? game = inspectingGameFetcher();
 
                 if (game == null)
                     return;
@@ -229,14 +229,14 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
         {
             private Common_Dropdown ui;
 
-            public ConfigChanger_Dropdown(Common_Dropdown ui, Game_Config key, string[] options, Func<GameDto?> getInspectingGame, params RunnerDto.RunnerType[] supportedTypes)
+            public ConfigChanger_Dropdown(Common_Dropdown ui, Game_Config key, string[] options, Func<Game?> getInspectingGame, params RunnerDto.RunnerType[] supportedTypes)
                 : base((Visual)ui.Parent!, key, getInspectingGame, supportedTypes)
             {
                 this.ui = ui;
                 this.ui.Setup(options, 0, Save);
             }
 
-            public override Task Load(GameDto game)
+            public override Task Load(Game game)
             {
                 ui.SilentlyChangeValue(game.config.GetInteger(key, 0));
                 return Task.CompletedTask;
@@ -244,7 +244,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 
             private async Task Save()
             {
-                GameDto? game = inspectingGameFetcher();
+                Game? game = inspectingGameFetcher();
 
                 if (game == null)
                     return;
@@ -257,14 +257,14 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
         {
             private Common_InputField ui;
 
-            public ConfigChanger_InputField(Common_InputField ui, Game_Config key, Func<GameDto?> getInspectingGame, params RunnerDto.RunnerType[] supportedTypes)
+            public ConfigChanger_InputField(Common_InputField ui, Game_Config key, Func<Game?> getInspectingGame, params RunnerDto.RunnerType[] supportedTypes)
                 : base((Visual)ui.Parent!, key, getInspectingGame, supportedTypes)
             {
                 this.ui = ui;
                 this.ui.OnChange(Save);
             }
 
-            public override Task Load(GameDto game)
+            public override Task Load(Game game)
             {
                 ui.SilentlyChangeValue(game.config.GetValue(key));
                 return Task.CompletedTask;
@@ -272,7 +272,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 
             private async Task Save()
             {
-                GameDto? game = inspectingGameFetcher();
+                Game? game = inspectingGameFetcher();
 
                 if (game == null)
                     return;

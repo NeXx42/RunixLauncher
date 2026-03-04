@@ -21,7 +21,7 @@ namespace GameLibrary.Logic
     {
         private static SemaphoreSlim _concurrentUnzipSlim = new SemaphoreSlim(3);
 
-        public static async Task DeleteGameFiles(GameDto game)
+        public static async Task DeleteGameFiles(Game game)
         {
             if (Directory.Exists(game.getAbsoluteFolderLocation))
                 Directory.Delete(game.getAbsoluteFolderLocation, true);
@@ -29,7 +29,7 @@ namespace GameLibrary.Logic
 
         public static async Task UpdateGameIcon(int gameId, Uri newIconPath)
         {
-            GameDto? game = LibraryManager.TryGetCachedGame(gameId);
+            Game? game = await LibraryManager.GetGame(gameId, CancellationToken.None);
 
             if (!File.Exists(newIconPath.LocalPath) || game == null)
             {

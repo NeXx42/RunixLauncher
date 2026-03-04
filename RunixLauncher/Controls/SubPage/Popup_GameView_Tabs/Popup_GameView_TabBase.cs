@@ -44,7 +44,7 @@ public abstract class Popup_GameView_TabBase : UserControl
         protected Common_ButtonToggle toggleBtn;
 
         protected int? lastGameId;
-        protected GameDto inspectingGame => master!.master.inspectingGame!;
+        protected Game inspectingGame => master!.master.inspectingGame!;
 
         public Tab(Control element, Common_ButtonToggle btn) : base(element, btn)
         {
@@ -78,7 +78,7 @@ public abstract class Popup_GameView_TabBase : UserControl
         }
 
         protected abstract void InternalSetup(TabGroup master);
-        protected abstract Task OpenWithGame(GameDto? game, bool isNewGame);
+        protected abstract Task OpenWithGame(Game? game, bool isNewGame);
     }
 
     public abstract Tab CreateGroup(Common_ButtonToggle btn, Panel parent);

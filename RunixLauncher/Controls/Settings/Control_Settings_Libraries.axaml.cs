@@ -79,6 +79,15 @@ public partial class Control_Settings_Libraries : UserControl, ISettingControl
 
     private async Task OpenEditMenu()
     {
+        await MainWindow.instance!.DisplayModalAsync<Modal_Library>(HandleModal);
+
+        async Task HandleModal(Modal_Library modal)
+        {
+            await modal.HandleOpen(selectedProfile.HasValue ? elements![selectedProfile.Value].lib : null);
+            //SoftRefresh();
+        }
+        /*
+
         if (selectedProfile.HasValue)
         {
             string? alias = await DependencyManager.OpenStringInputModal("New Alias");
@@ -102,7 +111,7 @@ public partial class Control_Settings_Libraries : UserControl, ISettingControl
 
             await LibraryManager.GenerateLibrary(path);
             await LoadValue();
-        }
+        }*/
     }
 
     private async Task DeleteSelectedProfile()

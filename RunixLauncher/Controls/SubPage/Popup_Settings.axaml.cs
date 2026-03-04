@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -94,10 +95,13 @@ public partial class Popup_Settings : UserControl, IControlChild
         }
     }
 
-    public async Task OnOpen()
+    public async Task OnOpen(CancellationToken cancellationToken)
     {
         foreach (ISettingControl setting in activeControls)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
             await setting.LoadValue();
         }
     }

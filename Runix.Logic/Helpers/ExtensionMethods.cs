@@ -4,7 +4,7 @@ namespace GameLibrary.Logic.Helpers;
 
 public static class ExtensionMethods
 {
-    public static IEnumerable<GameDto> Filter_Tags(this IEnumerable<GameDto> inp, HashSet<int> tagFilter)
+    public static IEnumerable<Game> Filter_Tags(this IEnumerable<Game> inp, HashSet<int> tagFilter)
     {
         if (tagFilter?.Count <= 0)
             return inp;
@@ -12,7 +12,7 @@ public static class ExtensionMethods
         return inp.Where(x => x.IsInFilter(ref tagFilter!));
     }
 
-    public static IEnumerable<GameDto> Filter_Text(this IEnumerable<GameDto> inp, string? textFilter)
+    public static IEnumerable<Game> Filter_Text(this IEnumerable<Game> inp, string? textFilter)
     {
         if (string.IsNullOrEmpty(textFilter))
             return inp;
@@ -20,7 +20,7 @@ public static class ExtensionMethods
         return inp.Where(x => x.gameName.StartsWith(textFilter, StringComparison.InvariantCultureIgnoreCase));
     }
 
-    public static IEnumerable<GameDto> Filter_OrderType(this IEnumerable<GameDto> inp, GameFilterRequest.OrderType orderType)
+    public static IEnumerable<Game> Filter_OrderType(this IEnumerable<Game> inp, GameFilterRequest.OrderType orderType)
     {
         switch (orderType)
         {
@@ -32,7 +32,7 @@ public static class ExtensionMethods
         return inp;
     }
 
-    public static IEnumerable<GameDto> Filter_Direction(this IEnumerable<GameDto> inp, bool isAsc)
+    public static IEnumerable<Game> Filter_Direction(this IEnumerable<Game> inp, bool isAsc)
     {
         return isAsc ? inp : inp.Reverse();
     }

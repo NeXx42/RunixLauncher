@@ -24,11 +24,11 @@ public class TagDto_Managed : TagDto
 
     public override bool canToggle => false;
 
-    public override bool DoesFitGame(GameDto game)
+    public override bool DoesFitGame(Game game)
     {
         switch (type)
         {
-            case ManagedTagType.Steam: return game is GameDto_Steam;
+            case ManagedTagType.Steam: return game is Game_Steam;
         }
 
 

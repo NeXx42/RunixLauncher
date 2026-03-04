@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
@@ -77,6 +78,7 @@ public abstract class LibraryPageBase : UserControl, IControlChild
         int[] games = await LibraryManager.GetGameList(GetGameFilter(), pageLoadTaskToken.Token);
 
         activeUI.Clear();
+        Task[] drawRequests = new Task[games.Length];
 
         for (int i = 0; i < Math.Max(cacheUI.Count, games.Length); i++)
         {
@@ -93,10 +95,13 @@ public abstract class LibraryPageBase : UserControl, IControlChild
             cacheUI[i].IsVisible = true;
             cacheUI[i].ToggleHover(false);
 
-            await cacheUI[i].Draw(games[i], ViewGame);
-
             activeUI.Add(games[i], i);
+
+            int temp = i;
+            drawRequests[i] = cacheUI[temp].Draw(games[i], ViewGame);
         }
+
+        await Task.WhenAll(drawRequests);
 
         hoveredGame = null;
         pageLoadTaskToken = null;
@@ -132,7 +137,12 @@ public abstract class LibraryPageBase : UserControl, IControlChild
     public virtual async Task RefreshGame(int gameId)
     {
         if (activeUI.TryGetValue(gameId, out int uiPos))
-            await cacheUI[uiPos].RedrawGameDetails(gameId);
+        {
+            Game? game = await LibraryManager.GetGame(gameId, CancellationToken.None);
+
+            if (game != null)
+                cacheUI[uiPos].RedrawGameDetails(game);
+        }
     }
 
     public virtual void UpdateImage(int gameId, ImageBrush? brush)

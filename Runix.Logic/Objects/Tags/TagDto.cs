@@ -35,7 +35,7 @@ public class TagDto
         await Database_Manager.Delete<dbo_GameTag>(SQLFilter.Equal(nameof(dbo_GameTag.TagId), id));
     }
 
-    public virtual bool DoesFitGame(GameDto game)
+    public virtual bool DoesFitGame(Game game)
     {
         return game.tags.Contains(id);
     }

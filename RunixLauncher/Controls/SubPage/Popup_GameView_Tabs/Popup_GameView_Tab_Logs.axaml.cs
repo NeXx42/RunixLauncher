@@ -31,12 +31,12 @@ public partial class Popup_GameView_Tab_Logs : Popup_GameView_TabBase
 
         protected override void InternalSetup(TabGroup master) { }
 
-        protected override async Task OpenWithGame(GameDto? game, bool isNewGame)
+        protected override async Task OpenWithGame(Game? game, bool isNewGame)
         {
             await RefreshLogs(game);
         }
 
-        private async Task RefreshLogs(GameDto? game)
+        private async Task RefreshLogs(Game? game)
         {
             if (game == null)
             {

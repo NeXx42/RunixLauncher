@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -47,7 +48,7 @@ public partial class Popup_TagManager : UserControl
         TagManager.onTagChange += (__, ___) => _ = RedrawTagList();
     }
 
-    public async Task OnOpen()
+    public async Task OnOpen(CancellationToken cancellationToken)
     {
         await SelectTag(null);
         await RedrawTagList();
