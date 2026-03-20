@@ -121,7 +121,7 @@ public static class RunnerManager
 
             command = "steam"
         };
-        dat.arguments.AddLast($"steam://rungameid/{game.appId}");
+        dat.arguments[ArgumentType.Application].AddLast($"steam://rungameid/{game.appId}");
 
         ExecuteRunRequest(dat, null);
     }
@@ -191,9 +191,6 @@ public static class RunnerManager
             }
         }
 
-
-        embeds = embeds.OrderBy(x => x.getPriority).ToList();
-
         foreach (IGameEmbed embed in embeds)
             embed.Embed(args, globalConfigValues);
     }
@@ -223,12 +220,18 @@ public static class RunnerManager
         TryAddEnvironmentVariable("DBUS_SESSION_BUS_ADDRESS");
         TryAddEnvironmentVariable("PULSE_SERVER");
 
-        foreach (var arg in req.arguments)
+        foreach (ArgumentType type in Enum.GetValues(typeof(ArgumentType))) // maintain order
         {
-            if (string.IsNullOrEmpty(arg))
+            if (!req.arguments.TryGetValue(type, out LinkedList<string>? subArguments) || subArguments == null)
                 continue;
 
-            info.ArgumentList.Add(arg);
+            foreach (string arg in subArguments)
+            {
+                if (string.IsNullOrEmpty(arg))
+                    continue;
+
+                info.ArgumentList.Add(arg);
+            }
         }
 
 
@@ -417,7 +420,8 @@ public static class RunnerManager
         None,
         WineConfig,
         WineTricks,
-        WineCMD
+        WineCMD,
+        WineRegistry
     }
 
     public struct LaunchRequest
@@ -434,6 +438,13 @@ public static class RunnerManager
         public ConfigProvider<Game_Config>? gameConfig;
     }
 
+    public enum ArgumentType
+    {
+        FireJail = -99,
+        Launcher = 0,
+        LocaleEmulator = 1,
+        Application = 10,
+    }
 
     public class LaunchArguments
     {
@@ -446,7 +457,12 @@ public static class RunnerManager
         public required string command;
         public string? workingDirectory;
 
-        public LinkedList<string> arguments = new LinkedList<string>();
+        public Dictionary<ArgumentType, LinkedList<string>> arguments = new Dictionary<ArgumentType, LinkedList<string>>()
+        {
+            { ArgumentType.Launcher, new LinkedList<string>() },
+            { ArgumentType.Application, new LinkedList<string>() },
+        };
+
         public Dictionary<string, string> environmentArguments = new Dictionary<string, string>();
     }
 

@@ -28,6 +28,7 @@ public class RunnerDto_umu : RunnerDto_Wine
         {
             case RunnerManager.SpecialLaunchRequest.WineConfig: return "winecfg";
             case RunnerManager.SpecialLaunchRequest.WineCMD: return "cmd";
+            case RunnerManager.SpecialLaunchRequest.WineRegistry: return "regedit";
         }
 
         return string.Empty;
@@ -42,8 +43,8 @@ public class RunnerDto_umu : RunnerDto_Wine
 
         if (game.path.EndsWith(".bat"))
         {
-            res.arguments.AddLast("cmd");
-            res.arguments.AddLast("/c");
+            res.arguments[RunnerManager.ArgumentType.Launcher].AddLast("cmd");
+            res.arguments[RunnerManager.ArgumentType.Launcher].AddLast("/c");
         }
 
         AddDefaultArgumentsToInit(ref game, ref res);

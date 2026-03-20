@@ -7,6 +7,7 @@ public enum ConfigKeys
     PasswordHash,
 
     Launcher_Concurrency,
+    Launcher_VirtualDesktopSize,
 
     Sandbox_Windows_SandieboxBox,
     Sandbox_Windows_SandieboxLocation,
@@ -24,5 +25,7 @@ public enum ConfigKeys
 
     Input_ControllerSupport,
 
-    Misc_LastArchivePassword
+    Misc_LastArchivePassword,
+
+    LocaleEmulator_Location
 }

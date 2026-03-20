@@ -60,6 +60,11 @@
             </Grid>
 
             <Grid ColumnDefinitions="100, *" Height="30">
+              <Label Content="Wine Registry" />
+              <Controls:Common_Button Grid.Column="1" x:Name="btn_Wine_WineRegistry" HorizontalAlignment="Stretch" Label="Launch"/>
+            </Grid>
+
+            <Grid ColumnDefinitions="100, *" Height="30">
               <Label Content="Shared Data" />
               <Controls:Common_ButtonToggle Grid.Column="1" x:Name="btn_Wine_SharedDocuments" HorizontalAlignment="Stretch" Label="Wine Tricks"/>
             </Grid>

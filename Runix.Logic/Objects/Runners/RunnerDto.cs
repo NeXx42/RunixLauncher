@@ -155,19 +155,22 @@ public class RunnerDto
         {
             string windowsPath = $"Z:/{game.path.Replace("\\", " / ")}";
 
-            res.arguments.AddLast("cmd");
-            res.arguments.AddLast("/c");
-            res.arguments.AddLast($"\"cd {Path.GetDirectoryName(windowsPath)} && {Path.GetFileName(windowsPath)} \"");
+            res.arguments[RunnerManager.ArgumentType.Launcher].AddLast("cmd");
+            res.arguments[RunnerManager.ArgumentType.Launcher].AddLast("/c");
+            res.arguments[RunnerManager.ArgumentType.Launcher].AddLast($"\"cd {Path.GetDirectoryName(windowsPath)} && {Path.GetFileName(windowsPath)} \"");
         }
         else
         {
             if (game.gameConfig?.GetBoolean(Game_Config.Wine_ExplorerLaunch, false) ?? false)
             {
-                res.arguments.AddLast("explorer");
-                res.arguments.AddLast("/desktop=Game,800x600");
+                string? size = ConfigHandler.configProvider?.GetValue(ConfigKeys.Launcher_VirtualDesktopSize);
+                size ??= "1920x1080";
+
+                res.arguments[RunnerManager.ArgumentType.Launcher].AddLast("explorer");
+                res.arguments[RunnerManager.ArgumentType.Launcher].AddLast($"/desktop=Game,{size}");
             }
 
-            res.arguments.AddLast(game.path);
+            res.arguments[RunnerManager.ArgumentType.Application].AddLast(game.path);
         }
 
 
@@ -176,14 +179,14 @@ public class RunnerDto
             string[] args = customArgs.Split(" ");
 
             foreach (string arg in args)
-                res.arguments.AddLast(arg);
+                res.arguments[RunnerManager.ArgumentType.Application].AddLast(arg);
         }
 
         if (game.gameConfig?.GetBoolean(Enums.Game_Config.Wine_Windowed, false) ?? false)
         {
-            res.arguments.AddLast("-windowed");
-            res.arguments.AddLast("-window");
-            res.arguments.AddLast("-w");
+            res.arguments[RunnerManager.ArgumentType.Application].AddLast("-windowed");
+            res.arguments[RunnerManager.ArgumentType.Application].AddLast("-window");
+            res.arguments[RunnerManager.ArgumentType.Application].AddLast("-w");
         }
     }
 

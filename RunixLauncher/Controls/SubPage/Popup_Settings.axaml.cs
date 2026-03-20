@@ -89,6 +89,8 @@ public partial class Popup_Settings : UserControl, IControlChild
                 case SettingsUI_Runners settingsUI_Runners: return new Control_Settings_Runners().Draw(setting, settingsUI_Runners);
                 case SettingsUI_Libraries settingsUI_Libraries: return new Control_Settings_Libraries().Draw(setting, settingsUI_Libraries);
                 case SettingsUI_DefaultFilter settingsUI_DefaultFilter: return new Control_Settings_DefaultFilter(setting);
+
+                case SettingsUI_Button settingsUI_Button: return new Control_Settings_Button(settingsUI_Button);
             }
 
             return null;

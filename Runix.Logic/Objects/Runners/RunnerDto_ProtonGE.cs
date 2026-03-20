@@ -48,6 +48,7 @@ public class RunnerDto_ProtonGE : RunnerDto
         {
             case RunnerManager.SpecialLaunchRequest.WineConfig: return "winecfg";
             case RunnerManager.SpecialLaunchRequest.WineCMD: return "cmd";
+            case RunnerManager.SpecialLaunchRequest.WineRegistry: return "regedit";
         }
 
         return string.Empty;
@@ -60,7 +61,7 @@ public class RunnerDto_ProtonGE : RunnerDto
 
         RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = Path.Combine(binaryRoot, "proton") };
 
-        res.arguments.AddLast("run");
+        res.arguments[RunnerManager.ArgumentType.Launcher].AddLast("run");
 
         AddDefaultArgumentsToInit(ref game, ref res);
 

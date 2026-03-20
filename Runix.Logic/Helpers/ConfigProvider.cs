@@ -108,10 +108,10 @@ public class ConfigProvider<ENUMTYPE>
 
         switch (typeof(T).Name)
         {
-            case nameof(String): return (T)Enum.ToObject(typeof(T), int.Parse(res));
+            case nameof(Enum): return (T)Enum.ToObject(typeof(T), int.Parse(res));
             case nameof(Boolean): return (T)(object)(res == "1");
 
-            case nameof(Enum): return (T)(object)(res);
+            case nameof(String): return (T)(object)(res);
             case nameof(Int32): return (T)(object)int.Parse(res);
         }
 

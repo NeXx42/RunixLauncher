@@ -31,6 +31,7 @@ public class RunnerDto_Wine : RunnerDto
         {
             case RunnerManager.SpecialLaunchRequest.WineConfig: return "winecfg";
             case RunnerManager.SpecialLaunchRequest.WineCMD: return "cmd";
+            case RunnerManager.SpecialLaunchRequest.WineRegistry: return "regedit";
         }
 
         return string.Empty;

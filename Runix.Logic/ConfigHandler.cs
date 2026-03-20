@@ -9,6 +9,7 @@ using CSharpSqliteORM;
 using GameLibrary.DB;
 using GameLibrary.DB.Tables;
 using GameLibrary.Logic.Enums;
+using GameLibrary.Logic.GameEmbeds;
 using GameLibrary.Logic.Helpers;
 using GameLibrary.Logic.Settings;
 using GameLibrary.Logic.Settings.UI;
@@ -78,18 +79,14 @@ namespace GameLibrary.Logic
                     ]
                 },
                 {
-                    "Runner",
+                    "Running",
                     [
                         new Setting_Title("Runners", 0, SettingOSCompatibility.Linux),
                         new Setting_Runners(),
 
                         new Setting_Title("Misc", 10, SettingOSCompatibility.Universal),
                         new Setting_Generic_Config("Concurrency", SettingOSCompatibility.Universal, ConfigKeys.Launcher_Concurrency, new SettingsUI_Toggle()),
-                    ]
-                },
-                {
-                    "Sandboxing",
-                    [
+
                         new Setting_Title("Firejail", 0, SettingOSCompatibility.Linux),
                         new Setting_Generic_Config("Use firejail", SettingOSCompatibility.Linux, ConfigKeys.Sandbox_Linux_Firejail_Enabled, new SettingsUI_Toggle()),
                         new Setting_Generic_Config("Block networktivity", SettingOSCompatibility.Linux, ConfigKeys.Sandbox_Linux_Firejail_Networking, new SettingsUI_Toggle()),
@@ -98,8 +95,14 @@ namespace GameLibrary.Logic
                         new Setting_Title("Sandboxie", 10, SettingOSCompatibility.Windows),
                         new Setting_Generic_Config("Sandboxie box name", SettingOSCompatibility.Windows, ConfigKeys.Sandbox_Windows_SandieboxBox, new SettingsUI_Toggle()),
                         new Setting_Generic_Config("Sandboxie location", SettingOSCompatibility.Windows, ConfigKeys.Sandbox_Windows_SandieboxLocation, new SettingsUI_DirectorySelector(){ folder = true}),
+
+                        new Setting_Title("Locale Emulation", 10, SettingOSCompatibility.Universal),
+                        new Setting_Generic_Config("Locale emulator location", SettingOSCompatibility.Universal, ConfigKeys.LocaleEmulator_Location, new SettingsUI_DirectorySelector(){ folder = true}),
+                        new Setting_Button(string.Empty, "Launch GUI", () => LaunchLocalEmulator("LEGui"), SettingOSCompatibility.Universal),
+                        new Setting_Button(string.Empty, "Launch Installer", () => LaunchLocalEmulator("LEInstaller"), SettingOSCompatibility.Universal),
+                        new Setting_Button(string.Empty, "Launch Updater", () => LaunchLocalEmulator("LEUpdater"), SettingOSCompatibility.Universal),
                     ]
-                }
+                },
             };
 
 
@@ -127,6 +130,21 @@ namespace GameLibrary.Logic
                 return true;
 
             return (compatibility == SettingOSCompatibility.Linux && isOnLinux) || (compatibility == SettingOSCompatibility.Windows && !isOnLinux);
+        }
+
+        public static async Task LaunchLocalEmulator(string executable)
+        {
+            if (!(configProvider?.TryGetValue(ConfigKeys.LocaleEmulator_Location, out string path) ?? false))
+            {
+                await DependencyManager.OpenYesNoModal("No emulator defined", "Unable to launch the locale emulator because there is no path defined.");
+                return;
+            }
+
+            await RunnerManager.RunGame(new RunnerManager.LaunchRequest()
+            {
+                identifier = "LocaleEmulator",
+                path = Path.Combine(path, $"{executable}.exe"),
+            });
         }
     }
 }
