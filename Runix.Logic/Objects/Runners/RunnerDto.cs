@@ -202,6 +202,8 @@ public class RunnerDto
     public virtual Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest req)
     {
         var args = new RunnerManager.LaunchArguments() { command = req.path };
+        AddDefaultArgumentsToInit(ref req, ref args);
+
         args.whiteListedDirs.Add(req.path);
 
         return Task.FromResult(args);

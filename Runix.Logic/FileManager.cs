@@ -366,7 +366,8 @@ namespace GameLibrary.Logic
             public ImportEntry_Folder(string folder)
             {
                 folderPath = folder.EndsWith("/") ? folder.Substring(0, folder.Length - 1) : folder;
-                binaries = Directory.GetFiles(folder).Where(RunnerManager.IsUniversallyAcceptedExecutableFormat).Select(x => Path.GetFileName(x)).ToArray();
+                //binaries = Directory.GetFiles(folder).Where(RunnerManager.IsUniversallyAcceptedExecutableFormat).Select(x => Path.GetFileName(x)).ToArray();
+                binaries = Directory.GetFiles(folder).Select(x => Path.GetFileName(x)).ToArray();
             }
         }
     }

@@ -28,7 +28,7 @@ public partial class Popup_AddGames : UserControl
         btn_Import.RegisterClick(HandleImport);
 
         libs = LibraryManager.GetLibraries();
-        inp_Library.Setup((string[])["None", .. libs.Select(x => x.root)], 0, null);
+        inp_Library.Setup((string[])["None", .. libs.Select(x => x.getFullName)], 0, null);
     }
 
 
@@ -99,7 +99,7 @@ public partial class Popup_AddGames : UserControl
 
     private async Task HandleFiles()
     {
-        string[]? files = await DependencyManager.OpenFilesDialog("Select File(s)", RunnerManager.GetAcceptableTypes());
+        string[]? files = await DependencyManager.OpenFilesDialog("Select File(s)");
 
         if (files == null)
             return;
