@@ -52,7 +52,7 @@ public class RunnerDto_umu : RunnerDto_Wine
         res.environmentArguments.Add("WINEPREFIX", winePrefix);
         res.environmentArguments.Add("PROTONPATH", protonPath);
         res.environmentArguments.Add("STEAM_RUNTIME", "1");
-        res.environmentArguments.Add("GAMEID", "0");
+        res.environmentArguments.Add("GAMEID", game.gameConfig?.GetValue(Game_Config.Launcher_umu_Id) ?? "0");
 
         res.environmentArguments.Add("UMU_LOG", "debug");
 

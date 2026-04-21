@@ -41,6 +41,8 @@
                   </StackPanel>
                 </Grid>
               </StackPanel>
+
+              <common:Common_ContextMenu HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15" x:Name="inp_Options" />
             </Grid>
           </Border>
 
@@ -54,7 +56,6 @@
         <Grid Margin="20" Height="40">
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
             <common:Common_Button Classes="negative" Margin="0,0,5,0" x:Name="btn_Delete" Width="90" Label="🗑 Delete"/>
-            <common:Common_Button Margin="0,0,5,0" x:Name="btn_Overlay" Width="150" Label="🧩 Open Overlay"/>
             <common:Common_Button Margin="0,0,5,0" x:Name="btn_Browse" Width="150" Label="📁 Browse"/>
           </StackPanel>
 

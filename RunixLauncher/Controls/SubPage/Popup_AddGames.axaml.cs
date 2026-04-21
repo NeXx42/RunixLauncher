@@ -119,6 +119,8 @@ public partial class Popup_AddGames : UserControl
 
         if (IsSelectionInvalid(file, out string path))
             return;
+
+        await LaunchBinary(path);
     }
 
     private void AddNewImport(string path, IIndexer_Import entry)
@@ -161,6 +163,23 @@ public partial class Popup_AddGames : UserControl
                 }
             }
         }
+    }
+
+    private async Task LaunchBinary(string path)
+    {
+        RunnerDto[] runners = RunnerManager.GetRunnerProfiles();
+        int? selected = await DependencyManager.OpenMultiModal("Runner", runners.Select(x => x.runnerName).ToArray());
+
+        if (selected == null)
+            return;
+
+
+        await RunnerManager.RunGame(new RunnerManager.LaunchRequest()
+        {
+            identifier = path,
+            path = path,
+            runnerId = runners[selected.Value].runnerId,
+        });
     }
 
     private void RemoveEntry(string path)

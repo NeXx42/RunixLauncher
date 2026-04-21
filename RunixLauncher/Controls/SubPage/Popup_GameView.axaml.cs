@@ -7,6 +7,7 @@ using Avalonia.Threading;
 using GameLibrary.Controller;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Objects;
+using Runix.Logic.Helpers;
 using RunixLauncher.Controls.SubPages.Popup_GameView_Tabs;
 using RunixLauncher.Utils;
 
@@ -28,7 +29,6 @@ public partial class Popup_GameView : UserControl, IControlChild
         );
 
         btn_Delete.RegisterClick(DeleteGame);
-        btn_Overlay.RegisterClick(OpenOverlay);
 
         btn_Browse.RegisterClick(BrowseToGame);
         btn_Launch.RegisterClick(LaunchGame, "Launching");
@@ -37,6 +37,8 @@ public partial class Popup_GameView : UserControl, IControlChild
 
         LibraryManager.onGameDetailsUpdate += (i) => _ = RefreshSelectedGame(i);
         RunnerManager.onGameStatusChange += (a, b) => HelperFunctions.WrapUIThread(() => UpdateRunningGameStatus(a, b));
+
+        inp_Options.Setup((string[])["Refresh Metadata", "Open Overlay"], HandleSubAction);
     }
 
     public async Task Draw(Game game, CancellationToken cancellationToken)
@@ -119,8 +121,6 @@ public partial class Popup_GameView : UserControl, IControlChild
         ]);
     }
 
-    private async Task OpenOverlay() => await OverlayManager.LaunchOverlay(inspectingGame!.gameId);
-
     private async Task StartNameChange()
     {
         string? res = await DependencyManager.OpenStringInputModal("Game Name", inspectingGame!.gameName);
@@ -145,15 +145,23 @@ public partial class Popup_GameView : UserControl, IControlChild
         btn_Launch.Label = to ? "Stop" : "▶ Launch";
     }
 
-    public Task Enter()
+    private async Task HandleSubAction(int index)
     {
-        throw new NotImplementedException();
+        switch (index)
+        {
+            case 0:
+                if (inspectingGame!.config.TryGetValue(GameLibrary.Logic.Enums.Game_Config.Library_SteamId, out string id))
+                    await DependencyManager.OpenLoadingModal(true, () => SteamHelper.UpdateExistingGame(long.Parse(id), inspectingGame));
+                break;
+
+            case 1:
+                await OverlayManager.LaunchOverlay(inspectingGame!.gameId);
+                break;
+        }
     }
 
-    public Task<bool> Move(int x, int y)
-    {
-        throw new NotImplementedException();
-    }
+    public Task Enter() => throw new NotImplementedException();
+    public Task<bool> Move(int x, int y) => throw new NotImplementedException();
 
     public async Task<bool> PressButton(ControllerButton btn)
     {
@@ -162,4 +170,5 @@ public partial class Popup_GameView : UserControl, IControlChild
 
         return await btn_Launch.PressButton(btn);
     }
+
 }

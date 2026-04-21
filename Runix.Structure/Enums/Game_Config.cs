@@ -13,4 +13,7 @@ public enum Game_Config
     Wine_ExplorerLaunch,
     Wine_IsolatedPrefix,
     Wine_ConsoleLaunched,
+
+    Library_SteamId,
+    Launcher_umu_Id
 }

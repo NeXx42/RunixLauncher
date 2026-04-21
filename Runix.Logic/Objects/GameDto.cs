@@ -7,6 +7,7 @@ using GameLibrary.Logic.Database.Tables;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.Helpers;
 using Logic.db;
+using Runix.Logic.Helpers;
 using Runix.Structure.DTOs;
 
 namespace GameLibrary.Logic.Objects;
@@ -131,7 +132,7 @@ public abstract class Game
 
     // updating properties
 
-    public async Task UpdateGameIcon(string path)
+    public async Task UpdateGameIcon(string path, bool save = true)
     {
         if (!string.IsNullOrEmpty(iconPath) && File.Exists(getAbsoluteIconPath))
         {
@@ -145,7 +146,9 @@ public abstract class Game
         iconPath = path;
 
         ImageManager.ClearCache(gameId);
-        await UpdateDatabaseEntry(nameof(dbo_Game.iconPath));
+
+        if (save)
+            await UpdateDatabaseEntry(nameof(dbo_Game.iconPath));
     }
 
     // default behaviour 
@@ -259,9 +262,43 @@ public abstract class Game
     public abstract Task Launch();
     public abstract bool IsRunning();
 
-    public abstract Task<string?> FetchIconFilePath();
-
     // overridable behaviour    
+
+    public virtual async Task<string?> FetchIconFilePath()
+    {
+        if (string.IsNullOrEmpty(iconPath))
+            return null;
+
+        if (iconPath.StartsWith("https://"))
+        {
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    string folder = getAbsoluteFolderLocation;
+
+                    if (!Directory.Exists(folder))
+                        return null;
+
+                    byte[] bytes = await client.GetByteArrayAsync(iconPath);
+
+                    iconPath = Path.Combine(folder, $"{Guid.NewGuid()}.png");
+                    await File.CreateText(iconPath).DisposeAsync();
+                    await File.WriteAllBytesAsync(iconPath, bytes);
+
+                    await UpdateDatabaseEntry(nameof(dbo_Game.iconPath));
+                }
+            }
+            catch
+            {
+                iconPath = string.Empty;
+                await UpdateDatabaseEntry(nameof(dbo_Game.iconPath));
+            }
+        }
+
+        return getAbsoluteIconPath;
+    }
+
 
     public virtual async Task<string?> ReadLogs()
     {
@@ -303,4 +340,15 @@ public abstract class Game
 
     public virtual string PromoteTempFile(string path) => string.Empty;
     public virtual (int? selected, string[] options)? GetPossibleBinaries() => null;
+
+    public virtual async Task UpdateFromSteamGame(SteamHelper.SteamData data)
+    {
+        this.gameName = data.name;
+        await UpdateGameIcon(data.iconUrl, false);
+
+        await config.SaveValue(Game_Config.Library_SteamId, data.appId.ToString());
+
+        ImageManager.ClearCache(gameId);
+        await UpdateDatabaseEntry(nameof(dbo_Game.gameName), nameof(dbo_Game.iconPath));
+    }
 }

@@ -1,0 +1,10 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="RunixLauncher.Controls.Common_ContextMenu" ClipToBounds="False">
+  <Button x:Name="ctrl" Content="Select Option" CornerRadius="8" Background="#111920" Foreground="#fff" BorderBrush="#262b30" BorderThickness="1">
+    <Button.ContextMenu>
+      <ContextMenu x:Name="menu" Placement="Bottom" HorizontalOffset="0" VerticalOffset="4"/>
+    </Button.ContextMenu>
+  </Button>
+</UserControl>

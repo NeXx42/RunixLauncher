@@ -45,7 +45,7 @@ public static class ControllerInputHandler
                 return;
         }
 
-        Console.WriteLine(control.Info.PropertyName);
+        //Console.WriteLine(control.Info.PropertyName);
 
         if (SwitchProperty())
         {

@@ -3,6 +3,7 @@ using CSharpSqliteORM;
 using GameLibrary.DB.Tables;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.Objects;
+using Runix.Logic.Helpers;
 using ValveKeyValue;
 
 namespace GameLibrary.Logic.Integration;
@@ -109,15 +110,7 @@ public static class Integration_Steam
 
     private static async Task<dbo_Game?> CreateNewGameObject(long id, string root, JsonElement doc, int libraryId)
     {
-        if (!doc.GetProperty("success").GetBoolean())
-            return CreatePlaceholder();
-
-        JsonElement data = doc.GetProperty("data");
-
-        if (data.GetProperty("type").GetString() != "game")
-            return CreatePlaceholder();
-
-
+        SteamHelper.SteamData steamData = await SteamHelper.ParseSteamData(id, doc);
         string manifestPath = Path.Combine(root, "steamapps", $"appmanifest_{id}.acf");
 
         using (FileStream stream = new FileStream(manifestPath, new FileStreamOptions()
@@ -132,10 +125,11 @@ public static class Integration_Steam
 
             string folderName = Path.Combine(root, "steamapps", "common", fileDoc.Children.First(x => x.Name.Equals("installdir")).Value.ToString()!);
 
+
             return new dbo_Game()
             {
-                gameName = data.GetProperty("name").GetString() ?? "INVALID",
-                iconPath = data.GetProperty("header_image").GetString(),
+                gameName = steamData.name,
+                iconPath = steamData.iconUrl,
 
                 executablePath = id.ToString(),
                 gameFolder = folderName,

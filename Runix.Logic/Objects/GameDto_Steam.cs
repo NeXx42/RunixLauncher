@@ -15,33 +15,6 @@ public class Game_Steam : Game
 
     public override string getAbsoluteFolderLocation => folderPath;
 
-    public override async Task<string?> FetchIconFilePath()
-    {
-        if (string.IsNullOrEmpty(iconPath))
-            return null;
-
-        if (iconPath.StartsWith("https://"))
-        {
-            using (HttpClient client = new HttpClient())
-            {
-                string folder = getAbsoluteFolderLocation;
-
-                if (!Directory.Exists(folder))
-                    return null;
-
-                byte[] bytes = await client.GetByteArrayAsync(iconPath);
-
-                iconPath = Path.Combine(folder, $"{Guid.NewGuid()}.png");
-                await File.CreateText(iconPath).DisposeAsync();
-                await File.WriteAllBytesAsync(iconPath, bytes);
-
-                await UpdateDatabaseEntry(nameof(dbo_Game.iconPath));
-            }
-        }
-
-        return iconPath;
-    }
-
     public override async Task Launch()
     {
         await RunnerManager.RunSteamGame(this);

@@ -71,8 +71,6 @@ public class Game_Custom : Game
         return (binaries.IndexOf(binaryPath!), binaries.ToArray());
     }
 
-    public override Task<string?> FetchIconFilePath() => Task.FromResult(string.IsNullOrEmpty(iconPath) ? null : getAbsoluteIconPath);
-
     public override (string msg, Func<Task> resolution)[] GetWarnings()
     {
         List<(string, Func<Task>)> warnings = new List<(string, Func<Task>)>();
