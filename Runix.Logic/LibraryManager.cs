@@ -44,54 +44,66 @@ namespace GameLibrary.Logic
             bool useGuidFolderNames = ConfigHandler.configProvider!.GetBoolean(ConfigKeys.Import_GUIDFolderNames, true);
             List<string> successfulGames = new List<string>();
 
-            foreach (KeyValuePair<string, FileManager.IImportEntry?> importEntry in availableImports)
-            {
-                if (importEntry.Value == null)
-                    continue;
-
-                FileManager.IImportEntry folder = importEntry.Value;
-
-                if (string.IsNullOrEmpty(folder.getBinaryPath))
-                    continue;
-
-                string gameName = folder.getPotentialName;
-                string absoluteFolder;
-
-                if (folder is FileManager.ImportEntry_Binary binaryImport)
-                {
-                    absoluteFolder = FileManager.CreateEmptyGameFolder(binaryImport.binaryLocation);
-                    binaryImport.binaryLocation = Path.Combine(absoluteFolder, Path.GetFileName(binaryImport.binaryLocation));
-                }
-                else
-                {
-                    absoluteFolder = folder.getBinaryFolder!;
-                }
-
-                dbo_Game newGame = new dbo_Game
-                {
-                    gameName = gameName,
-                    gameFolder = absoluteFolder,
-                    executablePath = Path.GetFileName(folder.getBinaryPath),
-                    libraryId = libraryId,
-                    status = (int)Game_Status.Active
-                };
-
-
-                if (libraryId.HasValue)
-                {
-                    newGame.gameFolder = useGuidFolderNames ? Guid.NewGuid().ToString() : gameName;
-                    dbo_Libraries library = (await Database_Manager.GetItem<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libaryId), libraryId.Value)))!;
-
-                    if (!await FileManager.MoveGameToItsLibrary(newGame, folder.getBinaryPath, library.rootPath))
-                        continue;
-                }
-
-                await Database_Manager.InsertItem(newGame);
-                successfulGames.Add(importEntry.Key);
-            }
+            await DependencyManager.OpenLoadingModal(true, GetTasks());
 
             onGameDeletion?.Invoke();
             return successfulGames;
+
+            Func<Task>[] GetTasks()
+            {
+                List<Func<Task>> updates = new List<Func<Task>>();
+
+                foreach (KeyValuePair<string, FileManager.IImportEntry?> importEntry in availableImports)
+                {
+                    if (importEntry.Value == null)
+                        continue;
+
+                    FileManager.IImportEntry folder = importEntry.Value;
+
+                    if (string.IsNullOrEmpty(folder.getBinaryPath))
+                        continue;
+
+                    updates.Add(async () =>
+                    {
+                        string gameName = folder.getPotentialName;
+                        string absoluteFolder;
+
+                        if (folder is FileManager.ImportEntry_Binary binaryImport)
+                        {
+                            absoluteFolder = FileManager.CreateEmptyGameFolder(binaryImport.binaryLocation);
+                            binaryImport.binaryLocation = Path.Combine(absoluteFolder, Path.GetFileName(binaryImport.binaryLocation));
+                        }
+                        else
+                        {
+                            absoluteFolder = folder.getBinaryFolder!;
+                        }
+
+                        dbo_Game newGame = new dbo_Game
+                        {
+                            gameName = gameName,
+                            gameFolder = absoluteFolder,
+                            executablePath = Path.GetFileName(folder.getBinaryPath),
+                            libraryId = libraryId,
+                            status = (int)Game_Status.Active
+                        };
+
+
+                        if (libraryId.HasValue)
+                        {
+                            newGame.gameFolder = useGuidFolderNames ? Guid.NewGuid().ToString() : gameName;
+                            dbo_Libraries library = (await Database_Manager.GetItem<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libaryId), libraryId.Value)))!;
+
+                            if (!await FileManager.MoveGameToItsLibrary(newGame, folder.getBinaryPath, library.rootPath))
+                                return;
+                        }
+
+                        await Database_Manager.InsertItem(newGame);
+                        successfulGames.Add(importEntry.Key);
+                    });
+                }
+
+                return updates.ToArray();
+            }
         }
 
         public static int GetMaxPages(int limit) => (int)Math.Ceiling(filteredGameCount / (float)limit) - 1;

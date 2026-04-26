@@ -44,7 +44,7 @@ public abstract class Popup_GameView_TabBase : UserControl
         protected Common_ButtonToggle toggleBtn;
 
         protected int? lastGameId;
-        protected Game inspectingGame => master!.master.inspectingGame!;
+        public Game inspectingGame => master!.master.inspectingGame!;
 
         public Tab(Control element, Common_ButtonToggle btn) : base(element, btn)
         {

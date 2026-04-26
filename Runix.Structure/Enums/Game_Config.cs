@@ -15,5 +15,10 @@ public enum Game_Config
     Wine_ConsoleLaunched,
 
     Library_SteamId,
-    Launcher_umu_Id
+    Launcher_umu_Id,
+
+    Launcher_dllOverride_steamapi64,
+    Launcher_dllOverride_dinput8,
+    Launcher_dllOverride_dxgi,
+    Launcher_dllOverride_Custom,
 }

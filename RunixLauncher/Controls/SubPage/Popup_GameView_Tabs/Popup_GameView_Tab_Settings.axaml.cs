@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.Objects;
@@ -16,10 +16,12 @@ namespace RunixLauncher.Controls.SubPages.Popup_GameView_Tabs;
 public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 {
     private UITabGroup tabGroup;
+    private Tab? thisTab;
 
     public Popup_GameView_Tab_Settings()
     {
         InitializeComponent();
+        DataContext = this;
 
         tabGroup = new UITabGroup(
             new UITabGroup_GroupToggleButton(tab_General, tabBtn_General),
@@ -28,12 +30,56 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
         );
 
         _ = tabGroup.ChangeSelection(0);
+
+        inp_Wine_DLLOverride_custom.Setup(() =>
+        {
+            Grid r = new Grid();
+            r.Height = 30;
+            r.Margin = new Thickness(5);
+            r.ColumnDefinitions = [new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star)];
+
+            TextBox n = new TextBox();
+            n.KeyUp += (_, __) => _ = inp_Wine_DLLOverride_custom.RequestUpdate();
+            n.TextAlignment = TextAlignment.Left;
+
+            Common_Dropdown d = new Common_Dropdown();
+            d.Setup(Enum.GetValues<DLLOverrideBehaviour>(), (int)DLLOverrideBehaviour.Default, inp_Wine_DLLOverride_custom.RequestUpdate);
+            Grid.SetColumn(d, 1);
+
+            r.Children.Add(n);
+            r.Children.Add(d);
+            return r;
+        },
+        (Grid c, Data_DLLOverride o) =>
+        {
+            (c.Children[0] as TextBox)!.Text = o.dllName;
+            (c.Children[1] as Common_Dropdown)!.SilentlyChangeValue((int)o.behaviour);
+        },
+        () =>
+        {
+            return new Data_DLLOverride()
+            {
+                behaviour = DLLOverrideBehaviour.Default
+            };
+        },
+        async (List<Grid> els) =>
+        {
+            Data_DLLOverride[] dat = els.Select(c => new Data_DLLOverride()
+            {
+                dllName = (c.Children[0] as TextBox)!.Text!,
+                behaviour = (DLLOverrideBehaviour)(c.Children[1] as Common_Dropdown)!.selectedIndex
+            }).ToArray();
+
+            await thisTab!.inspectingGame.config.SaveList(Game_Config.Launcher_dllOverride_Custom, dat);
+        });
     }
 
     public override Tab CreateGroup(Common_ButtonToggle btn, Panel parent)
     {
         parent.Children.Add(this);
-        return new Tab_LaunchSettings(this, btn);
+        thisTab = new Tab_LaunchSettings(this, btn);
+
+        return thisTab;
     }
 
     public class Tab_LaunchSettings : Tab
@@ -66,7 +112,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
                 // running settings
 
                 new ConfigChanger_Toggle(element.inp_Emulate, Game_Config.General_LocaleEmulation, () => inspectingGame),
-                new ConfigChanger_Dropdown(element.inp_CaptureLogs, Game_Config.General_LoggingLevel, Enum.GetNames<LoggingLevel>(), () => inspectingGame),
+                new ConfigChanger_Dropdown(element.inp_CaptureLogs, Game_Config.General_LoggingLevel, Enum.GetNames<LoggingLevel>(), (int)LoggingLevel.Off, () => inspectingGame),
                 new ConfigChanger_InputField(element.inp_Arguments, Game_Config.General_Arguments, () => inspectingGame),
 
                 new ConfigChanger_Toggle(element.inp_Wine_Windowed, Game_Config.Wine_Windowed, () => inspectingGame, wineRunnerTypes),
@@ -75,6 +121,8 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
                 new ConfigChanger_Toggle(element.inp_Wine_LaunchAsConsole, Game_Config.Wine_ConsoleLaunched, () => inspectingGame, wineRunnerTypes),
 
                 new ConfigChanger_InputField(element.inp_umu_Id, Game_Config.Launcher_umu_Id, () => inspectingGame, RunnerDto.RunnerType.umu_Launcher),
+
+                new ConfigChanger_Dropdown(element.inp_Wine_DLLOverride_steamapi64, Game_Config.Launcher_dllOverride_steamapi64, Enum.GetNames<DLLOverrideBehaviour>(), (int)DLLOverrideBehaviour.Default, () => inspectingGame, wineRunnerTypes),
             ];
         }
 
@@ -93,6 +141,8 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 
             foreach (ConfigChangerBase config in configOptions)
                 await config.Load(game!);
+
+            element.inp_Wine_DLLOverride_custom.Load(inspectingGame.config.GetList<Data_DLLOverride>(Game_Config.Launcher_dllOverride_Custom));
         }
 
         private void DrawLibraries(Game game)
@@ -232,17 +282,20 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
         internal sealed class ConfigChanger_Dropdown : ConfigChangerBase
         {
             private Common_Dropdown ui;
+            private int? defaultVal;
 
-            public ConfigChanger_Dropdown(Common_Dropdown ui, Game_Config key, string[] options, Func<Game?> getInspectingGame, params RunnerDto.RunnerType[] supportedTypes)
+            public ConfigChanger_Dropdown(Common_Dropdown ui, Game_Config key, string[] options, int? defaultOption, Func<Game?> getInspectingGame, params RunnerDto.RunnerType[] supportedTypes)
                 : base((Visual)ui.Parent!, key, getInspectingGame, supportedTypes)
             {
                 this.ui = ui;
-                this.ui.Setup(options, 0, Save);
+                this.defaultVal = defaultOption;
+
+                this.ui.Setup(options, defaultOption ?? 0, Save);
             }
 
             public override Task Load(Game game)
             {
-                ui.SilentlyChangeValue(game.config.GetInteger(key, 0));
+                ui.SilentlyChangeValue(game.config.GetInteger(key, defaultVal ?? 0));
                 return Task.CompletedTask;
             }
 

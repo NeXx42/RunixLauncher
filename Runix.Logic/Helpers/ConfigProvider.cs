@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using CSharpSqliteORM;
 using CSharpSqliteORM.Structure;
 
@@ -80,6 +82,7 @@ public class ConfigProvider<ENUMTYPE>
     public async Task<bool> SaveEnum<T>(ENUMTYPE key, T v) where T : Enum => await SaveInteger(key, Convert.ToInt32(v));
     public async Task<bool> SaveInteger(ENUMTYPE key, int v) => await SaveValue(key, v.ToString());
     public async Task<bool> SaveBool(ENUMTYPE key, bool b) => await SaveValue(key, b ? "1" : "0");
+    public async Task<bool> SaveList<T>(ENUMTYPE key, T[] dat) => await SaveValue(key, JsonSerializer.Serialize(dat));
 
     public async Task<bool> SaveValue(ENUMTYPE key, string? val)
     {
@@ -126,6 +129,18 @@ public class ConfigProvider<ENUMTYPE>
         return defaultVal;
     }
 
+    public bool GetEnum<T>(ENUMTYPE key, out T val) where T : Enum
+    {
+        if (TryGetValue(key, out string res))
+        {
+            val = (T)Enum.ToObject(typeof(T), int.Parse(res));
+            return true;
+        }
+
+        val = default;
+        return false;
+    }
+
     public bool GetInteger(ENUMTYPE key, out int val)
     {
         if (TryGetValue(key, out string res))
@@ -166,5 +181,23 @@ public class ConfigProvider<ENUMTYPE>
     {
         val = GetValue(key) ?? string.Empty;
         return !string.IsNullOrEmpty(val);
+    }
+
+    public bool TryGetList<T>(ENUMTYPE key, out T[] res)
+    {
+        if (data.TryGetValue(key, out string? raw) && !string.IsNullOrEmpty(raw))
+        {
+            res = JsonSerializer.Deserialize<T[]>(raw) ?? [];
+            return true;
+        }
+
+        res = [];
+        return false;
+    }
+
+    public T[] GetList<T>(ENUMTYPE key)
+    {
+        _ = TryGetList(key, out T[] res);
+        return res;
     }
 }

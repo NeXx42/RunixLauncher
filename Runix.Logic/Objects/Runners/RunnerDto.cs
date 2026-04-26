@@ -1,3 +1,4 @@
+using System.Text;
 using CSharpSqliteORM;
 using GameLibrary.Logic.Database.Tables;
 using GameLibrary.Logic.Enums;
@@ -187,6 +188,36 @@ public class RunnerDto
             res.arguments[RunnerManager.ArgumentType.Application].AddLast("-windowed");
             res.arguments[RunnerManager.ArgumentType.Application].AddLast("-window");
             res.arguments[RunnerManager.ArgumentType.Application].AddLast("-w");
+        }
+
+        Dictionary<string, string> dllOverrides = new Dictionary<string, string>();
+        AddDLLOverride("steam_api64", game.gameConfig?.GetEnum(Game_Config.Launcher_dllOverride_steamapi64, DLLOverrideBehaviour.Default) ?? DLLOverrideBehaviour.Default);
+
+        if (game.gameConfig?.TryGetList(Game_Config.Launcher_dllOverride_Custom, out Data_DLLOverride[] customOverrides) ?? false)
+        {
+            foreach (Data_DLLOverride dll in customOverrides)
+                AddDLLOverride(dll.dllName, dll.behaviour);
+        }
+
+        if (dllOverrides.Count > 0)
+            res.environmentArguments.Add("WINEDLLOVERRIDES", string.Join(";", dllOverrides.Select(x => $"{x.Key}={x.Value}")));
+
+        void AddDLLOverride(string dll, DLLOverrideBehaviour ofType)
+        {
+            if (ofType == DLLOverrideBehaviour.Default || string.IsNullOrEmpty(dll))
+                return;
+
+            string mode = "";
+
+            switch (ofType)
+            {
+                case DLLOverrideBehaviour.LocalOnly: mode = "n"; break;
+                case DLLOverrideBehaviour.LocalFallback: mode = "n,b"; break;
+            }
+            if (dllOverrides.ContainsKey(dll))
+                dllOverrides[dll] = mode;
+            else
+                dllOverrides.Add(dll, mode);
         }
     }
 

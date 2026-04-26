@@ -12,101 +12,93 @@
 
     <StackPanel Grid.Column="2">
       <Label FontSize="18" Content="General" x:Name="lbl_Header" />
-
       <!-- Management Settings -->
 
       <StackPanel x:Name="tab_General" Margin="10 0" Spacing="5" IsVisible="True">
-        <Grid ColumnDefinitions="150, *">
-          <Label Content="Steam Id" VerticalAlignment="Center"/>
-          <common:Common_InputField x:Name="inp_Library_SteamId" Grid.Column="1"/>
-        </Grid>
-
         <Grid ColumnDefinitions="150, *">
           <Label Content="Library" VerticalAlignment="Center"/>
           <common:Common_Dropdown x:Name="inp_Library_Library" Grid.Column="1"/>
         </Grid>
 
         <Grid ColumnDefinitions="150, *">
-          <Label Content="Logging Level" VerticalAlignment="Center"/>
-          <common:Common_Dropdown x:Name="inp_CaptureLogs" Grid.Column="1"/>
+          <Label Content="Steam Id" VerticalAlignment="Center"/>
+          <common:Common_InputField x:Name="inp_Library_SteamId" Grid.Column="1"/>
+        </Grid>
+
+        <Grid ColumnDefinitions="150, *">
+          <Label Content="UMU Id" VerticalAlignment="Center"/>
+          <common:Common_InputField x:Name="inp_umu_Id" Grid.Column="1"/>
         </Grid>
       </StackPanel>
 
       <!-- Launch Settings -->
 
-      <StackPanel x:Name="tab_LaunchSettings">
-
-        <StackPanel Margin="10 0" Spacing="5" IsVisible="True">
-          <Grid ColumnDefinitions="150, *">
-            <Label Content="Locale Emulation" VerticalAlignment="Center"/>
-            <common:Common_Toggle x:Name="inp_Emulate" Grid.Column="1"/>
-          </Grid>
-
-          <Grid ColumnDefinitions="150, *">
-            <Label Content="Arguments" VerticalAlignment="Center"/>
-            <common:Common_InputField x:Name="inp_Arguments" Grid.Column="1"/>
-          </Grid>
-        </StackPanel>
-
-        <!-- Profile -->
-
-        <Label FontSize="18" Content="Profile Settings" Margin="0 20 0 0" />
-        <StackPanel Margin="10 0" Spacing="5" IsVisible="True">
+      <StackPanel x:Name="tab_LaunchSettings" Spacing="5">
+        <StackPanel Margin="10 0" Spacing="5">
           <Grid ColumnDefinitions="150, *">
             <Label Content="Runner" VerticalAlignment="Center"/>
             <common:Common_Dropdown x:Name="inp_WineProfile" Grid.Column="1"/>
           </Grid>
-
           <Grid ColumnDefinitions="150, *">
             <Label Content="Binary" VerticalAlignment="Center"/>
             <common:Common_Dropdown x:Name="inp_binary" Grid.Column="1"/>
           </Grid>
-
-          <Grid ColumnDefinitions="150, 300">
-            <Label Content="Isolate Prefix" VerticalAlignment="Center"/>
-            <common:Common_Toggle x:Name="inp_IsolatePrefix" Grid.Column="1"/>
-          </Grid>
-        </StackPanel>
-
-      </StackPanel>
-
-      <!-- Runner Settings -->
-
-      <StackPanel x:Name="tab_RunnerSettings">
-        <!-- Launcher Controls -->
-        <StackPanel Margin="10 0" Spacing="5">
           <Grid ColumnDefinitions="150, *">
-            <Label Content="UMU Id" VerticalAlignment="Center"/>
-            <common:Common_InputField x:Name="inp_umu_Id" Grid.Column="1"/>
+            <Label Content="Arguments" VerticalAlignment="Center"/>
+            <common:Common_InputField x:Name="inp_Arguments" Grid.Column="1"/>
           </Grid>
-        </StackPanel>
-
-        <!-- Display -->
-        <Label FontSize="18" Content="Display" Margin="0 20 0 0" />
-        <StackPanel Margin="10 0" Spacing="5">
-          <Grid ColumnDefinitions="150, *">
-            <Label Content="Start Windowed" VerticalAlignment="Center"/>
-            <common:Common_Toggle x:Name="inp_Wine_Windowed" Grid.Column="1"/>
-          </Grid>
-
-          <Grid ColumnDefinitions="150, *">
-            <Label Content="Virtual Wine desktop" VerticalAlignment="Center"/>
-            <common:Common_Toggle x:Name="inp_Wine_VirtualDesktop" Grid.Column="1"/>
-          </Grid>
-        </StackPanel>
-
-        <!-- Display -->
-        <Label FontSize="18" Content="Compatibility" Margin="0 20 0 0" />
-        <StackPanel Margin="10 0" Spacing="5">
           <Grid ColumnDefinitions="150, *">
             <Label Content="Launch from console" VerticalAlignment="Center"/>
             <common:Common_Toggle x:Name="inp_Wine_LaunchAsConsole" Grid.Column="1"/>
           </Grid>
         </StackPanel>
-
       </StackPanel>
 
+      <!-- Runner Settings -->
 
+      <StackPanel x:Name="tab_RunnerSettings">
+        <StackPanel Margin="10 0" Spacing="5">
+          <Grid ColumnDefinitions="150, 300">
+            <Label Content="Isolate Prefix" VerticalAlignment="Center"/>
+            <common:Common_Toggle x:Name="inp_IsolatePrefix" Grid.Column="1"/>
+          </Grid>
+          <Grid ColumnDefinitions="150, *">
+            <Label Content="Locale Emulation" VerticalAlignment="Center"/>
+            <common:Common_Toggle x:Name="inp_Emulate" Grid.Column="1"/>
+          </Grid>
+
+          <!-- Display -->
+          <Label FontSize="18" Content="Display" Margin="0 20 0 0" />
+          <StackPanel Margin="10 0" Spacing="5">
+            <Grid ColumnDefinitions="150, *">
+              <Label Content="Start Windowed" VerticalAlignment="Center"/>
+              <common:Common_Toggle x:Name="inp_Wine_Windowed" Grid.Column="1"/>
+            </Grid>
+
+            <Grid ColumnDefinitions="150, *">
+              <Label Content="Virtual Wine desktop" VerticalAlignment="Center"/>
+              <common:Common_Toggle x:Name="inp_Wine_VirtualDesktop" Grid.Column="1"/>
+            </Grid>
+          </StackPanel>
+        </StackPanel>
+
+
+        <!-- Advanced -->
+        <Label FontSize="18" Content="Compatibility" Margin="0 20 0 0" />
+        <StackPanel Margin="10 0" Spacing="5">
+          <Grid ColumnDefinitions="150, *">
+            <Label Content="Logging Level" VerticalAlignment="Center"/>
+            <common:Common_Dropdown x:Name="inp_CaptureLogs" Grid.Column="1"/>
+          </Grid>
+
+          <Grid ColumnDefinitions="150, *">
+            <Label Content="steam_api64" VerticalAlignment="Center"/>
+            <common:Common_Dropdown x:Name="inp_Wine_DLLOverride_steamapi64" Grid.Column="1"/>
+          </Grid>
+
+          <common:Common_List Label="Custom DLL overrides" x:Name="inp_Wine_DLLOverride_custom"/>
+        </StackPanel>
+      </StackPanel>
     </StackPanel>
   </Grid>
 </UserControl>
