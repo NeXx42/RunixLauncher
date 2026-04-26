@@ -128,7 +128,6 @@ public class RunnerDto
 
     // logic
 
-    public string GetRoot() => Path.Combine(runnerRoot, runnerName.Replace(" ", string.Empty));
     public virtual async Task SharePrefixDocuments(string path) => throw new Exception("Invalid profile");
 
     public bool IsValidExtension(string path)
@@ -224,11 +223,14 @@ public class RunnerDto
     public void SetIsDefault(bool to) => isDefault = to;
     public virtual string GetWineConfigurationToolName(RunnerManager.SpecialLaunchRequest req) => string.Empty;
 
+    // Installing
+
+    public virtual bool IsInstalled(string version) => true;
+    public virtual LoadingTask DownloadVersion(string version) => LoadingTask.Empty;
+
     // Launching
 
     protected virtual string[] GetAcceptableExtensions() => [];
-
-    public virtual Task SetupRunner() => Task.CompletedTask;
 
     public virtual Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest req)
     {

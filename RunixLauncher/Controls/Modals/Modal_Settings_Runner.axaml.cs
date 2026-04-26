@@ -23,9 +23,6 @@ public partial class Modal_Settings_Runner : UserControl
 
     private UITabGroup tabGroup;
 
-    private RunnerDto.RunnerType getCurrentRunnerType => selectedRunner?.runnerType ?? (RunnerDto.RunnerType)inp_Type.selectedIndex;
-
-
     public Modal_Settings_Runner()
     {
         InitializeComponent();
@@ -41,10 +38,12 @@ public partial class Modal_Settings_Runner : UserControl
         btn_Wine_WineRegistry.RegisterClick(OpenWineRegistry, "Loading");
         btn_Wine_SharedDocuments.Register(ShareDocuments, "Updating");
 
+        btn_Prefix_Installer.RegisterClick(DownloadVersion, "Downloading");
+
         tabGroup = new UITabGroup(TabGroup_Buttons, TabGroup_Content, true);
     }
 
-    public Task HandleOpen(int? runnerId)
+    public Task HandleOpen(int runnerId)
     {
         selectedRunner = null;
         modalRes = new TaskCompletionSource();
@@ -53,17 +52,14 @@ public partial class Modal_Settings_Runner : UserControl
         return modalRes.Task;
     }
 
-    private async Task Draw(int? runnerId)
+    private async Task Draw(int runnerId)
     {
-        selectedRunner = runnerId.HasValue ? RunnerManager.GetRunnerProfile(runnerId.Value) : null;
-
-        string[] types = selectedRunner != null ? [selectedRunner.runnerType.ToString()] : System.Enum.GetNames(typeof(RunnerDto.RunnerType));
-        inp_Type.Setup(types, 0, ChangeRunnerType);
+        selectedRunner = RunnerManager.GetRunnerProfile(runnerId);
 
         await UpdateDefaultDetails();
         await UpdateWineDetails();
-
         await ChangeRunnerType();
+
         await tabGroup.ChangeSelection(0);
     }
 
@@ -98,19 +94,11 @@ public partial class Modal_Settings_Runner : UserControl
             return;
 
         string version = versionOptions != null ? versionOptions[inp_Version.selectedIndex] : string.Empty;
+        selectedRunner!.runnerName = inp_Name.Text!;
+        selectedRunner!.runnerRoot = selectedRoot!;
+        selectedRunner!.runnerVersion = version;
 
-        if (selectedRunner == null)
-        {
-            await RunnerManager.CreateProfile(inp_Name.Text!, selectedRoot!, inp_Type.selectedIndex, version);
-        }
-        else
-        {
-            selectedRunner.runnerName = inp_Name.Text!;
-            selectedRunner.runnerRoot = selectedRoot!;
-            selectedRunner.runnerVersion = version;
-
-            await selectedRunner.UpdateDatabaseEntry();
-        }
+        await selectedRunner.UpdateDatabaseEntry();
 
         modalRes?.SetResult();
     }
@@ -136,7 +124,7 @@ public partial class Modal_Settings_Runner : UserControl
 
     private async Task ChangeRunnerType()
     {
-        switch (getCurrentRunnerType)
+        switch (selectedRunner!.runnerType)
         {
             case RunnerDto.RunnerType.Wine:
             case RunnerDto.RunnerType.Wine_GE:
@@ -155,14 +143,16 @@ public partial class Modal_Settings_Runner : UserControl
 
     private async Task UpdateVersionInput()
     {
-        versionOptions = await RunnerDto.GetVersionsForRunnerTypes((int)getCurrentRunnerType);
+        versionOptions = await RunnerDto.GetVersionsForRunnerTypes((int)selectedRunner!.runnerType);
 
         if (versionOptions != null)
         {
             int selectedVersion = versionOptions.IndexOf(selectedRunner?.runnerVersion);
 
             inp_Version.IsVisible = true;
-            inp_Version.Setup(versionOptions, selectedVersion, null);
+            inp_Version.Setup(versionOptions, selectedVersion == -1 ? 0 : selectedVersion, UpdateVersionInstallerButton);
+
+            UpdateVersionInstallerButton();
         }
         else
         {
@@ -233,6 +223,28 @@ public partial class Modal_Settings_Runner : UserControl
         if (result != -1)
         {
             await UpdateWineDetails();
+        }
+    }
+
+    private void UpdateVersionInstallerButton()
+    {
+        if (!selectedRunner!.IsInstalled(versionOptions![inp_Version.selectedIndex]))
+        {
+            btn_Prefix_Installer.IsVisible = true;
+        }
+        else
+        {
+            btn_Prefix_Installer.IsVisible = false;
+        }
+    }
+
+    private async Task DownloadVersion()
+    {
+        if (!selectedRunner!.IsInstalled(versionOptions![inp_Version.selectedIndex]))
+        {
+            await DependencyManager.OpenLoadingModal(true,
+                selectedRunner.DownloadVersion(versionOptions![inp_Version.selectedIndex])
+            );
         }
     }
 }

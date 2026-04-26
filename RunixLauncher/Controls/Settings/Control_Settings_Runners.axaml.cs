@@ -95,11 +95,30 @@ public partial class Control_Settings_Runners : UserControl, ISettingControl
 
     private async Task OpenEditMenu()
     {
-        await MainWindow.instance!.DisplayModalAsync<Modal_Settings_Runner>(HandleModal);
-
-        async Task HandleModal(Modal_Settings_Runner modal)
+        if (selectedProfile.HasValue)
         {
-            await modal.HandleOpen(selectedProfile.HasValue ? profiles![selectedProfile.Value].runner.runnerId : null);
+            await MainWindow.instance!.DisplayModalAsync<Modal_Settings_Runner>(EditModal);
+        }
+        else
+        {
+            int? desiredType = await DependencyManager.OpenMultiModal("Runner type", System.Enum.GetNames(typeof(RunnerDto.RunnerType)));
+
+            if (desiredType.HasValue)
+            {
+                string? path = await DependencyManager.OpenFolderDialog("Runner root");
+
+                if (string.IsNullOrEmpty(path))
+                    return;
+
+                await RunnerManager.CreateProfile(path, (RunnerDto.RunnerType)desiredType.Value, string.Empty);
+                await LoadValue();
+            }
+        }
+
+
+        async Task EditModal(Modal_Settings_Runner modal)
+        {
+            await modal.HandleOpen(profiles![selectedProfile.Value].runner.runnerId);
             SoftRefresh();
         }
     }
@@ -122,7 +141,7 @@ public partial class Control_Settings_Runners : UserControl, ISettingControl
         int gamesAffected = await RunnerManager.GetGameCountForRunner(runner.runnerId);
 
         await DependencyManager.OpenConfirmationAsync($"Delete the runner {runner.runnerName}?",
-            $"{gamesAffected} games use the profile.\nWill delete the following directory\n\n{runner.GetRoot()}?",
+            $"{gamesAffected} games use the profile.\nWill delete the following directory\n\n{runner.runnerRoot}?",
             ("Delete", HandleDeletion, "Deleting"));
 
         async Task HandleDeletion()

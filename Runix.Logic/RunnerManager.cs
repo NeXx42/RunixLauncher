@@ -78,9 +78,13 @@ public static class RunnerManager
                 throw new Exception($"Invalid file for the runner - {launchRequest.path}");
             }
 
+            if (!selectedRunner.IsInstalled(selectedRunner.runnerVersion))
+            {
+                throw new Exception($"The runner has not been installed\n\nDownload by editing the runner '{selectedRunner.runnerName}' and pressing download next to the version.");
+            }
+
             Game? gameDto = await LibraryManager.GetGame(launchRequest.gameId, CancellationToken.None);
 
-            await selectedRunner.SetupRunner();
             LaunchArguments launchArguments = await selectedRunner.InitRunDetails(launchRequest);
             launchArguments.whiteListedDirs.AddRange(launchRequest.extraWhitelist ?? []);
 
@@ -140,7 +144,6 @@ public static class RunnerManager
         if (runnerDto == null)
             throw new Exception("No runner found");
 
-        await runnerDto.SetupRunner();
         LaunchArguments req = await runnerDto.InitRunDetails(new LaunchRequest()
         {
             identifier = request.ToString(),
@@ -308,14 +311,16 @@ public static class RunnerManager
 
     // db stuff
 
-    public static async Task CreateProfile(string title, string path, int typeId, string version)
+    public static async Task CreateProfile(string path, RunnerDto.RunnerType type, string version)
     {
+        path = Path.Combine(path, $"{type}_{Guid.NewGuid()}");
+
         dbo_Runner profile = new dbo_Runner()
         {
             runnerId = -1,
-            runnerName = title,
+            runnerName = $"{type} NEW",
             runnerRoot = path,
-            runnerType = typeId,
+            runnerType = (int)type,
             runnerVersion = version,
 
             isDefault = !cachedDefaultRunnerId.HasValue
@@ -372,7 +377,7 @@ public static class RunnerManager
 
         try
         {
-            Directory.Delete(runner.GetRoot(), true);
+            Directory.Delete(runner.runnerRoot, true);
         }
         catch
         {

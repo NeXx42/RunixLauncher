@@ -18,24 +18,28 @@ public partial class Modal_Loading : UserControl
     }
 
 
-    public async Task LoadTasks(bool showLoading, params Func<Task>[] tasks)
+    public async Task LoadTasks(bool showLoading, params LoadingTask[] tasks)
     {
         await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
 
         if (showLoading)
         {
-            lbl_Header.Content = "Loading";
-            lbl_Description.Text = "Loading...";
-
             inp_ProgressBar.Minimum = 0;
             inp_ProgressBar.Maximum = tasks.Length - 1;
 
             for (int i = 0; i < tasks.Length; i++)
             {
+                lbl_Header.Content = tasks[i].header;
+
                 try
                 {
-                    await tasks[i]();
-                    await Dispatcher.UIThread.InvokeAsync(() => inp_ProgressBar.Value = i);
+                    foreach (var subTask in tasks[i].task)
+                    {
+                        lbl_Description.Text = subTask.Item1;
+
+                        await subTask.Item2();
+                        await Dispatcher.UIThread.InvokeAsync(() => inp_ProgressBar.Value = i);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -45,7 +49,7 @@ public partial class Modal_Loading : UserControl
         }
         else
         {
-            await Task.WhenAll(tasks.Select(x => x()));
+            await Task.WhenAll(tasks.SelectMany(x => x.task.Select(x => x.Item2())));
         }
     }
 }

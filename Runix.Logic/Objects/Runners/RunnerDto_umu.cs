@@ -8,38 +8,18 @@ namespace GameLibrary.Logic.Objects;
 
 public class RunnerDto_umu : RunnerDto_Wine
 {
-    private readonly string prefixLoc;
-
-    private readonly string version;
-
     private static string getRuntimeLocationRoot => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/Steam/compatibilitytools.d");
 
     public RunnerDto_umu(dbo_Runner runner, dbo_RunnerConfig[] configValues) : base(runner, configValues)
     {
-        version = runnerVersion;
-        prefixLoc = Path.Combine(rootLoc, "prefixes").CreateDirectoryIfNotExists();
-    }
-
-    public override Task SetupRunner() => Task.CompletedTask;
-
-    public override string GetWineConfigurationToolName(RunnerManager.SpecialLaunchRequest req)
-    {
-        switch (req)
-        {
-            case RunnerManager.SpecialLaunchRequest.WineConfig: return "winecfg";
-            case RunnerManager.SpecialLaunchRequest.WineCMD: return "cmd";
-            case RunnerManager.SpecialLaunchRequest.WineRegistry: return "regedit";
-        }
-
-        return string.Empty;
     }
 
     public override Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)
     {
         RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = "umu-run" };
-        WineHelper.GetPrefixName(prefixRoot, game, out string winePrefix);
+        WineHelper.GetPrefixName(getPrefixRoot, game, out string winePrefix);
 
-        string protonPath = Path.Combine(getRuntimeLocationRoot, version);
+        string protonPath = Path.Combine(getRuntimeLocationRoot, runnerVersion);
 
         if (game.path.EndsWith(".bat"))
         {
@@ -84,5 +64,5 @@ public class RunnerDto_umu : RunnerDto_Wine
         return files.Select(x => Path.GetFileName(x)).ToArray();
     }
 
-    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(Path.Combine(prefixRoot, WineHelper.SHARED_PREFIX_NAME), path, this);
+    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(Path.Combine(getPrefixRoot, WineHelper.SHARED_PREFIX_NAME), path, this);
 }

@@ -16,7 +16,7 @@ public class UILinker : IUILinker
         MainWindow.instance!.Close();
     }
 
-    public async Task OpenLoadingModal(bool progressiveLoad, Func<Task>[] tasks)
+    public async Task OpenLoadingModal(bool progressiveLoad, LoadingTask[] tasks)
     {
         await MainWindow.instance!.DisplayModalAsync<Modal_Loading>(ModalRequest);
 

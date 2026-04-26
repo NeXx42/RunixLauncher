@@ -30,44 +30,42 @@
 
             <Border Height="10"/>
 
-            <Grid ColumnDefinitions="100, *" Height="30">
-              <Label Content="Type" />
-              <Controls:Common_Dropdown Grid.Column="1" x:Name="inp_Type" HorizontalAlignment="Stretch" />
-            </Grid>
-
-            <Grid ColumnDefinitions="100, *" Height="30" x:Name="group_Version">
+            <Grid ColumnDefinitions="100, *, Auto" Height="30" x:Name="group_Version">
               <Label Content="Version" />
               <Controls:Common_Dropdown Grid.Column="1" x:Name="inp_Version" HorizontalAlignment="Stretch" />
+              <Controls:Common_Button Grid.Column="2" x:Name="btn_Prefix_Installer" HorizontalAlignment="Stretch" Label="Download" Margin="5, 0, 0, 0"/>
             </Grid>
 
           </StackPanel>
 
           <!--  Wine  -->
           <StackPanel Spacing="5">
-            <Grid ColumnDefinitions="100, *" Height="30">
-              <Label Content="Wine CFG" />
-              <Controls:Common_Button Grid.Column="1" x:Name="btn_Wine_WineCfg" HorizontalAlignment="Stretch" Label="Launch"/>
-            </Grid>
+            <Label Content="Tools"/>
+            <StackPanel Margin="5, 0, 0, 0">
+              <Grid ColumnDefinitions="100, *" Height="30">
+                <Label Content="Wine CFG" />
+                <Controls:Common_Button Grid.Column="1" x:Name="btn_Wine_WineCfg" HorizontalAlignment="Stretch" Label="Launch"/>
+              </Grid>
+              <Grid ColumnDefinitions="100, *" Height="30">
+                <Label Content="Wine Tricks" />
+                <Controls:Common_Button Grid.Column="1" x:Name="btn_Wine_WineTricks" HorizontalAlignment="Stretch" Label="Launch"/>
+              </Grid>
 
-            <Grid ColumnDefinitions="100, *" Height="30">
-              <Label Content="Wine Tricks" />
-              <Controls:Common_Button Grid.Column="1" x:Name="btn_Wine_WineTricks" HorizontalAlignment="Stretch" Label="Launch"/>
-            </Grid>
+              <Grid ColumnDefinitions="100, *" Height="30">
+                <Label Content="Wine Console" />
+                <Controls:Common_Button Grid.Column="1" x:Name="btn_Wine_WineCMD" HorizontalAlignment="Stretch" Label="Launch"/>
+              </Grid>
 
-            <Grid ColumnDefinitions="100, *" Height="30">
-              <Label Content="Wine Console" />
-              <Controls:Common_Button Grid.Column="1" x:Name="btn_Wine_WineCMD" HorizontalAlignment="Stretch" Label="Launch"/>
-            </Grid>
+              <Grid ColumnDefinitions="100, *" Height="30">
+                <Label Content="Wine Registry" />
+                <Controls:Common_Button Grid.Column="1" x:Name="btn_Wine_WineRegistry" HorizontalAlignment="Stretch" Label="Launch"/>
+              </Grid>
 
-            <Grid ColumnDefinitions="100, *" Height="30">
-              <Label Content="Wine Registry" />
-              <Controls:Common_Button Grid.Column="1" x:Name="btn_Wine_WineRegistry" HorizontalAlignment="Stretch" Label="Launch"/>
-            </Grid>
-
-            <Grid ColumnDefinitions="100, *" Height="30">
-              <Label Content="Shared Data" />
-              <Controls:Common_ButtonToggle Grid.Column="1" x:Name="btn_Wine_SharedDocuments" HorizontalAlignment="Stretch" Label="Wine Tricks"/>
-            </Grid>
+              <Grid ColumnDefinitions="100, *" Height="30">
+                <Label Content="Shared Data" />
+                <Controls:Common_ButtonToggle Grid.Column="1" x:Name="btn_Wine_SharedDocuments" HorizontalAlignment="Stretch" Label="Wine Tricks"/>
+              </Grid>
+            </StackPanel>
           </StackPanel>
 
         </Grid>

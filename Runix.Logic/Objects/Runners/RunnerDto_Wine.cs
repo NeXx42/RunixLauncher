@@ -9,13 +9,10 @@ namespace GameLibrary.Logic.Objects;
 
 public class RunnerDto_Wine : RunnerDto
 {
-    protected readonly string rootLoc;
-    protected readonly string prefixRoot;
+    protected string getPrefixRoot => Path.Combine(runnerRoot, "prefixes").CreateDirectoryIfNotExists();
 
-    protected virtual string getSharedPrefixFolder => Path.Combine(prefixRoot, "shared");
-
+    protected string GetBinaryPath(string? version = null) => Path.Combine(runnerRoot, "binaries", string.IsNullOrEmpty(version) ? runnerVersion : version);
     public static Task<string[]?> GetRunnerVersions() => Task.FromResult<string[]?>(null);
-
 
     protected virtual string GetWineExecutable(RunnerManager.SpecialLaunchRequest? launchRequest)
     {
@@ -42,24 +39,18 @@ public class RunnerDto_Wine : RunnerDto
 
     public RunnerDto_Wine(dbo_Runner runner, dbo_RunnerConfig[] configValues) : base(runner, configValues)
     {
-        rootLoc = GetRoot().CreateDirectoryIfNotExists();
-        Path.Combine(rootLoc, "binaries").CreateDirectoryIfNotExists();
-        Path.Combine(rootLoc, "prefixes").CreateDirectoryIfNotExists();
-
-        prefixRoot = Path.Combine(rootLoc, "prefixes").CreateDirectoryIfNotExists();
-        getSharedPrefixFolder.CreateDirectoryIfNotExists();
     }
 
     public override async Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)
     {
         RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = GetWineExecutable(game.customExecutable) };
-        WineHelper.GetPrefixName(prefixRoot, game, out string winePrefix);
+        WineHelper.GetPrefixName(getPrefixRoot, game, out string winePrefix);
 
         AddDefaultArgumentsToInit(ref game, ref res);
 
         res.whiteListedDirs.Add(Path.GetDirectoryName(game.path)!);
         res.whiteListedDirs.Add(winePrefix);
-        res.whiteListedDirs.Add(rootLoc);
+        res.whiteListedDirs.Add(runnerRoot);
 
         res.environmentArguments.Add("WINEPREFIX", winePrefix);
 
@@ -102,5 +93,5 @@ public class RunnerDto_Wine : RunnerDto
         }), null).WaitForExitAsync();
     }
 
-    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(Path.Combine(prefixRoot, WineHelper.SHARED_PREFIX_NAME), path, this);
+    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(Path.Combine(runnerRoot, WineHelper.SHARED_PREFIX_NAME), path, this);
 }

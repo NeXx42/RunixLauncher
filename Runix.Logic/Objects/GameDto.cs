@@ -132,6 +132,12 @@ public abstract class Game
 
     // updating properties
 
+    public async Task UpdateGameName(string to)
+    {
+        gameName = to;
+        await UpdateDatabaseEntry(nameof(dbo_Game.gameName));
+    }
+
     public async Task UpdateGameIcon(string path, bool save = true)
     {
         if (!string.IsNullOrEmpty(iconPath) && File.Exists(getAbsoluteIconPath))

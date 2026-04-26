@@ -9,55 +9,22 @@ using Runix.Logic.Helpers;
 
 namespace GameLibrary.Logic.Objects;
 
-public class RunnerDto_ProtonGE : RunnerDto
+public class RunnerDto_ProtonGE : RunnerDto_Wine
 {
     public const string GITHUB_NAME = "GloriousEggroll/proton-ge-custom";
-
-    protected readonly string prefixRoot;
-    protected readonly string rootLoc;
-
-    protected readonly string version;
-    protected readonly string binaryFolder;
-
-    protected string? binaryPath;
-
-    protected override string[] GetAcceptableExtensions() => ["exe"];
-    public static async Task<string[]?> GetRunnerVersions() => await GithubVersionHelper.GetRunnerVersions(GITHUB_NAME);
+    public static async new Task<string[]?> GetRunnerVersions() => await GithubVersionHelper.GetRunnerVersions(GITHUB_NAME);
 
     public RunnerDto_ProtonGE(dbo_Runner runner, dbo_RunnerConfig[] configValues) : base(runner, configValues)
     {
-        rootLoc = GetRoot().CreateDirectoryIfNotExists();
-        prefixRoot = Path.Combine(rootLoc, "prefixes").CreateDirectoryIfNotExists();
-
-        version = runner.runnerVersion;
-        binaryFolder = Path.Combine(rootLoc, "binaries", version);
     }
 
-
-    public override async Task SetupRunner()
-    {
-        if (!Directory.Exists(binaryFolder))
-        {
-            await GithubVersionHelper.InstallWine(binaryFolder, GITHUB_NAME, version, (a) => a.GetProperty("content_type").GetString()?.Equals("application/gzip") ?? false);
-        }
-    }
-
-    public override string GetWineConfigurationToolName(RunnerManager.SpecialLaunchRequest req)
-    {
-        switch (req)
-        {
-            case RunnerManager.SpecialLaunchRequest.WineConfig: return "winecfg";
-            case RunnerManager.SpecialLaunchRequest.WineCMD: return "cmd";
-            case RunnerManager.SpecialLaunchRequest.WineRegistry: return "regedit";
-        }
-
-        return string.Empty;
-    }
+    public override bool IsInstalled(string version) => !string.IsNullOrEmpty(version) && Directory.Exists(Path.Combine(runnerRoot, "binaries", version));
+    public override LoadingTask DownloadVersion(string version) => GithubVersionHelper.InstallWine(GetBinaryPath(version), GITHUB_NAME, version, (a) => a.GetProperty("content_type").GetString()?.Equals("application/gzip") ?? false);
 
     public override Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)
     {
-        WineHelper.GetPrefixName(prefixRoot, game, out string winePrefix);
-        string binaryRoot = Directory.GetDirectories(binaryFolder).First();
+        WineHelper.GetPrefixName(getPrefixRoot, game, out string winePrefix);
+        string binaryRoot = Directory.GetDirectories(GetBinaryPath()).First();
 
         RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = Path.Combine(binaryRoot, "proton") };
 
@@ -82,30 +49,5 @@ public class RunnerDto_ProtonGE : RunnerDto
         return Task.FromResult(res);
     }
 
-    protected virtual void AddLogging(RunnerManager.LaunchArguments args, LoggingLevel level)
-    {
-        string? logString = null;
-
-        switch (level)
-        {
-            case LoggingLevel.Low:
-                logString = "+err";
-                break;
-
-            case LoggingLevel.High:
-                logString = "+err,+warn";
-                break;
-
-            case LoggingLevel.Everything:
-                logString = "+all";
-                break;
-        }
-
-        if (string.IsNullOrEmpty(logString))
-            return;
-
-        args.environmentArguments.Add("WINEDEBUG", logString);
-    }
-
-    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(Path.Combine(prefixRoot, WineHelper.SHARED_PREFIX_NAME, "pfx"), path, this);
+    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(Path.Combine(runnerRoot, WineHelper.SHARED_PREFIX_NAME, "pfx"), path, this);
 }

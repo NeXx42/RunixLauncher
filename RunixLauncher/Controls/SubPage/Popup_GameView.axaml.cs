@@ -126,7 +126,7 @@ public partial class Popup_GameView : UserControl, IControlChild
         string? res = await DependencyManager.OpenStringInputModal("Game Name", inspectingGame!.gameName);
 
         if (!string.IsNullOrEmpty(res))
-            await LibraryManager.UpdateGame_Name(inspectingGame, res);
+            await inspectingGame.UpdateGameName(res);
     }
 
     private async Task RefreshSelectedGame(int gameId)

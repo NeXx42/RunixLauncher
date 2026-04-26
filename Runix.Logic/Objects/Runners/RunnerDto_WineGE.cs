@@ -10,42 +10,28 @@ namespace GameLibrary.Logic.Objects;
 public class RunnerDto_WineGE : RunnerDto_Wine
 {
     public const string GITHUB_NAME = "GloriousEggroll/wine-ge-custom";
+    protected string getWineLib => Path.Combine(Directory.GetDirectories(GetBinaryPath()).First(), "lib");
 
-    protected readonly string version;
-    protected readonly string binaryFolder;
 
-    protected string? binaryPath;
+    public RunnerDto_WineGE(dbo_Runner runner, dbo_RunnerConfig[] configValues) : base(runner, configValues)
+    {
+    }
 
-    protected string getWineLib => Path.Combine(Directory.GetDirectories(binaryFolder).First(), "lib");
     protected override string GetWineExecutable(RunnerManager.SpecialLaunchRequest? processName)
     {
         if (processName == RunnerManager.SpecialLaunchRequest.WineTricks)
             return "winetricks";
 
-        return Path.Combine(Directory.GetDirectories(binaryFolder).First(), "bin", "wine64");
-    }
-
-    public RunnerDto_WineGE(dbo_Runner runner, dbo_RunnerConfig[] configValues) : base(runner, configValues)
-    {
-        version = runner.runnerVersion;
-        binaryFolder = Path.Combine(rootLoc, "binaries", version);
+        return Path.Combine(Directory.GetDirectories(GetBinaryPath()).First(), "bin", "wine64");
     }
 
     public static new async Task<string[]?> GetRunnerVersions() => await GithubVersionHelper.GetRunnerVersions(GITHUB_NAME);
-
-    public override async Task SetupRunner()
-    {
-        if (!Directory.Exists(binaryFolder))
-        {
-            await GithubVersionHelper.InstallWine(binaryFolder, GITHUB_NAME, version, (a) => a.GetProperty("content_type").GetString()?.Equals("application/x-xz") ?? false);
-        }
-    }
-
+    public override bool IsInstalled(string version) => !string.IsNullOrEmpty(version) && Directory.Exists(GetBinaryPath(version));
 
     public override async Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)
     {
         var res = await base.InitRunDetails(game);
-        res.whiteListedDirs.Add(binaryFolder);
+        res.whiteListedDirs.Add(GetBinaryPath());
 
         res.environmentArguments.Add("LD_LIBRARY_PATH", getWineLib);
         return res;

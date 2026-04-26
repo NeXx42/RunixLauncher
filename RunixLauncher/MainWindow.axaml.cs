@@ -8,8 +8,6 @@ using Avalonia.Threading;
 using GameLibrary.Controller;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Enums;
-using Runix.DataAccess.Repositories.Mock;
-using Runix.DataAccess.Repositories.Sqlite;
 using RunixLauncher.Controls.Pages;
 using RunixLauncher.Helpers;
 using RunixLauncher.Utils;
@@ -36,9 +34,6 @@ public partial class MainWindow : Window, IControllerInputCallback
 
     private async Task OnStartAsync()
     {
-        DependencyManager.RegisterGameRepo<GameRepository>();
-        DependencyManager.RegisterLibraryRepo<LibraryRepository>();
-
         await DependencyManager.PreSetup(new UILinker(), new AvaloniaImageBrushFetcher());
         string? passwordHash = ConfigHandler.configProvider!.GetValue(ConfigKeys.PasswordHash);
 

@@ -58,29 +58,44 @@ public static class GithubVersionHelper
         }
     }
 
-    public static async Task InstallWine(string binaryFolder, string githubName, string version, Func<JsonElement, bool> AssesSelector)
+    public static LoadingTask InstallWine(string binaryFolder, string githubName, string version, Func<JsonElement, bool> AssesSelector)
     {
         binaryFolder.CreateDirectoryIfNotExists();
 
-        using (HttpClient client = new HttpClient())
+        return new LoadingTask()
         {
-            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0");
-            client.DefaultRequestHeaders.Add("Accept", "text/json");
+            task = new List<(string, Func<Task>)>()
+            {
+                ( "Downloading", Install ),
+                ( "Extracting", Extract ),
+            }
+        };
 
-            string url = $"https://api.github.com/repos/{githubName}/releases/tags/{version}";
-            HttpResponseMessage res = await client.GetAsync(url);
+        async Task Install()
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:143.0) Gecko/20100101 Firefox/143.0");
+                client.DefaultRequestHeaders.Add("Accept", "text/json");
 
-            var json = await res.Content.ReadAsStringAsync();
-            JsonDocument doc = JsonDocument.Parse(json);
+                string url = $"https://api.github.com/repos/{githubName}/releases/tags/{version}";
+                HttpResponseMessage res = await client.GetAsync(url);
 
-            JsonElement? asset = doc.RootElement.GetProperty("assets").EnumerateArray().FirstOrDefault(AssesSelector);
+                var json = await res.Content.ReadAsStringAsync();
+                JsonDocument doc = JsonDocument.Parse(json);
 
-            if (asset == null)
-                throw new Exception("Failed to find asset");
+                JsonElement? asset = doc.RootElement.GetProperty("assets").EnumerateArray().FirstOrDefault(AssesSelector);
 
-            await DependencyManager.OpenLoadingModal(false, async () => await DownloadFile(asset.Value.GetProperty("browser_download_url").GetString()!, $"{binaryFolder}.tar.xz"));
+                if (asset == null)
+                    throw new Exception("Failed to find asset");
+
+                await DownloadFile(asset.Value.GetProperty("browser_download_url").GetString()!, $"{binaryFolder}.tar.xz");
+            }
+        }
+
+        async Task Extract()
+        {
             await DependencyManager.OpenLoadingModal(false, async () => await ExtractFile($"{binaryFolder}.tar.xz", binaryFolder));
-
             File.Delete($"{binaryFolder}.tar.xz");
         }
     }

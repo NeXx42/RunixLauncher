@@ -110,8 +110,20 @@ namespace GameLibrary.Logic
 
         public static async Task<int[]> GetGameList(GameFilterRequest filterRequest, CancellationToken cancellationToken)
         {
-            (int[] res, filteredGameCount) = await DependencyManager.gameRepo!.GameGameList(filterRequest.ConstructSQL(), filterRequest.page, filterRequest.take, cancellationToken);
+            string sql = filterRequest.ConstructSQL();
+            sql += $" LIMIT {filterRequest.take} OFFSET {filterRequest.take * filterRequest.page};";
+
+            int? totalCount = null;
+            int[] res = await Database_Manager.GetItemsGeneric(sql, DeserializeDatabaseRequest, cancellationToken);
+
+            filteredGameCount = totalCount ?? 0;
             return res;
+
+            async Task<int> DeserializeDatabaseRequest(SQLiteDataReader reader)
+            {
+                totalCount ??= Convert.ToInt32(reader["total_count"]);
+                return Convert.ToInt32(reader["id"]);
+            }
         }
 
         public static async Task<Game?> GetGame(int? gameId, CancellationToken cancellationToken)
@@ -129,7 +141,17 @@ namespace GameLibrary.Logic
 
             try
             {
-                GameDTO? obj = await DependencyManager.gameRepo!.GetGame(gameId, cancellationToken);
+
+                dbo_Game? dboGame = await Database_Manager.GetItem<dbo_Game>(SQLFilter.Equal(nameof(dbo_Game.id), gameId), cancellationToken);
+                if (dboGame == null || cancellationToken.IsCancellationRequested) return null;
+
+                dbo_GameTag[] dboTags = await Database_Manager.GetItems<dbo_GameTag>(SQLFilter.Equal(nameof(dbo_GameTag.GameId), gameId), cancellationToken);
+                if (cancellationToken.IsCancellationRequested) return null;
+
+                dbo_GameConfig[] dboConfig = await Database_Manager.GetItems<dbo_GameConfig>(SQLFilter.Equal(nameof(dbo_GameConfig.gameId), gameId), cancellationToken);
+                if (cancellationToken.IsCancellationRequested) return null;
+
+                GameDTO? obj = new GameDTO(dboGame, dboTags, dboConfig);
 
                 if (obj == null)
                 {
@@ -176,7 +198,9 @@ namespace GameLibrary.Logic
                 }
             }
 
-            await DependencyManager.gameRepo!.DeleteGame(game.gameId, CancellationToken.None);
+            await Database_Manager.Delete<dbo_GameConfig>(SQLFilter.Equal(nameof(dbo_GameConfig.gameId), game.gameId));
+            await Database_Manager.Delete<dbo_GameTag>(SQLFilter.Equal(nameof(dbo_GameTag.GameId), game.gameId));
+            await Database_Manager.Delete<dbo_Game>(SQLFilter.Equal(nameof(dbo_Game.id), game.gameId));
             cachedGames.Remove(game.gameId);
 
             onGameDeletion?.Invoke();
@@ -219,26 +243,21 @@ namespace GameLibrary.Logic
         {
             // really should do in a single db call, but its not too big of an issue
 
-            foreach (Game game in cachedGames.Values)
+            foreach (Game? game in cachedGames.Values)
             {
-                if (game.runnerId == runnerId)
+                if (game?.runnerId == runnerId)
                 {
                     await game.ChangeRunnerId(null);
                 }
             }
         }
 
-        public static async Task UpdateGame_Name(Game game, string to)
-        {
-            game.gameName = to;
-            await DependencyManager.gameRepo!.SaveGame(game.GetDTO(), CancellationToken.None);
-
-            onGameDetailsUpdate?.Invoke(game.gameId);
-        }
-
         public static async Task<Game[]> GetGamesPerLibrary(int libraryId, CancellationToken token)
         {
-            int[] games = await DependencyManager.libraryRepo!.GetLinkedGameNames(libraryId, token);
+            string paramName = Database_Manager.GetGenericParameterName();
+            string sql = $"SELECT {nameof(dbo_Game.id)} FROM {dbo_Game.tableName} WHERE {nameof(dbo_Game.libraryId)} = @{paramName}";
+
+            int[] games = await Database_Manager.ExecuteSQLQuery(sql, Deserializer, token, new SQLiteParameter(paramName, libraryId));
             List<Game> relevantGames = new List<Game>();
 
             foreach (int gameId in games)
@@ -252,6 +271,11 @@ namespace GameLibrary.Logic
             }
 
             return relevantGames.ToArray();
+
+            async Task<int> Deserializer(SQLiteDataReader reader)
+            {
+                return (int)(long)reader[nameof(dbo_Game.id)];
+            }
         }
     }
 }

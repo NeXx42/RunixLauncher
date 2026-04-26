@@ -6,7 +6,7 @@ public interface IUILinker
 
     public void Quit();
 
-    public Task OpenLoadingModal(bool progressiveLoad, params Func<Task>[] tasks);
+    public Task OpenLoadingModal(bool progressiveLoad, params LoadingTask[] tasks);
 
     public Task<string?> OpenStringInputModal(string title, string? existingText = "", bool obfuscateInput = false);
     public Task<bool> OpenYesNoModal(string title, string paragraph);

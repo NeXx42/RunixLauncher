@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpSqliteORM", "Runix.Da
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runix.Structure", "Runix.Structure\Runix.Structure.csproj", "{01D277F9-928F-4E74-928F-F343D92120AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runix.DataAccess", "Runix.DataAccess\Runix.DataAccess.csproj", "{B21838AA-707E-4423-A0ED-CAFCA708A45F}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,18 +83,6 @@ Global
 		{01D277F9-928F-4E74-928F-F343D92120AE}.Release|x64.Build.0 = Release|Any CPU
 		{01D277F9-928F-4E74-928F-F343D92120AE}.Release|x86.ActiveCfg = Release|Any CPU
 		{01D277F9-928F-4E74-928F-F343D92120AE}.Release|x86.Build.0 = Release|Any CPU
-		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Debug|x64.Build.0 = Debug|Any CPU
-		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Debug|x86.Build.0 = Debug|Any CPU
-		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Release|x64.ActiveCfg = Release|Any CPU
-		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Release|x64.Build.0 = Release|Any CPU
-		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Release|x86.ActiveCfg = Release|Any CPU
-		{B21838AA-707E-4423-A0ED-CAFCA708A45F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
