@@ -21,4 +21,6 @@ public enum Game_Config
     Launcher_dllOverride_dinput8,
     Launcher_dllOverride_dxgi,
     Launcher_dllOverride_Custom,
+
+    Launcher_Wine_CustomEnvironmentVariables,
 }

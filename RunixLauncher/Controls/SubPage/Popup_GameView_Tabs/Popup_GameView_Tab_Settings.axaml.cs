@@ -34,8 +34,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
         inp_Wine_DLLOverride_custom.Setup(() =>
         {
             Grid r = new Grid();
-            r.Height = 30;
-            r.Margin = new Thickness(5);
+            r.Height = 25;
             r.ColumnDefinitions = [new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star)];
 
             TextBox n = new TextBox();
@@ -72,6 +71,42 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 
             await thisTab!.inspectingGame.config.SaveList(Game_Config.Launcher_dllOverride_Custom, dat);
         });
+
+        inp_Wine_CustomEnvironmentVariables.Setup(() =>
+        {
+            Grid r = new Grid();
+            r.Height = 25;
+            r.ColumnDefinitions = [new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star)];
+
+            TextBox n = new TextBox();
+            n.KeyUp += (_, __) => _ = inp_Wine_CustomEnvironmentVariables.RequestUpdate();
+            n.TextAlignment = TextAlignment.Left;
+
+            TextBox d = new TextBox();
+            d.KeyUp += (_, __) => _ = inp_Wine_CustomEnvironmentVariables.RequestUpdate();
+            d.TextAlignment = TextAlignment.Left;
+            Grid.SetColumn(d, 1);
+
+            r.Children.Add(n);
+            r.Children.Add(d);
+            return r;
+        },
+        (Grid c, Data_EnvironmentVar o) =>
+        {
+            (c.Children[0] as TextBox)!.Text = o.key;
+            (c.Children[1] as TextBox)!.Text = o.value;
+        },
+        () => new Data_EnvironmentVar(),
+        async (List<Grid> els) =>
+        {
+            Data_EnvironmentVar[] dat = els.Select(c => new Data_EnvironmentVar()
+            {
+                key = (c.Children[0] as TextBox)!.Text!,
+                value = (c.Children[1] as TextBox)!.Text!,
+            }).ToArray();
+
+            await thisTab!.inspectingGame.config.SaveList(Game_Config.Launcher_Wine_CustomEnvironmentVariables, dat);
+        });
     }
 
     public override Tab CreateGroup(Common_ButtonToggle btn, Panel parent)
@@ -95,6 +130,8 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
         {
             configOptions = [];
             this.element = element;
+
+            this.element.btn_CleanProfile.RegisterClick(TryToCleanProfile);
         }
 
         protected override void InternalSetup(TabGroup master)
@@ -143,6 +180,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
                 await config.Load(game!);
 
             element.inp_Wine_DLLOverride_custom.Load(inspectingGame.config.GetList<Data_DLLOverride>(Game_Config.Launcher_dllOverride_Custom));
+            element.inp_Wine_CustomEnvironmentVariables.Load(inspectingGame.config.GetList<Data_EnvironmentVar>(Game_Config.Launcher_Wine_CustomEnvironmentVariables));
         }
 
         private void DrawLibraries(Game game)
@@ -221,6 +259,20 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 
             foreach (ConfigChangerBase config in configOptions)
                 config.HandleSupportedType(inspectingGame.runnerType ?? RunnerDto.RunnerType.None);
+        }
+
+        private async Task TryToCleanProfile()
+        {
+            if (inspectingGame?.runnerId == null)
+                return;
+
+            RunnerDto? runner = RunnerManager.GetRunnerProfile(inspectingGame.runnerId);
+
+            if (runner == null)
+                return;
+
+            if (await DependencyManager.OpenYesNoModal("Clean profile", "Are you sure you want to clean the profile? All data for this game will be lost"))
+                await DependencyManager.OpenLoadingModal(true, new LoadingTask("Cleaning profile", "Deleting...", () => runner.CleanProfile(inspectingGame)));
         }
 
 

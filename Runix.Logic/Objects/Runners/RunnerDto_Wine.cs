@@ -94,4 +94,20 @@ public class RunnerDto_Wine : RunnerDto
     }
 
     public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(Path.Combine(runnerRoot, WineHelper.SHARED_PREFIX_NAME), path, this);
+
+    public override async Task CleanProfile(Game? game)
+    {
+        if (!(game?.config?.GetBoolean(Game_Config.Wine_IsolatedPrefix, false) ?? false))
+        {
+            await DependencyManager.OpenMessageDialog("Cannot clean.", "Cannot clean the shared profile.");
+            return;
+        }
+
+        string path = Path.Combine(getPrefixRoot, game.gameId.ToString());
+
+        if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
+            return;
+
+        Directory.Delete(path, true);
+    }
 }

@@ -1,6 +1,5 @@
 using CSharpSqliteORM;
 using GameLibrary.Logic.Interfaces;
-using Runix.Structure.Interfaces.Repositories;
 
 namespace GameLibrary.Logic;
 
@@ -108,7 +107,10 @@ public static class DependencyManager
         => await uiLinker!.OpenConfirmationAsync(title, paragraph, controls);
 
     public static async Task OpenExceptionDialog(string header, Exception e) // replace with actual dialog
-        => await uiLinker!.OpenYesNoModal(header, $"{e.Message}\n\n{e.StackTrace}");
+        => await uiLinker!.OpenMessageModal(header, $"{e.Message}\n\n{e.StackTrace}");
+
+    public static async Task OpenMessageDialog(string header, string description) // replace with actual dialog
+        => await uiLinker!.OpenMessageModal(header, description);
 
     public static async Task<int?> OpenMultiModal(string header, string[] options)
         => await uiLinker!.OpenMultiSelectModal(header, options);

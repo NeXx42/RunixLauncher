@@ -1,14 +1,9 @@
 ﻿using System.Data.SQLite;
-using System.Net.NetworkInformation;
-using System.Text;
 using CSharpSqliteORM;
 using GameLibrary.DB.Tables;
 using GameLibrary.Logic.Database.Tables;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.Objects;
-using Logic.db;
-using Runix.Structure.DTOs;
-using Runix.Structure.Interfaces.Repositories;
 
 namespace GameLibrary.Logic
 {
@@ -151,25 +146,17 @@ namespace GameLibrary.Logic
                 dbo_GameConfig[] dboConfig = await Database_Manager.GetItems<dbo_GameConfig>(SQLFilter.Equal(nameof(dbo_GameConfig.gameId), gameId), cancellationToken);
                 if (cancellationToken.IsCancellationRequested) return null;
 
-                GameDTO? obj = new GameDTO(dboGame, dboTags, dboConfig);
-
-                if (obj == null)
-                {
-                    cachedGames[gameId] = null;
-                    return null;
-                }
-
-                if (obj.libraryId.HasValue && cachedLibraries.TryGetValue(obj.libraryId.Value, out LibraryDto? lib) && lib != null)
+                if (dboGame.libraryId.HasValue && cachedLibraries.TryGetValue(dboGame.libraryId.Value, out LibraryDto? lib) && lib != null)
                 {
                     switch (lib.externalType)
                     {
                         case Library_ExternalProviders.Steam:
-                            game = new Game_Steam(obj);
+                            game = new Game_Steam(dboGame, dboTags, dboConfig);
                             break;
                     }
                 }
 
-                game ??= new Game_Custom(obj);
+                game ??= new Game_Custom(dboGame, dboTags, dboConfig);
                 cachedGames[gameId] = game;
 
                 return game;

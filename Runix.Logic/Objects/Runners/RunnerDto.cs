@@ -201,6 +201,12 @@ public class RunnerDto
         if (dllOverrides.Count > 0)
             res.environmentArguments.Add("WINEDLLOVERRIDES", string.Join(";", dllOverrides.Select(x => $"{x.Key}={x.Value}")));
 
+        if (game.gameConfig?.TryGetList(Game_Config.Launcher_Wine_CustomEnvironmentVariables, out Data_EnvironmentVar[] customEnvArgs) ?? false)
+        {
+            foreach (Data_EnvironmentVar envArg in customEnvArgs)
+                res.environmentArguments[envArg.key] = envArg.value;
+        }
+
         void AddDLLOverride(string dll, DLLOverrideBehaviour ofType)
         {
             if (ofType == DLLOverrideBehaviour.Default || string.IsNullOrEmpty(dll))
@@ -213,19 +219,19 @@ public class RunnerDto
                 case DLLOverrideBehaviour.LocalOnly: mode = "n"; break;
                 case DLLOverrideBehaviour.LocalFallback: mode = "n,b"; break;
             }
-            if (dllOverrides.ContainsKey(dll))
-                dllOverrides[dll] = mode;
-            else
-                dllOverrides.Add(dll, mode);
+
+            dllOverrides[dll] = mode;
         }
     }
 
     public void SetIsDefault(bool to) => isDefault = to;
     public virtual string GetWineConfigurationToolName(RunnerManager.SpecialLaunchRequest req) => string.Empty;
 
+    public virtual Task CleanProfile(Game? game) => Task.CompletedTask;
+
     // Installing
 
-    public virtual bool IsInstalled(string version) => true;
+    public virtual bool IsInstalled(string? version) => true;
     public virtual LoadingTask DownloadVersion(string version) => LoadingTask.Empty;
 
     // Launching

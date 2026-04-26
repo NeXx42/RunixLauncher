@@ -65,6 +65,12 @@ public class UILinker : IUILinker
         }
     }
 
+    public async Task OpenMessageModal(string title, string paragraph)
+    {
+        await MainWindow.instance!.DisplayModalAsync<Modal_YesNo>(ModalRequest);
+        async Task ModalRequest(Modal_YesNo modal) => await modal.RequestGeneric(title, paragraph);
+    }
+
     public async Task<int> OpenConfirmationAsync(string title, string paragraph, params (string btn, Func<Task> callback, string? loadingMessage)[] controls)
     {
         int res = -1;

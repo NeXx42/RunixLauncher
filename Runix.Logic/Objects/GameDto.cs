@@ -1,14 +1,10 @@
 using System.Diagnostics;
-using System.Net.NetworkInformation;
-using System.Text;
 using CSharpSqliteORM;
 using GameLibrary.DB.Tables;
 using GameLibrary.Logic.Database.Tables;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.Helpers;
-using Logic.db;
 using Runix.Logic.Helpers;
-using Runix.Structure.DTOs;
 
 namespace GameLibrary.Logic.Objects;
 
@@ -53,39 +49,23 @@ public abstract class Game
         return true;
     }
 
-    public Game(GameDTO game)
+    public Game(dbo_Game game, dbo_GameTag[] tags, dbo_GameConfig[] config)
     {
         this.gameId = game.id;
         this.gameName = game.gameName;
-
-        this.iconPath = game.iconPath;
         this.folderPath = game.gameFolder;
         this.binaryPath = game.executablePath;
+        this.iconPath = game.iconPath;
+        this.libraryId = game.libraryId;
+        this.runnerId = game.runnerId;
+        this.status = (Game_Status)game.status;
 
         this.minsPlayed = game.minsPlayed;
         this.lastPlayed = game.lastPlayed;
 
-        this.runnerId = game.runnerId;
-        this.libraryId = game.libraryId;
-        this.status = game.status;
-
-        this.tags = game.tags;
-        this.config = new ConfigProvider<Game_Config>(game.config, SaveConfig, DeleteConfig);
+        this.tags = tags.Select(x => x.TagId).ToHashSet();
+        this.config = new ConfigProvider<Game_Config>(config.ToDictionary(x => x.configKey, x => x.configValue), SaveConfig, DeleteConfig);
     }
-
-    public GameDTO GetDTO() => new GameDTO()
-    {
-        id = gameId,
-        gameName = gameName,
-        iconPath = iconPath,
-        gameFolder = folderPath,
-        executablePath = binaryPath,
-        minsPlayed = minsPlayed,
-        lastPlayed = lastPlayed,
-        runnerId = runnerId,
-        libraryId = libraryId,
-        status = status
-    };
 
     protected async Task UpdateDatabaseEntry(params string[] columns)
     {

@@ -1,14 +1,11 @@
-using System.Diagnostics;
-using CSharpSqliteORM;
 using GameLibrary.DB.Tables;
 using GameLibrary.Logic.Database.Tables;
-using Runix.Structure.DTOs;
 
 namespace GameLibrary.Logic.Objects;
 
 public class Game_Custom : Game
 {
-    public Game_Custom(GameDTO game) : base(game)
+    public Game_Custom(dbo_Game game, dbo_GameTag[] tags, dbo_GameConfig[] config) : base(game, tags, config)
     {
         runnerType = RunnerManager.GetRunnerProfile(game.runnerId)?.runnerType ?? RunnerDto.RunnerType.None;
     }
