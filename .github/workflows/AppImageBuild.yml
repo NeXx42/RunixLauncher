@@ -1,0 +1,84 @@
+name: Build AppImage
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    env:
+      OUTPUT_DIR: ./Build/Output/
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libfuse2 \
+            desktop-file-utils \
+            libglib2.0-dev \
+            libgtk-3-dev
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-gnu
+
+      - name: Download appimagetool
+        run: |
+          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage \
+            -O appimagetool
+          chmod +x appimagetool
+
+      - name: Clean output directory
+        run: rm -rf ${{ env.OUTPUT_DIR }}/*
+
+      - name: Build GTK overlay (Rust)
+        working-directory: GameLibrary_GTKOverlay
+        run: cargo build --release
+
+      - name: Publish .NET app
+        run: |
+          dotnet publish RunixLauncher/RunixLauncher.csproj \
+            -c Release \
+            -r linux-x64 \
+            --self-contained true \
+            /p:PublishSingleFile=false \
+            -o ${{ env.OUTPUT_DIR }}/RunixLauncher
+
+      - name: Assemble AppDir
+        run: |
+          mkdir -p ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir/usr/bin
+          mkdir -p ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir/usr/share/icons/hicolor/256x256/apps/
+          cp -r ${{ env.OUTPUT_DIR }}/RunixLauncher/* \
+                ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir/usr/bin
+          cp ./Build/AppImageData/* \
+             ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir
+          cp -r ./Build/AppImageData/*.png \
+                ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir/usr/share/icons/hicolor/256x256/apps/
+
+      - name: Build AppImage
+        run: |
+          ARCH=x86_64 ./appimagetool \
+            ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir \
+            ${{ env.OUTPUT_DIR }}/RunixLauncher.appimage
+          chmod +x ${{ env.OUTPUT_DIR }}/RunixLauncher.appimage
+
+      - name: Upload AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RunixLauncher-AppImage
+          path: ${{ env.OUTPUT_DIR }}/RunixLauncher.appimage
