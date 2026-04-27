@@ -1,0 +1,174 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Media;
+using Avalonia.Threading;
+using GameLibrary.Controller;
+using GameLibrary.Logic;
+using GameLibrary.Logic.Objects;
+using Runix.Logic.Helpers;
+using RunixLauncher.Controls.SubPages.Popup_GameView_Tabs;
+using RunixLauncher.Utils;
+
+namespace RunixLauncher.Controls.SubPage;
+
+public partial class Popup_GameView : UserControl, IControlChild
+{
+    public Game? inspectingGame { private set; get; }
+    private Popup_GameView_TabBase.TabGroup tabs;
+
+    public Popup_GameView()
+    {
+        InitializeComponent();
+
+        tabs = new Popup_GameView_TabBase.TabGroup(this,
+            new Popup_GameView_Tab_Tags().CreateGroup(groupBtn_Tags, tab_Container),
+            new Popup_GameView_Tab_Settings().CreateGroup(groupBtn_Settings, tab_Container),
+            new Popup_GameView_Tab_Logs().CreateGroup(groupBtn_Logs, tab_Container)
+        );
+
+        btn_Delete.RegisterClick(DeleteGame);
+
+        btn_Browse.RegisterClick(BrowseToGame);
+        btn_Launch.RegisterClick(LaunchGame, "Launching");
+
+        lbl_Title.PointerPressed += (_, __) => _ = StartNameChange();
+
+        LibraryManager.onGameDetailsUpdate += (i) => _ = RefreshSelectedGame(i);
+        RunnerManager.onGameStatusChange += (a, b) => HelperFunctions.WrapUIThread(() => UpdateRunningGameStatus(a, b));
+
+        inp_Options.Setup((string[])["Refresh Metadata", "Open Overlay"], HandleSubAction);
+    }
+
+    public async Task Draw(Game game, CancellationToken cancellationToken)
+    {
+        if (inspectingGame != game)
+        {
+            img_bg.Source = null;
+        }
+
+        inspectingGame = game;
+        lbl_Title.Content = game.gameName;
+        lbl_LastPlayed.Content = $"Last played {game.GetLastPlayedFormatted()}";
+
+        UpdateRunningGameStatus(game.gameName, RunnerManager.IsIdentifierRunning(game.gameName));
+        DrawWarnings();
+
+        await Dispatcher.UIThread.InvokeAsync(() => { });
+        await ImageManager.GetGameImage<ImageBrush>(game, UpdateGameIcon);
+        await tabs.OpenFresh(cancellationToken);
+    }
+
+    private void DrawWarnings()
+    {
+        cont_Warnings.Children.Clear();
+        (string, Func<Task>)[] warnings = inspectingGame!.GetWarnings();
+
+        if (warnings.Length > 0)
+        {
+            foreach (var warning in warnings)
+            {
+                Common_Button btn = new Common_Button();
+                btn.Classes.Add("negative");
+                btn.Label = warning.Item1;
+                btn.Height = 30;
+
+                btn.RegisterClick(async () => await HandleWarningFix(warning.Item2));
+                cont_Warnings.Children.Add(btn);
+            }
+        }
+
+        async Task HandleWarningFix(Func<Task> body)
+        {
+            await body();
+            await RefreshSelectedGame(inspectingGame!.gameId);
+        }
+    }
+
+    private void UpdateGameIcon(int gameId, ImageBrush? img)
+    {
+        if (inspectingGame?.gameId != gameId)
+            return;
+
+        img_bg.Source = img == null ? null : (IImage)img.Source!;
+    }
+
+    private async Task LaunchGame()
+    {
+        if (inspectingGame!.IsRunning())
+        {
+            RunnerManager.KillProcess(inspectingGame!.gameName);
+        }
+        else
+        {
+            await inspectingGame!.Launch();
+        }
+    }
+
+    private void BrowseToGame() => inspectingGame?.BrowseToGame();
+
+    private async Task DeleteGame()
+    {
+        if (inspectingGame == null)
+            return;
+
+        string paragraph = $"Files are located:\n\n{inspectingGame!.getAbsoluteFolderLocation}";
+        await DependencyManager.OpenConfirmationAsync("Delete Game?", paragraph,
+        [
+            ("Remove", async () => await LibraryManager.DeleteGame(inspectingGame, false), "Removing"),
+            ("Delete Files", async () => await LibraryManager.DeleteGame(inspectingGame, true), "Deleting"),
+        ]);
+    }
+
+    private async Task StartNameChange()
+    {
+        string? res = await DependencyManager.OpenStringInputModal("Game Name", inspectingGame!.gameName);
+
+        if (!string.IsNullOrEmpty(res))
+            await inspectingGame.UpdateGameName(res);
+    }
+
+    private async Task RefreshSelectedGame(int gameId)
+    {
+        if (gameId != inspectingGame?.gameId)
+            return;
+
+        await Draw(inspectingGame!, CancellationToken.None);
+    }
+
+    private void UpdateRunningGameStatus(string binary, bool to)
+    {
+        if (inspectingGame?.gameName != binary)
+            return;
+
+        btn_Launch.Label = to ? "Stop" : "▶ Launch";
+    }
+
+    private async Task HandleSubAction(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                if (inspectingGame!.config.TryGetValue(GameLibrary.Logic.Enums.Game_Config.Library_SteamId, out string id))
+                    await DependencyManager.OpenLoadingModal(true, () => SteamHelper.UpdateExistingGame(long.Parse(id), inspectingGame));
+                break;
+
+            case 1:
+                await OverlayManager.LaunchOverlay(inspectingGame!.gameId);
+                break;
+        }
+    }
+
+    public Task Enter() => throw new NotImplementedException();
+    public Task<bool> Move(int x, int y) => throw new NotImplementedException();
+
+    public async Task<bool> PressButton(ControllerButton btn)
+    {
+        if (btn == ControllerButton.B)
+            return true;
+
+        return await btn_Launch.PressButton(btn);
+    }
+
+}

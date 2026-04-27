@@ -1,0 +1,16 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="1920" d:DesignHeight="1080" x:Class="RunixLauncher.Controls.Modals.Modal_Loading">
+  <Border Background="#0a0e13" CornerRadius="10" BorderBrush="{DynamicResource bg_Border}" BorderThickness="1" Width="350" Height="150">
+    <Grid Margin="5" RowDefinitions="Auto * Auto">
+      <Label x:Name="lbl_Header" Content="Extracting" HorizontalAlignment="Center"/>
+      <TextBox x:Name="lbl_Description" Text="Loading xxx" Grid.Row="1" Margin="5"></TextBox>
+
+      <Grid Height="25" Margin="5" Grid.Row="2" ColumnDefinitions="*" VerticalAlignment="Bottom">
+        <ProgressBar VerticalAlignment="Stretch" Grid.Column="0" Minimum="0" Maximum="100" Value="0" ShowProgressText="True" x:Name="inp_ProgressBar"/>
+        <!--<Common:Common_Button x:Name="btn_Progress_Cancel" Grid.Column="2" Label="Cancel" Classes="negative"/>!-->
+      </Grid>
+    </Grid>
+  </Border>
+</UserControl>

@@ -1,0 +1,81 @@
+using System.Diagnostics;
+
+namespace GameLibrary.Logic;
+
+public static class OverlayManager
+{
+    public const string GTK_OVERLAY_RETURN_IDENTIFIER = "GTKOVERLAY_RETURNPATH:";
+
+    private static (Thread thread, Process process)? activeGTKOverlay;
+
+
+    public static async Task LaunchOverlay(int gameId)
+    {
+        if (ConfigHandler.isOnLinux)
+        {
+            if (activeGTKOverlay.HasValue)
+            {
+                activeGTKOverlay.Value.process.Kill();
+                await activeGTKOverlay.Value.process.WaitForExitAsync();
+            }
+
+            string gtkOverlay = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GameLibrary_GTKOverlay");
+
+            if (!File.Exists(gtkOverlay))
+            {
+                // maybe worth changing this to just hide the overlay in the ui if not found
+
+                Console.WriteLine("Overlay doesn't exist");
+                return;
+                //throw new Exception("GTK overlay not found");
+            }
+
+            var processInfo = new ProcessStartInfo
+            {
+                FileName = gtkOverlay,
+                WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory,
+                RedirectStandardOutput = true,
+                UseShellExecute = false
+            };
+
+            Process p = Process.Start(processInfo)!;
+
+            activeGTKOverlay = (new Thread(async () => await ListenForGTKOutput(gameId, p)), p);
+            activeGTKOverlay.Value.thread.Start();
+        }
+        else
+        {
+            //
+        }
+    }
+
+    private static async Task ListenForGTKOutput(int gameId, Process p)
+    {
+        Console.WriteLine("start listen");
+        while (!p.HasExited)
+        {
+            string? line = await p.StandardOutput.ReadLineAsync();
+            Console.WriteLine(line);
+
+            if (line?.StartsWith(GTK_OVERLAY_RETURN_IDENTIFIER) ?? false)
+            {
+                string? path = line.Remove(0, GTK_OVERLAY_RETURN_IDENTIFIER.Length);
+
+                if (path.Equals("CLIPBOARD") || true)
+                {
+                    path = await ImageManager.GetImageFromClipboard(5);
+                }
+
+                if (File.Exists(path))
+                {
+                    await FileManager.UpdateGameIcon(gameId, new Uri(path));
+                }
+
+                p.Kill();
+                break;
+            }
+        }
+
+        activeGTKOverlay = null;
+    }
+}

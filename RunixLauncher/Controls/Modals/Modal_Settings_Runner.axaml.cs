@@ -1,0 +1,250 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Markup.Xaml;
+using Avalonia.Platform.Storage;
+using DynamicData;
+using GameLibrary.Logic;
+using GameLibrary.Logic.Database.Tables;
+using GameLibrary.Logic.Objects;
+using RunixLauncher.Helpers;
+
+namespace RunixLauncher.Controls.Modals;
+
+public partial class Modal_Settings_Runner : UserControl
+{
+    private TaskCompletionSource? modalRes;
+
+    private RunnerDto? selectedRunner;
+    private string? selectedRoot;
+
+    private string[]? versionOptions;
+
+    private UITabGroup tabGroup;
+
+    public Modal_Settings_Runner()
+    {
+        InitializeComponent();
+
+        btn_Close.RegisterClick(Close);
+        btn_Save.RegisterClick(Save, "Saving");
+
+        btn_Dir.RegisterClick(SelectDirectory);
+
+        btn_Wine_WineCfg.RegisterClick(OpenWineCfg, "Loading");
+        btn_Wine_WineTricks.RegisterClick(OpenWineTricks, "Loading");
+        btn_Wine_WineCMD.RegisterClick(OpenWineCmd, "Loading");
+        btn_Wine_WineRegistry.RegisterClick(OpenWineRegistry, "Loading");
+        btn_Wine_SharedDocuments.Register(ShareDocuments, "Updating");
+
+        btn_Prefix_Installer.RegisterClick(DownloadVersion, "Downloading");
+
+        tabGroup = new UITabGroup(TabGroup_Buttons, TabGroup_Content, true);
+    }
+
+    public Task HandleOpen(int runnerId)
+    {
+        selectedRunner = null;
+        modalRes = new TaskCompletionSource();
+
+        _ = Draw(runnerId);
+        return modalRes.Task;
+    }
+
+    private async Task Draw(int runnerId)
+    {
+        selectedRunner = RunnerManager.GetRunnerProfile(runnerId);
+
+        await UpdateDefaultDetails();
+        await UpdateWineDetails();
+        await ChangeRunnerType();
+
+        await tabGroup.ChangeSelection(0);
+    }
+
+    private async Task UpdateDefaultDetails()
+    {
+        inp_Name.Text = selectedRunner?.runnerName ?? string.Empty;
+
+        selectedRoot = selectedRunner?.runnerRoot ?? string.Empty;
+        btn_Dir.Label = selectedRoot ?? "Select directory";
+    }
+
+    private async Task UpdateWineDetails()
+    {
+        string? sharedDocuments = string.Empty;
+        selectedRunner?.globalRunnerValues.TryGetValue(RunnerDto.RunnerConfigValues.Wine_SharedDocuments, out sharedDocuments);
+
+        btn_Wine_SharedDocuments.Label = sharedDocuments ?? "Select folder";
+        btn_Wine_SharedDocuments.isSelected = !string.IsNullOrEmpty(sharedDocuments);
+    }
+
+
+
+
+    private void Close()
+    {
+        modalRes?.SetResult();
+    }
+
+    private async Task Save()
+    {
+        if (!ValidateInput())
+            return;
+
+        string version = versionOptions != null ? versionOptions[inp_Version.selectedIndex] : string.Empty;
+        selectedRunner!.runnerName = inp_Name.Text!;
+        selectedRunner!.runnerRoot = selectedRoot!;
+        selectedRunner!.runnerVersion = version;
+
+        await selectedRunner.UpdateDatabaseEntry();
+
+        modalRes?.SetResult();
+    }
+
+    private bool ValidateInput()
+    {
+        if (string.IsNullOrEmpty(selectedRoot)) return false;
+        if (string.IsNullOrEmpty(inp_Name.Text)) return false;
+
+        return true;
+    }
+
+    private async Task SelectDirectory()
+    {
+        string? folder = await DependencyManager.OpenFolderDialog("Pick folder");
+
+        if (string.IsNullOrEmpty(folder))
+            return;
+
+        selectedRoot = folder;
+        btn_Dir.Label = selectedRoot;
+    }
+
+    private async Task ChangeRunnerType()
+    {
+        switch (selectedRunner!.runnerType)
+        {
+            case RunnerDto.RunnerType.Wine:
+            case RunnerDto.RunnerType.Wine_GE:
+            case RunnerDto.RunnerType.umu_Launcher:
+            case RunnerDto.RunnerType.Proton_GE:
+                tabGroup.ToggleGroupVisibility(1, true);
+                break;
+
+            default:
+                tabGroup.ToggleGroupVisibility(1, false);
+                break;
+        }
+
+        await UpdateVersionInput();
+    }
+
+    private async Task UpdateVersionInput()
+    {
+        versionOptions = await RunnerDto.GetVersionsForRunnerTypes((int)selectedRunner!.runnerType);
+
+        if (versionOptions != null)
+        {
+            int selectedVersion = versionOptions.IndexOf(selectedRunner?.runnerVersion);
+
+            inp_Version.IsVisible = true;
+            inp_Version.Setup(versionOptions, selectedVersion == -1 ? 0 : selectedVersion, UpdateVersionInstallerButton);
+
+            UpdateVersionInstallerButton();
+        }
+        else
+        {
+            inp_Version.IsVisible = false;
+        }
+    }
+
+    private async Task<bool> EnsureExistingProfile()
+    {
+        if (selectedRunner == null)
+        {
+            await DependencyManager.OpenYesNoModal("Failed!", "Cannot complete operation on an uncreated profile.\nSave before attempting again.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private async Task OpenWineCfg()
+    {
+        if (!await EnsureExistingProfile())
+            return;
+
+        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, RunnerManager.SpecialLaunchRequest.WineConfig);
+    }
+
+    private async Task OpenWineTricks()
+    {
+        if (!await EnsureExistingProfile())
+            return;
+
+        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, RunnerManager.SpecialLaunchRequest.WineTricks);
+    }
+
+    private async Task OpenWineCmd()
+    {
+        if (!await EnsureExistingProfile())
+            return;
+
+        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, RunnerManager.SpecialLaunchRequest.WineCMD);
+    }
+
+    private async Task OpenWineRegistry()
+    {
+        if (!await EnsureExistingProfile())
+            return;
+
+        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, RunnerManager.SpecialLaunchRequest.WineRegistry);
+    }
+
+
+    private async Task ShareDocuments(bool val)
+    {
+        if (!await EnsureExistingProfile())
+            return;
+
+        string? selectedPath = await DependencyManager.OpenFolderDialog("Select shared folder");
+
+        if (string.IsNullOrEmpty(selectedPath))
+            return;
+
+        int result = await DependencyManager.OpenConfirmationAsync(
+            "Share prefix documents?",
+            "This is a destructive action,\nProceeding will delete the AppData, and Documents folder of the prefix and link to a shared directory.\nthis CAN NOT be undone!",
+            ("Link", async () => await selectedRunner!.SharePrefixDocuments(selectedPath), "working")
+        );
+
+        if (result != -1)
+        {
+            await UpdateWineDetails();
+        }
+    }
+
+    private void UpdateVersionInstallerButton()
+    {
+        if (!selectedRunner!.IsInstalled(versionOptions![inp_Version.selectedIndex]))
+        {
+            btn_Prefix_Installer.IsVisible = true;
+        }
+        else
+        {
+            btn_Prefix_Installer.IsVisible = false;
+        }
+    }
+
+    private async Task DownloadVersion()
+    {
+        if (!selectedRunner!.IsInstalled(versionOptions![inp_Version.selectedIndex]))
+        {
+            await DependencyManager.OpenLoadingModal(true,
+                selectedRunner.DownloadVersion(versionOptions![inp_Version.selectedIndex])
+            );
+        }
+    }
+}
