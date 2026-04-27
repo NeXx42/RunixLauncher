@@ -74,9 +74,12 @@ jobs:
           mkdir -p ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir/usr/share/icons/hicolor/256x256/apps/
           
           cp -r ${{ env.OUTPUT_DIR }}/RunixLauncher/* ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir/usr/bin
-          cp ./Build/AppImageData/* ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir
-          cp -r ./Build/AppImageData/*.png ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir/usr/share/icons/hicolor/256x256/apps/
-
+          
+          cp ./Build/_Shared/RunixLauncher.desktop ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir/RunixLauncher.desktop
+          
+          cp ./Build/_Shared/RunixLauncher.png ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir/RunixLauncher.png
+          cp ./Build/_Shared/RunixLauncher.png ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir/usr/share/icons/hicolor/256x256/apps/RunixLauncher.png
+          
       - name: Build AppImage
         run: |
           ARCH=x86_64 ./appimagetool ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir ${{ env.OUTPUT_DIR }}/RunixLauncher.appimage
