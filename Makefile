@@ -104,7 +104,7 @@ publish:
 	cp ./Build/_Shared/RunixLauncher.png ${OUTPUT_DIR}/RunixLauncher.AppDir/RunixLauncher.png
 	cp ./Build/_Shared/RunixLauncher.png ${OUTPUT_DIR}/RunixLauncher.AppDir/usr/share/icons/hicolor/256x256/apps/RunixLauncher.png
 	
-	appimagetool ${OUTPUT_DIR}/RunixLauncher.AppDir ${OUTPUT_DIR}/RunixLauncher.appimage
+	ARCH=x86_64 appimagetool ${OUTPUT_DIR}/RunixLauncher.AppDir ${OUTPUT_DIR}/RunixLauncher.appimage
 	chmod +x ${OUTPUT_DIR}/RunixLauncher.appimage
 
 	# -----------------------------[ flatpak ]-----------------------------
