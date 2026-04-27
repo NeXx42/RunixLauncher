@@ -85,17 +85,13 @@ jobs:
             ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir \
             ${{ env.OUTPUT_DIR }}/RunixLauncher.appimage
           chmod +x ${{ env.OUTPUT_DIR }}/RunixLauncher.appimage
-
-      - name: Upload AppImage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: RunixLauncher-AppImage
-          path: ${{ env.OUTPUT_DIR }}/RunixLauncher.appimage
           
   release:
     needs: build
     runs-on: ubuntu-22.04
-
+    permissions:
+      contents: write
+    
     steps:
       - name: Download AppImage artifact
         uses: actions/download-artifact@v4
