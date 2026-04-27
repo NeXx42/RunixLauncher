@@ -98,9 +98,8 @@ publish:
 	mkdir -p ${OUTPUT_DIR}/RunixLauncher.AppDir/usr/bin
 	mkdir -p ${OUTPUT_DIR}/RunixLauncher.AppDir/usr/share/icons/hicolor/256x256/apps/
 	
+	cp -r ./Build/AppImageData/* ${OUTPUT_DIR}/RunixLauncher.AppDir/
 	cp -r ${OUTPUT_DIR}/RunixLauncher/* ${OUTPUT_DIR}/RunixLauncher.AppDir/usr/bin
-	
-	cp ./Build/AppImageData/RunixLauncher.desktop ${OUTPUT_DIR}/RunixLauncher.AppDir/RunixLauncher.desktop
 	
 	cp ./Build/_Shared/RunixLauncher.png ${OUTPUT_DIR}/RunixLauncher.AppDir/RunixLauncher.png
 	cp ./Build/_Shared/RunixLauncher.png ${OUTPUT_DIR}/RunixLauncher.AppDir/usr/share/icons/hicolor/256x256/apps/RunixLauncher.png
