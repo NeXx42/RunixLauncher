@@ -4,6 +4,8 @@ using GameLibrary.Logic.Database.Tables;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.GameRunners;
 using GameLibrary.Logic.Helpers;
+using Runix.Input;
+using Runix.Structure.Enums;
 
 namespace GameLibrary.Logic.Objects;
 
@@ -189,6 +191,14 @@ public class RunnerDto
             res.arguments[RunnerManager.ArgumentType.Application].AddLast("-w");
         }
 
+        if (game.gameConfig?.GetEnum(Game_Config.ControllerType, out ControllerType controllerMapping) ?? false)
+        {
+            string mapping = ControllerMappingHandler.GetControllerMapping(controllerMapping);
+
+            if (!string.IsNullOrEmpty(mapping))
+                res.environmentArguments.Add("SDL_GAMECONTROLLERCONFIG", mapping);
+        }
+
         Dictionary<string, string> dllOverrides = new Dictionary<string, string>();
         AddDLLOverride("steam_api64", game.gameConfig?.GetEnum(Game_Config.Launcher_dllOverride_steamapi64, DLLOverrideBehaviour.Default) ?? DLLOverrideBehaviour.Default);
 
@@ -225,7 +235,7 @@ public class RunnerDto
     }
 
     public void SetIsDefault(bool to) => isDefault = to;
-    public virtual string GetWineConfigurationToolName(RunnerManager.SpecialLaunchRequest req) => string.Empty;
+    public virtual void HandleSpecialLaunchRequest(RunnerManager.LaunchArguments args, RunnerManager.SpecialLaunchRequest req) { }
 
     public virtual Task CleanProfile(Game? game) => Task.CompletedTask;
 

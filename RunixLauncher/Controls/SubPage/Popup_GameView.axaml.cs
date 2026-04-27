@@ -38,7 +38,7 @@ public partial class Popup_GameView : UserControl, IControlChild
         LibraryManager.onGameDetailsUpdate += (i) => _ = RefreshSelectedGame(i);
         RunnerManager.onGameStatusChange += (a, b) => HelperFunctions.WrapUIThread(() => UpdateRunningGameStatus(a, b));
 
-        inp_Options.Setup((string[])["Refresh Metadata", "Open Overlay"], HandleSubAction);
+        inp_Options.Setup((string[])["Open Overlay"], HandleSubAction);
     }
 
     public async Task Draw(Game game, CancellationToken cancellationToken)
@@ -150,11 +150,6 @@ public partial class Popup_GameView : UserControl, IControlChild
         switch (index)
         {
             case 0:
-                if (inspectingGame!.config.TryGetValue(GameLibrary.Logic.Enums.Game_Config.Library_SteamId, out string id))
-                    await DependencyManager.OpenLoadingModal(true, () => SteamHelper.UpdateExistingGame(long.Parse(id), inspectingGame));
-                break;
-
-            case 1:
                 await OverlayManager.LaunchOverlay(inspectingGame!.gameId);
                 break;
         }

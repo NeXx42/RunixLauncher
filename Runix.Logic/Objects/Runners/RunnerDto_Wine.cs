@@ -14,24 +14,33 @@ public class RunnerDto_Wine : RunnerDto
     protected string GetBinaryPath(string? version = null) => Path.Combine(runnerRoot, "binaries", string.IsNullOrEmpty(version) ? runnerVersion : version);
     public static Task<string[]?> GetRunnerVersions() => Task.FromResult<string[]?>(null);
 
-    protected virtual string GetWineExecutable(RunnerManager.SpecialLaunchRequest? launchRequest)
-    {
-        if (launchRequest == RunnerManager.SpecialLaunchRequest.WineTricks)
-            return "winetricks";
+    protected virtual string GetWineExecutable(RunnerManager.SpecialLaunchRequest? launchRequest) => "wine";
 
-        return "wine";
-    }
-
-    public override string GetWineConfigurationToolName(RunnerManager.SpecialLaunchRequest req)
+    public override void HandleSpecialLaunchRequest(RunnerManager.LaunchArguments args, RunnerManager.SpecialLaunchRequest req)
     {
+        LinkedList<string> launch = new LinkedList<string>();
+
         switch (req)
         {
-            case RunnerManager.SpecialLaunchRequest.WineConfig: return "winecfg";
-            case RunnerManager.SpecialLaunchRequest.WineCMD: return "cmd";
-            case RunnerManager.SpecialLaunchRequest.WineRegistry: return "regedit";
+            case RunnerManager.SpecialLaunchRequest.WineConfig:
+                launch.AddFirst("winecfg");
+                break;
+            case RunnerManager.SpecialLaunchRequest.WineCMD:
+                launch.AddFirst("cmd");
+                break;
+            case RunnerManager.SpecialLaunchRequest.WineTricks:
+                args.command = "winetricks";
+                break;
+            case RunnerManager.SpecialLaunchRequest.WineRegistry:
+                launch.AddFirst("regedit");
+                break;
+            case RunnerManager.SpecialLaunchRequest.WineJoystick:
+                launch.AddFirst("control");
+                launch.AddLast("joy.cpl");
+                break;
         }
 
-        return string.Empty;
+        args.arguments[RunnerManager.ArgumentType.Application] = launch;
     }
 
     protected override string[] GetAcceptableExtensions() => ["exe", "bat"];

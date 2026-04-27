@@ -2,6 +2,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Runix.Database\CSharpSqliteORM.csproj" />
     <ProjectReference Include="..\Runix.Structure\Runix.Structure.csproj" />
+    <ProjectReference Include="..\Runix.Input\Runix.Input.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="SharpCompress" Version="0.42.1" />

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia;
@@ -32,10 +33,7 @@ public partial class Modal_Settings_Runner : UserControl
 
         btn_Dir.RegisterClick(SelectDirectory);
 
-        btn_Wine_WineCfg.RegisterClick(OpenWineCfg, "Loading");
-        btn_Wine_WineTricks.RegisterClick(OpenWineTricks, "Loading");
-        btn_Wine_WineCMD.RegisterClick(OpenWineCmd, "Loading");
-        btn_Wine_WineRegistry.RegisterClick(OpenWineRegistry, "Loading");
+        btn_Wine_Tools.Setup(["CFG", "Wine Tricks", "CMD", "Registry", "Joystick"], HandleWineToolsCallback);
         btn_Wine_SharedDocuments.Register(ShareDocuments, "Updating");
 
         btn_Prefix_Installer.RegisterClick(DownloadVersion, "Downloading");
@@ -171,38 +169,25 @@ public partial class Modal_Settings_Runner : UserControl
         return true;
     }
 
-    private async Task OpenWineCfg()
+    private async Task HandleWineToolsCallback(int id)
     {
         if (!await EnsureExistingProfile())
             return;
 
-        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, RunnerManager.SpecialLaunchRequest.WineConfig);
+        RunnerManager.SpecialLaunchRequest? req = null;
+        switch (id)
+        {
+            case 0: req = RunnerManager.SpecialLaunchRequest.WineConfig; break;
+            case 1: req = RunnerManager.SpecialLaunchRequest.WineTricks; break;
+            case 2: req = RunnerManager.SpecialLaunchRequest.WineCMD; break;
+            case 3: req = RunnerManager.SpecialLaunchRequest.WineRegistry; break;
+            case 4: req = RunnerManager.SpecialLaunchRequest.WineJoystick; break;
+
+        }
+
+        if (req.HasValue)
+            await RunnerManager.RunWineTricks(selectedRunner!.runnerId, req.Value);
     }
-
-    private async Task OpenWineTricks()
-    {
-        if (!await EnsureExistingProfile())
-            return;
-
-        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, RunnerManager.SpecialLaunchRequest.WineTricks);
-    }
-
-    private async Task OpenWineCmd()
-    {
-        if (!await EnsureExistingProfile())
-            return;
-
-        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, RunnerManager.SpecialLaunchRequest.WineCMD);
-    }
-
-    private async Task OpenWineRegistry()
-    {
-        if (!await EnsureExistingProfile())
-            return;
-
-        await RunnerManager.RunWineTricks(selectedRunner!.runnerId, RunnerManager.SpecialLaunchRequest.WineRegistry);
-    }
-
 
     private async Task ShareDocuments(bool val)
     {

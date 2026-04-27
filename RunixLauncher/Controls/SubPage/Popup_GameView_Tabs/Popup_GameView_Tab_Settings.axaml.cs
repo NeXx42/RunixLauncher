@@ -9,6 +9,9 @@ using Avalonia.Media;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.Objects;
+using Runix.Logic.Helpers;
+using Runix.Structure.Enums;
+using RunixLauncher.Controls.Modals;
 using RunixLauncher.Helpers;
 
 namespace RunixLauncher.Controls.SubPages.Popup_GameView_Tabs;
@@ -160,7 +163,12 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
                 new ConfigChanger_InputField(element.inp_umu_Id, Game_Config.Launcher_umu_Id, () => inspectingGame, RunnerDto.RunnerType.umu_Launcher),
 
                 new ConfigChanger_Dropdown(element.inp_Wine_DLLOverride_steamapi64, Game_Config.Launcher_dllOverride_steamapi64, Enum.GetNames<DLLOverrideBehaviour>(), (int)DLLOverrideBehaviour.Default, () => inspectingGame, wineRunnerTypes),
+
+                new ConfigChanger_Dropdown(element.inp_ControllerType, Game_Config.ControllerType, Enum.GetNames<ControllerType>(), (int)ControllerType.Disabled, () => inspectingGame, wineRunnerTypes),
             ];
+
+            element.btn_RefreshSteamMetaData.RegisterClick(TryToRefreshSteamMetaData);
+            element.btn_EditWineProfile.RegisterClick(TryToEditSelectedProfile);
         }
 
         protected override async Task OpenWithGame(Game? game, bool isNewGame)
@@ -275,6 +283,22 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
                 await DependencyManager.OpenLoadingModal(true, new LoadingTask("Cleaning profile", "Deleting...", () => runner.CleanProfile(inspectingGame)));
         }
 
+        private async Task TryToRefreshSteamMetaData()
+        {
+            if (long.TryParse(element.inp_Library_SteamId.getText, out long id))
+                await DependencyManager.OpenLoadingModal(true, () => SteamHelper.UpdateExistingGame(id, inspectingGame));
+        }
+
+        private async Task TryToEditSelectedProfile()
+        {
+            RunnerDto? runner = RunnerManager.GetRunnerProfile(inspectingGame.runnerId);
+
+            if (runner == null)
+                return;
+
+            await MainWindow.instance!.DisplayModalAsync<Modal_Settings_Runner>(EditModal);
+            async Task EditModal(Modal_Settings_Runner modal) => await modal.HandleOpen(inspectingGame.runnerId!.Value);
+        }
 
 
         internal abstract class ConfigChangerBase

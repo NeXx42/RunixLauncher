@@ -17,13 +17,7 @@ public class RunnerDto_WineGE : RunnerDto_Wine
     {
     }
 
-    protected override string GetWineExecutable(RunnerManager.SpecialLaunchRequest? processName)
-    {
-        if (processName == RunnerManager.SpecialLaunchRequest.WineTricks)
-            return "winetricks";
-
-        return Path.Combine(Directory.GetDirectories(GetBinaryPath()).First(), "bin", "wine64");
-    }
+    protected override string GetWineExecutable(RunnerManager.SpecialLaunchRequest? processName) => Path.Combine(Directory.GetDirectories(GetBinaryPath()).First(), "bin", "wine64");
 
     public static new async Task<string[]?> GetRunnerVersions() => await GithubVersionHelper.GetRunnerVersions(GITHUB_NAME);
     public override bool IsInstalled(string? version) => !string.IsNullOrEmpty(version) && Directory.Exists(GetBinaryPath(version));

@@ -21,14 +21,20 @@
             <common:Common_Dropdown x:Name="inp_Library_Library" Grid.Column="1"/>
           </Grid>
 
-          <Grid ColumnDefinitions="150, *">
+          <Grid ColumnDefinitions="150, *, 5, 150">
             <Label Content="Steam Id" VerticalAlignment="Center"/>
             <common:Common_InputField x:Name="inp_Library_SteamId" Grid.Column="1"/>
+            <common:Common_Button x:Name="btn_RefreshSteamMetaData" Grid.Column="3" Label="Refresh Metadata"/>
           </Grid>
 
           <Grid ColumnDefinitions="150, *">
             <Label Content="UMU Id" VerticalAlignment="Center"/>
             <common:Common_InputField x:Name="inp_umu_Id" Grid.Column="1"/>
+          </Grid>
+
+          <Grid ColumnDefinitions="150, *">
+            <Label Content="Controller Mappings" VerticalAlignment="Center"/>
+            <common:Common_Dropdown x:Name="inp_ControllerType" Grid.Column="1"/>
           </Grid>
         </StackPanel>
       </StackPanel>
@@ -36,9 +42,10 @@
       <!-- Launch Settings -->
       <StackPanel x:Name="tab_LaunchSettings" Spacing="5">
         <StackPanel Margin="10 0" Spacing="5">
-          <Grid ColumnDefinitions="150, *">
+          <Grid ColumnDefinitions="150, *, 5, 150">
             <Label Content="Runner" VerticalAlignment="Center"/>
             <common:Common_Dropdown x:Name="inp_WineProfile" Grid.Column="1"/>
+            <common:Common_Button x:Name="btn_EditWineProfile" Grid.Column="3" Label="Edit"/>
           </Grid>
 
           <Grid ColumnDefinitions="150, *">
@@ -73,21 +80,21 @@
             <common:Common_Toggle x:Name="inp_Emulate" Grid.Column="1"/>
           </Grid>
 
-          <!-- Display -->
-          <Label FontSize="18" Content="Display" Margin="0 20 0 0" />
-          <StackPanel Margin="10 0" Spacing="5">
-            <Grid ColumnDefinitions="150, *">
-              <Label Content="Start Windowed" VerticalAlignment="Center"/>
-              <common:Common_Toggle x:Name="inp_Wine_Windowed" Grid.Column="1"/>
-            </Grid>
-
-            <Grid ColumnDefinitions="150, *">
-              <Label Content="Virtual Wine desktop" VerticalAlignment="Center"/>
-              <common:Common_Toggle x:Name="inp_Wine_VirtualDesktop" Grid.Column="1"/>
-            </Grid>
-          </StackPanel>
         </StackPanel>
 
+        <!-- Display -->
+        <Label FontSize="18" Content="Display" Margin="0 20 0 0" />
+        <StackPanel Margin="10 0" Spacing="5">
+          <Grid ColumnDefinitions="150, *">
+            <Label Content="Start Windowed" VerticalAlignment="Center"/>
+            <common:Common_Toggle x:Name="inp_Wine_Windowed" Grid.Column="1"/>
+          </Grid>
+
+          <Grid ColumnDefinitions="150, *">
+            <Label Content="Virtual Wine desktop" VerticalAlignment="Center"/>
+            <common:Common_Toggle x:Name="inp_Wine_VirtualDesktop" Grid.Column="1"/>
+          </Grid>
+        </StackPanel>
 
         <!-- Advanced -->
         <Label FontSize="18" Content="Compatibility" Margin="0 20 0 0" />

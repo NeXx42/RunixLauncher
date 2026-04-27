@@ -43,22 +43,8 @@
             <Label Content="Tools"/>
             <StackPanel Margin="5, 0, 0, 0">
               <Grid ColumnDefinitions="100, *" Height="30">
-                <Label Content="Wine CFG" />
-                <Controls:Common_Button Grid.Column="1" x:Name="btn_Wine_WineCfg" HorizontalAlignment="Stretch" Label="Launch"/>
-              </Grid>
-              <Grid ColumnDefinitions="100, *" Height="30">
-                <Label Content="Wine Tricks" />
-                <Controls:Common_Button Grid.Column="1" x:Name="btn_Wine_WineTricks" HorizontalAlignment="Stretch" Label="Launch"/>
-              </Grid>
-
-              <Grid ColumnDefinitions="100, *" Height="30">
-                <Label Content="Wine Console" />
-                <Controls:Common_Button Grid.Column="1" x:Name="btn_Wine_WineCMD" HorizontalAlignment="Stretch" Label="Launch"/>
-              </Grid>
-
-              <Grid ColumnDefinitions="100, *" Height="30">
-                <Label Content="Wine Registry" />
-                <Controls:Common_Button Grid.Column="1" x:Name="btn_Wine_WineRegistry" HorizontalAlignment="Stretch" Label="Launch"/>
+                <Label Content="Wine Tools" />
+                <Controls:Common_ContextMenu Grid.Column="1" x:Name="btn_Wine_Tools" HorizontalAlignment="Stretch"/>
               </Grid>
 
               <Grid ColumnDefinitions="100, *" Height="30">

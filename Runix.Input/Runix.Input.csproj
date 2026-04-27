@@ -8,4 +8,7 @@
     <PackageReference Include="HIDDevices" Version="4.1.2" />
     <PackageReference Include="HIDDevices.Usages" Version="4.1.2" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Runix.Structure\Runix.Structure.csproj" />
+  </ItemGroup>
 </Project>

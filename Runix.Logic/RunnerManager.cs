@@ -149,8 +149,9 @@ public static class RunnerManager
             identifier = request.ToString(),
             runnerId = runnerId,
             customExecutable = request,
-            path = runnerDto.GetWineConfigurationToolName(request)
+            path = ""
         });
+        runnerDto.HandleSpecialLaunchRequest(req, request);
 
         req.loggingLevel = LoggingLevel.Off;
         ExecuteRunRequest(req, null);
@@ -431,7 +432,8 @@ public static class RunnerManager
         WineConfig,
         WineTricks,
         WineCMD,
-        WineRegistry
+        WineRegistry,
+        WineJoystick
     }
 
     public struct LaunchRequest
