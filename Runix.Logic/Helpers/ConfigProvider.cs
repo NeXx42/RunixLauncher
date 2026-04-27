@@ -137,7 +137,7 @@ public class ConfigProvider<ENUMTYPE>
             return true;
         }
 
-        val = default;
+        val = default!;
         return false;
     }
 

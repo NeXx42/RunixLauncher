@@ -544,7 +544,7 @@ public static class RunnerManager
 
         private void HandleExit(object? sender, EventArgs args)
         {
-            RunnerManager.OnExitProcess(identifier);
+            _ = RunnerManager.OnExitProcess(identifier);
         }
 
 

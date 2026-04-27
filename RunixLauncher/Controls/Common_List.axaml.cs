@@ -16,27 +16,26 @@ public partial class Common_List : UserControl
     public static readonly StyledProperty<string> LabelProperty = AvaloniaProperty.Register<Common_List, string>(nameof(Label), string.Empty);
     public string Label { get => GetValue(LabelProperty); set => SetValue(LabelProperty, value); }
 
-    private Dictionary<Guid, DataEntry> elements;
+    private Dictionary<Guid, DataEntry>? elements;
 
-    private Func<Control> factory;
-    private Action<DataEntry, object> drawElement;
+    private Func<Control>? factory;
+    private Action<DataEntry, object>? drawElement;
 
-    private Func<object> createData;
-    private Func<int, Task> removeData;
-    private Func<Task> updater;
+    private Func<object>? createData;
+    private Func<Task>? updater;
 
     private Guid? selected
     {
         get => m_Selected;
         set
         {
-            if (m_Selected.HasValue && elements.ContainsKey(m_Selected.Value))
+            if (m_Selected.HasValue && (elements?.ContainsKey(m_Selected.Value) ?? false))
                 elements[m_Selected.Value].ToggleSelection(false);
 
             m_Selected = value == m_Selected ? null : value;
             btn_Remove.IsVisible = m_Selected.HasValue;
 
-            if (m_Selected.HasValue && elements.ContainsKey(m_Selected.Value))
+            if (m_Selected.HasValue && (elements?.ContainsKey(m_Selected.Value) ?? false))
                 elements[m_Selected.Value].ToggleSelection(true);
         }
     }
@@ -60,12 +59,12 @@ public partial class Common_List : UserControl
         this.drawElement = (c, o) => drawer((ELEMENT_TYPE)c.itemUI, (DATATYPE)o);
 
         this.createData = () => (object)generator()!;
-        this.updater = () => updater(elements.Select(x => (ELEMENT_TYPE)x.Value.itemUI).ToList());
+        this.updater = () => updater(elements!.Select(x => (ELEMENT_TYPE)x.Value.itemUI).ToList());
     }
 
     public async Task LoadAsync<T>(Func<Task<ICollection<T>>> loader)
     {
-        elements.Clear();
+        elements?.Clear();
 
         // cool animation here
         Load(await loader());
@@ -75,7 +74,7 @@ public partial class Common_List : UserControl
     {
         selected = null;
 
-        elements.Clear();
+        elements?.Clear();
         container.Children.Clear();
 
         for (int i = 0; i < data.Count; i++)
@@ -84,31 +83,31 @@ public partial class Common_List : UserControl
 
     private async Task AddElement()
     {
-        object o = createData();
+        object o = createData!();
         CreateElement(o);
-        await updater();
+        await updater!();
     }
 
     private void CreateElement(object data)
     {
-        DataEntry entry = new DataEntry(this, factory());
+        DataEntry entry = new DataEntry(this, factory!());
 
-        elements.Add(entry.id, entry);
-        drawElement(entry, data);
+        elements!.Add(entry.id, entry);
+        drawElement!(entry, data);
     }
 
     private async Task RemoveEntry()
     {
-        if (!selected.HasValue || !elements.ContainsKey(selected.Value))
+        if (!selected.HasValue || !(elements?.ContainsKey(selected.Value) ?? false))
             return;
 
         elements[selected.Value].Remove();
         selected = null;
 
-        await updater();
+        await updater!();
     }
 
-    public async Task RequestUpdate() => await updater();
+    public async Task RequestUpdate() => await updater!();
 
     private struct DataEntry
     {
@@ -145,7 +144,7 @@ public partial class Common_List : UserControl
         public void Remove()
         {
             master.container.Children.Remove(border);
-            master.elements.Remove(id);
+            master.elements!.Remove(id);
         }
 
         public void ToggleSelection(bool to)

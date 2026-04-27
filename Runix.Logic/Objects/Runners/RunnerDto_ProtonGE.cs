@@ -18,7 +18,7 @@ public class RunnerDto_ProtonGE : RunnerDto_Wine
     {
     }
 
-    public override bool IsInstalled(string version) => !string.IsNullOrEmpty(version) && Directory.Exists(Path.Combine(runnerRoot, "binaries", version));
+    public override bool IsInstalled(string? version) => !string.IsNullOrEmpty(version) && Directory.Exists(Path.Combine(runnerRoot, "binaries", version));
     public override LoadingTask DownloadVersion(string version) => GithubVersionHelper.InstallWine(GetBinaryPath(version), GITHUB_NAME, version, (a) => a.GetProperty("content_type").GetString()?.Equals("application/gzip") ?? false);
 
     public override Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)
