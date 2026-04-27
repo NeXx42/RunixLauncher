@@ -26,7 +26,7 @@ public class RunnerDto_WineGE : RunnerDto_Wine
     }
 
     public static new async Task<string[]?> GetRunnerVersions() => await GithubVersionHelper.GetRunnerVersions(GITHUB_NAME);
-    public override bool IsInstalled(string version) => !string.IsNullOrEmpty(version) && Directory.Exists(GetBinaryPath(version));
+    public override bool IsInstalled(string? version) => !string.IsNullOrEmpty(version) && Directory.Exists(GetBinaryPath(version));
 
     public override async Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)
     {

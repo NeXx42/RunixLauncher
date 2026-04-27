@@ -51,42 +51,21 @@ jobs:
           wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage \
             -O appimagetool
           chmod +x appimagetool
-
-      - name: Clean output directory
-        run: rm -rf ${{ env.OUTPUT_DIR }}/*
-
-      - name: Build GTK overlay (Rust)
-        working-directory: GameLibrary_GTKOverlay
-        run: cargo build --release
-
-      - name: Publish .NET app
-        run: |
-          dotnet publish RunixLauncher/RunixLauncher.csproj \
-            -c Release \
-            -r linux-x64 \
-            --self-contained true \
-            /p:PublishSingleFile=false \
-            -o ${{ env.OUTPUT_DIR }}/RunixLauncher
-
-      - name: Assemble AppDir
-        run: |
-          mkdir -p ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir/usr/bin
-          mkdir -p ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir/usr/share/icons/hicolor/256x256/apps/
           
-          cp -r ${{ env.OUTPUT_DIR }}/RunixLauncher/* ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir/usr/bin
-          cp ./Build/AppImageData/* ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir
-          cp -r ./Build/AppImageData/*.png ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir/usr/share/icons/hicolor/256x256/apps/
-
-      - name: Build AppImage
-        run: |
-          ARCH=x86_64 ./appimagetool ${{ env.OUTPUT_DIR }}/RunixLauncher.AppDir ${{ env.OUTPUT_DIR }}/RunixLauncher.appimage
-          chmod +x ${{ env.OUTPUT_DIR }}/RunixLauncher.appimage
+      - name: Build
+        run: make publish
           
       - name: Upload AppImage artifact
         uses: actions/upload-artifact@v4
         with:
           name: RunixLauncher-AppImage
           path: ${{ env.OUTPUT_DIR }}/RunixLauncher.appimage
+          
+      - name: Upload Flatpak artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RunixLauncher-Flatpak
+          path: ${{ env.OUTPUT_DIR }}/RunixLauncher.flatpak
           
   release:
     needs: build
@@ -100,6 +79,12 @@ jobs:
         with:
             name: RunixLauncher-AppImage
             path: ./output
+            
+      - name: Download Flatpak artifact
+        uses: actions/download-artifact@v4
+        with:
+            name: RunixLauncher-Flatpak
+            path: ./output
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -107,4 +92,6 @@ jobs:
             tag_name: ${{ github.event.inputs.tag }}
             name: ${{ github.event.inputs.title }}
             body: ${{ github.event.inputs.description }}
-            files: ./output/RunixLauncher.appimage  # <- now points to downloaded path
+            files: |
+              ./output/RunixLauncher.appimage
+              ./output/RunixLauncher.flatpak

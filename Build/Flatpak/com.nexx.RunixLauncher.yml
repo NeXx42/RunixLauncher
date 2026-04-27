@@ -1,0 +1,36 @@
+app-id: com.nexx.RunixLauncher
+runtime: org.freedesktop.Platform
+runtime-version: "24.08"
+sdk: org.freedesktop.Sdk
+command: RunixLauncher
+
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=x11
+  - --socket=wayland
+  - --device=dri
+  - --filesystem=home
+  - --filesystem=/media
+  - --filesystem=/run/media
+  
+modules:
+  - name: RunixLauncher
+    buildsystem: simple
+
+    build-commands:
+      - mkdir -p /app/bin
+      - cp -r * /app/bin/
+
+      - install -Dm644 RunixLauncher.desktop /app/share/applications/com.nexx.RunixLauncher.desktop
+      - install -Dm644 RunixLauncher-512.png /app/share/icons/hicolor/256x256/apps/com.nexx.RunixLauncher.png
+
+    sources:
+      - type: dir
+        path: ../Output/RunixLauncher
+
+      - type: file
+        path: ../Flatpak/RunixLauncher.desktop
+
+      - type: file
+        path: ../_Shared/RunixLauncher-512.png

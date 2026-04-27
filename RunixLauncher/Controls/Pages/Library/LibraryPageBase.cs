@@ -66,7 +66,7 @@ public abstract class LibraryPageBase : UserControl, IControlChild
         await (pageLoadTaskToken?.CancelAsync() ?? Task.CompletedTask);
         pageLoadTaskToken = new CancellationTokenSource();
 
-        library.ToggleMenu(false);
+        await library.ToggleMenu(false);
 
         foreach (Library_Game ui in cacheUI)
         {

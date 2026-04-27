@@ -11,8 +11,8 @@ namespace RunixLauncher.Controls;
 
 public partial class Common_ContextMenu : UserControl
 {
-    private (string, MenuItem)[] activeItems;
-    private Action<int> callback;
+    private (string, MenuItem)[]? activeItems;
+    private Action<int>? callback;
 
     public Common_ContextMenu()
     {
@@ -21,7 +21,7 @@ public partial class Common_ContextMenu : UserControl
     }
 
     public void SetupString(IEnumerable<string> options, Action<string> onCallback)
-        => SetupInternal(options, (int id) => onCallback?.Invoke(activeItems[id].Item1));
+        => SetupInternal(options, (int id) => onCallback?.Invoke(activeItems![id].Item1));
 
     public void Setup(IEnumerable<string> options, Func<int, Task> onCallback)
         => SetupInternal(options, (i) => _ = onCallback(i));

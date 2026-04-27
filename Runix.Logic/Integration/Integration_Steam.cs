@@ -138,15 +138,5 @@ public static class Integration_Steam
                 status = (int)Game_Status.Active
             };
         }
-
-        dbo_Game CreatePlaceholder() => new dbo_Game()
-        {
-            executablePath = id.ToString(),
-            gameFolder = root,
-
-            gameName = "steam_placeholder",
-            status = (int)Game_Status.Placeholder,
-            libraryId = libraryId
-        };
     }
 }
