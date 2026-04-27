@@ -21,6 +21,7 @@ namespace GameLibrary.Logic
     public static class ConfigHandler
     {
         public static bool isOnLinux { private set; get; }
+        public static bool isFlatpak => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("FLATPAK_ID"));
 
         public static ConfigProvider<ConfigKeys>? configProvider;
         public static ReadOnlyDictionary<string, SettingBase[]>? groupedSettings { get; private set; }

@@ -5,6 +5,8 @@ namespace GameLibrary.Logic.GameEmbeds;
 
 public class GameEmbed_Locale : IGameEmbed
 {
+    public int getOrder => (int)RunnerManager.ArgumentType.LocaleEmulator;
+
     public const string EMULATOR_PROGRAM_NAME = "LEProc.exe";
 
     public void Embed(RunnerManager.LaunchArguments inp, ConfigProvider<RunnerDto.RunnerConfigValues> args)

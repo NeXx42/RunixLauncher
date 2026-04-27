@@ -192,9 +192,14 @@ public static class RunnerManager
                     await globalConfigValues.SaveBool(RunnerDto.RunnerConfigValues.Generic_Sandbox_IsolateFilesystem, true);
                 }
             }
+
+            if (ConfigHandler.isFlatpak || true)
+            {
+                embeds.Add(new GameEmbed_Flatpak());
+            }
         }
 
-        foreach (IGameEmbed embed in embeds)
+        foreach (IGameEmbed embed in embeds.OrderByDescending(x => x.getOrder))
             embed.Embed(args, globalConfigValues);
     }
 
@@ -449,6 +454,7 @@ public static class RunnerManager
         Launcher = 0,
         LocaleEmulator = 1,
         Application = 10,
+        Flatpak = -9999
     }
 
     public class LaunchArguments

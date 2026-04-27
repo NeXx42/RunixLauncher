@@ -6,6 +6,8 @@ namespace GameLibrary.Logic.GameEmbeds;
 
 public class GameEmbed_Firejail : IGameEmbed
 {
+    public int getOrder => (int)RunnerManager.ArgumentType.FireJail;
+
     public void Embed(RunnerManager.LaunchArguments inp, ConfigProvider<RunnerDto.RunnerConfigValues> args)
     {
         string actualCommand = inp.command;
