@@ -7,7 +7,7 @@ public static class DependencyManager
 {
     private static IUILinker? uiLinker;
 
-    public const string APPLICATION_NAME = "MyLibraryApplication";
+    public const string APPLICATION_NAME = "RunixLauncher";
     public const string DB_POINTER_FILE = "dblink";
 
     public static string GetUserStorageFolder() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), APPLICATION_NAME);

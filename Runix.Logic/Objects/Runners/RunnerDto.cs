@@ -30,6 +30,8 @@ public class RunnerDto
 
         Generic_Sandbox_BlockNetwork,
         Generic_Sandbox_IsolateFilesystem,
+
+        Generic_EnvironmentVars
     }
 
 
@@ -211,11 +213,8 @@ public class RunnerDto
         if (dllOverrides.Count > 0)
             res.environmentArguments.Add("WINEDLLOVERRIDES", string.Join(";", dllOverrides.Select(x => $"{x.Key}={x.Value}")));
 
-        if (game.gameConfig?.TryGetList(Game_Config.Launcher_Wine_CustomEnvironmentVariables, out Data_EnvironmentVar[] customEnvArgs) ?? false)
-        {
-            foreach (Data_EnvironmentVar envArg in customEnvArgs)
-                res.environmentArguments[envArg.key] = envArg.value;
-        }
+        ApplyEnvironmentVariables(ref res, globalRunnerValues?.GetList<Data_EnvironmentVar>(RunnerConfigValues.Generic_EnvironmentVars));
+        ApplyEnvironmentVariables(ref res, game.gameConfig?.GetList<Data_EnvironmentVar>(Game_Config.Launcher_Wine_CustomEnvironmentVariables));
 
         void AddDLLOverride(string dll, DLLOverrideBehaviour ofType)
         {
@@ -231,6 +230,15 @@ public class RunnerDto
             }
 
             dllOverrides[dll] = mode;
+        }
+
+        void ApplyEnvironmentVariables(ref RunnerManager.LaunchArguments res, Data_EnvironmentVar[]? customEnvArgs)
+        {
+            if (customEnvArgs == null)
+                return;
+
+            foreach (Data_EnvironmentVar envArg in customEnvArgs)
+                res.environmentArguments[envArg.key] = envArg.value;
         }
     }
 

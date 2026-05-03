@@ -36,6 +36,7 @@
               <Controls:Common_Button Grid.Column="2" x:Name="btn_Prefix_Installer" HorizontalAlignment="Stretch" Label="Download" Margin="5, 0, 0, 0"/>
             </Grid>
 
+            <Controls:Common_List Label="Environment Variables" x:Name="inp_CustomEnvironmentVariables"/>
           </StackPanel>
 
           <!--  Wine  -->

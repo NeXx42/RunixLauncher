@@ -158,7 +158,9 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
                 new ConfigChanger_Toggle(element.inp_Wine_Windowed, Game_Config.Wine_Windowed, () => inspectingGame, wineRunnerTypes),
                 new ConfigChanger_Toggle(element.inp_IsolatePrefix, Game_Config.Wine_IsolatedPrefix, () => inspectingGame, wineRunnerTypes),
                 new ConfigChanger_Toggle(element.inp_Wine_VirtualDesktop, Game_Config.Wine_ExplorerLaunch, () => inspectingGame, wineRunnerTypes),
+
                 new ConfigChanger_Toggle(element.inp_Wine_LaunchAsConsole, Game_Config.Wine_ConsoleLaunched, () => inspectingGame, wineRunnerTypes),
+                new ConfigChanger_Toggle(element.inp_SteamBridge, Game_Config.Launcher_UseSteamBridge, () => inspectingGame),
 
                 new ConfigChanger_InputField(element.inp_umu_Id, Game_Config.Launcher_umu_Id, () => inspectingGame, RunnerDto.RunnerType.umu_Launcher),
 
@@ -297,7 +299,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
                 return;
 
             await MainWindow.instance!.DisplayModalAsync<Modal_Settings_Runner>(EditModal);
-            async Task EditModal(Modal_Settings_Runner modal) => await modal.HandleOpen(inspectingGame.runnerId!.Value);
+            async Task EditModal(Modal_Settings_Runner modal) => await modal.HandleOpen(runner.runnerId);
         }
 
 

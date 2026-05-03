@@ -23,5 +23,6 @@ public enum Game_Config
     Launcher_dllOverride_Custom,
 
     Launcher_Wine_CustomEnvironmentVariables,
-    ControllerType
+    ControllerType,
+    Launcher_UseSteamBridge
 }

@@ -12,6 +12,7 @@ namespace RunixLauncher.Controls.Settings;
 
 public partial class Control_Settings_DirectorySelector : UserControl, ISettingControl
 {
+    private string? defaultVal;
     private SettingBase? setting;
 
     public Control_Settings_DirectorySelector()
@@ -24,6 +25,8 @@ public partial class Control_Settings_DirectorySelector : UserControl, ISettingC
     public ISettingControl Draw(SettingBase setting, SettingsUI_DirectorySelector info)
     {
         this.setting = setting;
+
+        defaultVal = info.defaultVal ?? string.Empty;
         title.Content = setting.getName;
 
         return this;
@@ -34,7 +37,7 @@ public partial class Control_Settings_DirectorySelector : UserControl, ISettingC
         if (setting == null)
             return;
 
-        UpdateLabel(await setting.LoadSetting(string.Empty));
+        UpdateLabel(await setting.LoadSetting(defaultVal ?? string.Empty));
     }
 
     private async Task SelectDirectory()

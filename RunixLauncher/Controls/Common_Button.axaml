@@ -15,11 +15,13 @@
 
 
         <Style Selector="local|Common_Button.positive Border#ctrl">
-            <Setter Property="Background" Value="#ff1a9fff"/>
-            <Setter Property="BorderBrush" Value="#ff1a9fff"/>
+            <Setter Property="Background" Value="#1a9fff"/>
+            <Setter Property="BorderBrush" Value="#1a9fff"/>
         </Style>
         <Style Selector="local|Common_Button.positive:pointerover Border#ctrl">
-            <Setter Property="BoxShadow" Value="0 0 10 0 #ff1a9fff"/>
+            <Setter Property="BoxShadow" Value="0 0 10 0 #1a9fff"/>
+            <Setter Property="Background" Value="#23a1fb"/>
+            <Setter Property="BorderBrush" Value="#23a1fb"/>
         </Style>
 
 

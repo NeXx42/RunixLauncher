@@ -36,8 +36,8 @@ namespace RunixLauncher.Controls
             get => GetValue(LabelProperty);
             set
             {
-                defaultMessage = value.ToUpper();
-                SetValue(LabelProperty, value.ToUpper());
+                defaultMessage = value;
+                SetValue(LabelProperty, value);
             }
         }
 

@@ -59,7 +59,9 @@ public partial class Common_List : UserControl
         this.drawElement = (c, o) => drawer((ELEMENT_TYPE)c.itemUI, (DATATYPE)o);
 
         this.createData = () => (object)generator()!;
-        this.updater = () => updater(elements!.Select(x => (ELEMENT_TYPE)x.Value.itemUI).ToList());
+        this.updater = () => updater(GetData<ELEMENT_TYPE>());
+
+        selected = null;
     }
 
     public async Task LoadAsync<T>(Func<Task<ICollection<T>>> loader)
@@ -108,6 +110,9 @@ public partial class Common_List : UserControl
     }
 
     public async Task RequestUpdate() => await updater!();
+
+    public List<T> GetData<T>() where T : Control
+        => elements!.Select(x => (T)x.Value.itemUI).ToList();
 
     private struct DataEntry
     {

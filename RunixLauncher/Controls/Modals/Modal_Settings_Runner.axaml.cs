@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -39,6 +40,30 @@ public partial class Modal_Settings_Runner : UserControl
         btn_Prefix_Installer.RegisterClick(DownloadVersion, "Downloading");
 
         tabGroup = new UITabGroup(TabGroup_Buttons, TabGroup_Content, true);
+
+        inp_CustomEnvironmentVariables.Setup(() =>
+        {
+            Grid r = new Grid();
+            r.Height = 25;
+            r.ColumnDefinitions = [new ColumnDefinition(GridLength.Star), new ColumnDefinition(GridLength.Star)];
+
+            TextBox n = new TextBox();
+            n.TextAlignment = Avalonia.Media.TextAlignment.Left;
+
+            TextBox d = new TextBox();
+            d.TextAlignment = Avalonia.Media.TextAlignment.Left;
+            Grid.SetColumn(d, 1);
+
+            r.Children.Add(n);
+            r.Children.Add(d);
+            return r;
+        },
+        (Grid c, Data_EnvironmentVar o) =>
+        {
+            (c.Children[0] as TextBox)!.Text = o.key;
+            (c.Children[1] as TextBox)!.Text = o.value;
+        },
+        () => new Data_EnvironmentVar(), _ => Task.CompletedTask);
     }
 
     public Task HandleOpen(int runnerId)
@@ -53,6 +78,8 @@ public partial class Modal_Settings_Runner : UserControl
     private async Task Draw(int runnerId)
     {
         selectedRunner = RunnerManager.GetRunnerProfile(runnerId);
+
+        inp_CustomEnvironmentVariables.Load(selectedRunner?.globalRunnerValues.GetList<Data_EnvironmentVar>(RunnerDto.RunnerConfigValues.Generic_EnvironmentVars) ?? []);
 
         await UpdateDefaultDetails();
         await UpdateWineDetails();
@@ -91,11 +118,19 @@ public partial class Modal_Settings_Runner : UserControl
         if (!ValidateInput())
             return;
 
+
         string version = versionOptions != null ? versionOptions[inp_Version.selectedIndex] : string.Empty;
         selectedRunner!.runnerName = inp_Name.Text!;
         selectedRunner!.runnerRoot = selectedRoot!;
         selectedRunner!.runnerVersion = version;
 
+        Data_EnvironmentVar[] envVars = inp_CustomEnvironmentVariables.GetData<Grid>().Select(x => new Data_EnvironmentVar()
+        {
+            key = (x.Children[0] as TextBox)!.Text!,
+            value = (x.Children[1] as TextBox)!.Text!,
+        }).ToArray();
+
+        await selectedRunner!.globalRunnerValues.SaveList(RunnerDto.RunnerConfigValues.Generic_EnvironmentVars, envVars);
         await selectedRunner.UpdateDatabaseEntry();
 
         modalRes?.SetResult();

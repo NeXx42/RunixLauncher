@@ -10,6 +10,7 @@ using GameLibrary.Logic.GameEmbeds;
 using GameLibrary.Logic.GameRunners;
 using GameLibrary.Logic.Helpers;
 using GameLibrary.Logic.Objects;
+using Runix.Logic.Helpers;
 
 namespace GameLibrary.Logic;
 
@@ -94,7 +95,14 @@ public static class RunnerManager
             launchArguments.identifier = launchRequest.identifier;
             launchArguments.loggingLevel = gameDto?.config.GetEnum(Game_Config.General_LoggingLevel, LoggingLevel.Off) ?? LoggingLevel.Off;
 
-            ExecuteRunRequest(launchArguments, gameDto?.getAbsoluteLogFile);
+            if (gameDto?.config.GetBoolean(Game_Config.Launcher_UseSteamBridge, false) ?? false)
+            {
+                ExecuteRunRequestWithInjectedSteamRuntime(launchArguments, gameDto?.getAbsoluteLogFile);
+            }
+            else
+            {
+                ExecuteRunRequest(launchArguments, gameDto?.getAbsoluteLogFile);
+            }
 
             if (gameDto != null)
             {
@@ -221,13 +229,7 @@ public static class RunnerManager
             ErrorDialog = true
         };
 
-        // default required environment variables
-        TryAddEnvironmentVariable("HOME");
-        TryAddEnvironmentVariable("DISPLAY");
-        TryAddEnvironmentVariable("WAYLAND_DISPLAY");
-        TryAddEnvironmentVariable("XDG_RUNTIME_DIR");
-        TryAddEnvironmentVariable("DBUS_SESSION_BUS_ADDRESS");
-        TryAddEnvironmentVariable("PULSE_SERVER");
+
 
         foreach (ArgumentType type in Enum.GetValues(typeof(ArgumentType))) // maintain order
         {
@@ -274,20 +276,73 @@ public static class RunnerManager
         }
 
         return process;
-
-        void TryAddEnvironmentVariable(string name)
-        {
-            if (req.environmentArguments.ContainsKey(name))
-                return;
-
-            string? inherited = Environment.GetEnvironmentVariable(name);
-
-            if (!string.IsNullOrEmpty(inherited))
-                req.environmentArguments.Add(name, inherited);
-        }
     }
 
 
+    public static Process ExecuteRunRequestWithInjectedSteamRuntime(LaunchArguments req, string? logFile)
+    {
+        if (!(ConfigHandler.configProvider?.TryGetValue(ConfigKeys.Steam_BridgeShortcutId, out string shortcutId) ?? false))
+            throw new Exception("Could not find steambridge id. Please validate the steambridge from within the settings page.");
+
+        using (StreamWriter writer = new StreamWriter(SteamHelper.CreateSteamBridge()))
+        {
+            writer.WriteLine("#!/bin/bash");
+
+            foreach (var env in req.environmentArguments)
+            {
+                writer.WriteLine($"export {env.Key}=\"{env.Value}\"");
+            }
+
+            writer.WriteLine($"cd \"{req.workingDirectory}\"");
+
+            writer.WriteLine("\n");
+            writer.Write($"exec \"{req.command}\" ");
+
+            foreach (ArgumentType type in Enum.GetValues(typeof(ArgumentType))) // maintain order
+            {
+                if (!req.arguments.TryGetValue(type, out LinkedList<string>? subArguments) || subArguments == null)
+                    continue;
+
+                foreach (string arg in subArguments)
+                {
+                    if (string.IsNullOrEmpty(arg))
+                        continue;
+
+                    writer.Write($"\"{arg.Replace("\"", "\\\"")}\" ");
+                }
+            }
+        }
+
+
+        Process process = new Process
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "steam",
+                Arguments = $"steam://launch/{shortcutId}",
+
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                RedirectStandardInput = true,
+                ErrorDialog = true
+            },
+            EnableRaisingEvents = true
+        };
+
+        if (!string.IsNullOrEmpty(req.identifier))
+        {
+            // ActiveProcess - starts the process
+            activeGames.Add(req.identifier, new ActiveProcess(req.identifier, req.gameId, process, logFile));
+            onGameStatusChange?.Invoke(req.identifier, true);
+        }
+        else
+        {
+            process.Start();
+        }
+
+        return process;
+    }
 
 
     public static void KillProcess(string identifier)
@@ -477,6 +532,28 @@ public static class RunnerManager
         };
 
         public Dictionary<string, string> environmentArguments = new Dictionary<string, string>();
+
+        public LaunchArguments()
+        {
+            // default required environment variables
+            TryAddEnvironmentVariable("HOME");
+            TryAddEnvironmentVariable("DISPLAY");
+            TryAddEnvironmentVariable("WAYLAND_DISPLAY");
+            TryAddEnvironmentVariable("XDG_RUNTIME_DIR");
+            TryAddEnvironmentVariable("DBUS_SESSION_BUS_ADDRESS");
+            TryAddEnvironmentVariable("PULSE_SERVER");
+
+            void TryAddEnvironmentVariable(string name)
+            {
+                if (environmentArguments.ContainsKey(name))
+                    return;
+
+                string? inherited = Environment.GetEnvironmentVariable(name);
+
+                if (!string.IsNullOrEmpty(inherited))
+                    environmentArguments.Add(name, inherited);
+            }
+        }
     }
 
     private class ActiveProcess : IDisposable

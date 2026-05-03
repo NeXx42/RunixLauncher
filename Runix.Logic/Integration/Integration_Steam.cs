@@ -65,6 +65,7 @@ public static class Integration_Steam
             {
                 rootPath = "steamlib",
                 libraryExternalType = (int)Library_ExternalProviders.Steam,
+                alias = "steamlib"
             };
 
             await Database_Manager.InsertItem(existingLib);
@@ -76,7 +77,7 @@ public static class Integration_Steam
 
     private static async Task<(string, long)[]?> FindMounts()
     {
-        string libraryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".steam/steam/steamapps/libraryfolders.vdf");
+        string libraryPath = Path.Combine(SteamHelper.GetSteamLocation(), "./steamapps/libraryfolders.vdf");
 
         if (!File.Exists(Path.Combine(libraryPath)))
             return null;
@@ -110,7 +111,19 @@ public static class Integration_Steam
 
     private static async Task<dbo_Game?> CreateNewGameObject(long id, string root, JsonElement doc, int libraryId)
     {
-        SteamHelper.SteamData steamData = await SteamHelper.ParseSteamData(id, doc);
+        SteamHelper.SteamData? steamData = null;
+
+        try
+        {
+            steamData = await SteamHelper.ParseSteamData(id, doc);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Failed to parse gameid - {id}");
+            Console.WriteLine(e.Message);
+            return null;
+        }
+
         string manifestPath = Path.Combine(root, "steamapps", $"appmanifest_{id}.acf");
 
         using (FileStream stream = new FileStream(manifestPath, new FileStreamOptions()
@@ -128,8 +141,8 @@ public static class Integration_Steam
 
             return new dbo_Game()
             {
-                gameName = steamData.name,
-                iconPath = steamData.iconUrl,
+                gameName = steamData.Value.name,
+                iconPath = steamData.Value.iconUrl,
 
                 executablePath = id.ToString(),
                 gameFolder = folderName,

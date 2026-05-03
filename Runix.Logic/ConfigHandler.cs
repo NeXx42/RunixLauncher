@@ -14,6 +14,7 @@ using GameLibrary.Logic.Helpers;
 using GameLibrary.Logic.Settings;
 using GameLibrary.Logic.Settings.UI;
 using Logic.db;
+using Runix.Logic.Helpers;
 using Runix.Logic.Settings;
 
 namespace GameLibrary.Logic
@@ -75,8 +76,10 @@ namespace GameLibrary.Logic
                         new Setting_Title("Libraries", 0, SettingOSCompatibility.Universal),
                         new Setting_Libraries(),
 
-                        new Setting_Title("Integration", 0, SettingOSCompatibility.Universal),
+                        new Setting_Title("Steam", 0, SettingOSCompatibility.Universal),
                         new Setting_SteamIntegration(),
+                        new Setting_Generic_Config("Location", SettingOSCompatibility.Universal, ConfigKeys.Steam_Location, new SettingsUI_DirectorySelector(SteamHelper.GetDefaultSteamLocation(), true)),
+                        new Setting_Button("Bridge", "Edit", SettingsUI_Button.GenericModalLaunchers.SteamBridge,  SettingOSCompatibility.Universal),
                     ]
                 },
                 {

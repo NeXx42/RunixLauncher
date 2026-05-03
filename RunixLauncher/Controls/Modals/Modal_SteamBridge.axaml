@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="RunixLauncher.Controls.Modals.Modal_SteamBridge"
+  xmlns:Common="clr-namespace:RunixLauncher.Controls">
+  <Border VerticalAlignment="Center" HorizontalAlignment="Center" Width="500" MaxHeight="800" Background="#0f1419" CornerRadius="16" ClipToBounds="True" BorderBrush="#1b1f24" BorderThickness="1">
+    <StackPanel Margin="10">
+      <Label HorizontalAlignment="Center" FontSize="20">Steam Bridge</Label>
+      <TextBlock TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center">
+        <Run >The steam bridge is used to inject the steam runtime into a game launched from Runix. This means that the game will inherit the steam overlay and controller mappings, among other things.</Run>
+      </TextBlock>
+      <TextBlock TextWrapping="Wrap" HorizontalAlignment="Left" Margin="0 20 0 0">
+        <Run FontWeight="700">To set this up, in steam: </Run>
+        <LineBreak/>
+        <Run>▸ Games > Add a Non-Steam Game to My Library</Run>
+        <LineBreak/>
+        <Run>▸ Browse</Run>
+        <LineBreak/>
+        <Run x:Name="inp_Dir"></Run>
+        <LineBreak/>
+        <Run>▸ Add Selected Programs</Run>
+        <LineBreak/>
+      </TextBlock>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="5">
+        <Common:Common_Button Label="Close" Height="35" Width="100" Margin="0 20 0 0" x:Name="btn_Close"/>
+        <Common:Common_Button Label="Save and Validate" Height="35" Width="150" Margin="0 20 0 0" x:Name="btn_Validate" Classes="positive"/>
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</UserControl>
