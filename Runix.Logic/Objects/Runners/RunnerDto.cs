@@ -213,6 +213,11 @@ public class RunnerDto
         if (dllOverrides.Count > 0)
             res.environmentArguments.Add("WINEDLLOVERRIDES", string.Join(";", dllOverrides.Select(x => $"{x.Key}={x.Value}")));
 
+        if (game.gameConfig?.TryGetValue(Game_Config.Library_SteamId, out string steamId) ?? false)
+        {
+            res.environmentArguments["SteamAppId"] = steamId;
+        }
+
         ApplyEnvironmentVariables(ref res, globalRunnerValues?.GetList<Data_EnvironmentVar>(RunnerConfigValues.Generic_EnvironmentVars));
         ApplyEnvironmentVariables(ref res, game.gameConfig?.GetList<Data_EnvironmentVar>(Game_Config.Launcher_Wine_CustomEnvironmentVariables));
 
