@@ -162,12 +162,14 @@ public abstract class Game
 
         if (ConfigHandler.isOnLinux)
         {
-            Process.Start(new ProcessStartInfo
+            var startInfo = new ProcessStartInfo()
             {
                 FileName = "xdg-open",
-                Arguments = getAbsoluteFolderLocation,
                 UseShellExecute = false
-            });
+            };
+
+            startInfo.ArgumentList.Add(getAbsoluteFolderLocation);
+            Process.Start(startInfo);
         }
         else
         {
