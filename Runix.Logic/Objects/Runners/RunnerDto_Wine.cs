@@ -100,7 +100,7 @@ public class RunnerDto_Wine : RunnerDto
         }), null).WaitForExitAsync();
     }
 
-    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(Path.Combine(runnerRoot, WineHelper.SHARED_PREFIX_NAME), path, this);
+    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(Path.Combine(getPrefixRoot, WineHelper.SHARED_PREFIX_NAME), path, this);
 
     public override async Task CleanProfile(Game? game)
     {

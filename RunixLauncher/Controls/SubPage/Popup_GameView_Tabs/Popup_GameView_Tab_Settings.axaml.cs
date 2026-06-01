@@ -263,10 +263,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 
         private async Task UpdateSupportedSettings()
         {
-            ((Visual)element.inp_binary.Parent!).IsVisible = inspectingGame.runnerType == RunnerDto.RunnerType.Proton_GE
-                                            || inspectingGame.runnerType == RunnerDto.RunnerType.Wine
-                                            || inspectingGame.runnerType == RunnerDto.RunnerType.Wine_GE
-                                            || inspectingGame.runnerType == RunnerDto.RunnerType.umu_Launcher;
+            ((Visual)element.inp_binary.Parent!).IsVisible = RunnerDto.IsWineDerivative(inspectingGame.runnerType);
 
             foreach (ConfigChangerBase config in configOptions)
                 config.HandleSupportedType(inspectingGame.runnerType ?? RunnerDto.RunnerType.None);

@@ -172,27 +172,20 @@ public partial class Modal_Settings_Runner : UserControl
 
     private async Task ChangeRunnerType()
     {
-        switch (selectedRunner!.runnerType)
+        if (RunnerDto.IsWineDerivative(selectedRunner!.runnerType))
         {
-            case RunnerDto.RunnerType.Wine:
-            case RunnerDto.RunnerType.Wine_GE:
-            case RunnerDto.RunnerType.umu_Launcher:
-            case RunnerDto.RunnerType.Proton_GE:
-            case RunnerDto.RunnerType.Proton_Plus:
-                tabGroup.ToggleGroupVisibility(1, true);
-                btn_Umu_Location.IsVisible = false;
+            tabGroup.ToggleGroupVisibility(1, true);
+            btn_Umu_Location.IsVisible = false;
 
-                if (selectedRunner!.runnerType == RunnerDto.RunnerType.umu_Launcher)
-                {
-                    btn_Umu_Location.Label = (selectedRunner as RunnerDto_umu)!.getRuntimeLocationRoot;
-                    btn_Umu_Location.IsVisible = true;
-                }
-
-                break;
-
-            default:
-                tabGroup.ToggleGroupVisibility(1, false);
-                break;
+            if (selectedRunner!.runnerType == RunnerDto.RunnerType.umu_Launcher)
+            {
+                btn_Umu_Location.Label = (selectedRunner as RunnerDto_umu)!.getRuntimeLocationRoot;
+                btn_Umu_Location.IsVisible = true;
+            }
+        }
+        else
+        {
+            tabGroup.ToggleGroupVisibility(1, false);
         }
 
         await UpdateVersionInput();

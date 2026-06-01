@@ -25,6 +25,13 @@ public class RunnerDto
         Proton_Plus = 5,
     }
 
+    public static bool IsWineDerivative(RunnerType? type) =>
+        type == RunnerType.Wine ||
+        type == RunnerType.Wine_GE ||
+        type == RunnerType.umu_Launcher ||
+        type == RunnerType.Proton_GE ||
+        type == RunnerType.Proton_Plus;
+
     public enum RunnerConfigValues
     {
         Wine_Prefix,

@@ -70,5 +70,5 @@ public class RunnerDto_ProtonPlus : RunnerDto_Wine
         return Task.FromResult(res);
     }
 
-    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(Path.Combine(runnerRoot, WineHelper.SHARED_PREFIX_NAME, "pfx"), path, this);
+    public override async Task SharePrefixDocuments(string path) => await WineHelper.SharePrefixDataFolders(Path.Combine(getPrefixRoot, WineHelper.SHARED_PREFIX_NAME, "pfx"), path, this);
 }
