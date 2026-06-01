@@ -4,10 +4,11 @@ using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.GameRunners;
 using GameLibrary.Logic.Helpers;
 using Runix.Logic.Helpers;
+using Runix.Logic.Objects.Runners;
 
 namespace GameLibrary.Logic.Objects;
 
-public class RunnerDto_Wine : RunnerDto
+public class RunnerDto_Wine : RunnerDto, IWineRunner
 {
     protected string getPrefixRoot => Path.Combine(runnerRoot, "prefixes").CreateDirectoryIfNotExists();
 
@@ -28,6 +29,7 @@ public class RunnerDto_Wine : RunnerDto
                 break;
             case RunnerManager.SpecialLaunchRequest.WineTricks:
                 args.command = "winetricks";
+                args.arguments.Clear();
                 break;
             case RunnerManager.SpecialLaunchRequest.WineRegistry:
                 launch.AddFirst("regedit");
@@ -116,5 +118,30 @@ public class RunnerDto_Wine : RunnerDto
             return;
 
         Directory.Delete(path, true);
+    }
+
+    public async Task<(string title, string path)[]> GetPrefixes()
+    {
+        string[] dirs = Directory.GetDirectories(getPrefixRoot);
+        List<(string, string)> results = new();
+
+        foreach (string dir in dirs)
+        {
+            string dirName = Path.GetFileName(dir);
+
+            if (int.TryParse(dirName, out int gameId))
+            {
+                Game? game = await LibraryManager.GetGame(gameId, CancellationToken.None);
+
+                if (game != null)
+                    results.Add((game.gameName, dir));
+            }
+            else
+            {
+                results.Add((dirName, dir));
+            }
+        }
+
+        return results.ToArray();
     }
 }

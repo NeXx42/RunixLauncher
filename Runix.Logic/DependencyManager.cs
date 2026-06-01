@@ -127,4 +127,7 @@ public static class DependencyManager
 
     public static async Task<string?> OpenFileDialog(string title, params string[] allowedTypes)
         => await uiLinker!.OpenFileDialog(title, allowedTypes);
+
+    public static void BrowseLocation(string to)
+        => uiLinker!.BrowseLocation(to);
 }

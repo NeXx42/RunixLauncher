@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
@@ -10,6 +11,7 @@ using DynamicData;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Database.Tables;
 using GameLibrary.Logic.Objects;
+using Runix.Logic.Objects.Runners;
 using RunixLauncher.Helpers;
 
 namespace RunixLauncher.Controls.Modals;
@@ -23,6 +25,8 @@ public partial class Modal_Settings_Runner : UserControl
     private string? selectedUmuRoot;
 
     private string[]? versionOptions;
+    private (string, string)[]? winePrefixes;
+    private (string, string)? selectedPrefix;
 
     private UITabGroup tabGroup;
 
@@ -37,9 +41,12 @@ public partial class Modal_Settings_Runner : UserControl
 
         btn_Wine_Tools.Setup(["CFG", "Wine Tricks", "CMD", "Registry", "Joystick"], HandleWineToolsCallback);
         btn_Wine_SharedDocuments.Register(ShareDocuments, "Updating");
+        btn_WinePrefix_Browse.RegisterClick(BrowsePrefix, "Browsing");
+        btn_WinePrefix_Delete.RegisterClick(DeletePrefix, "Deleting");
 
         btn_Prefix_Installer.RegisterClick(DownloadVersion, "Downloading");
         btn_Umu_Location.RegisterClick(UpdateUmuRoot, "Updating");
+
 
         tabGroup = new UITabGroup(TabGroup_Buttons, TabGroup_Content, true);
 
@@ -172,10 +179,14 @@ public partial class Modal_Settings_Runner : UserControl
 
     private async Task ChangeRunnerType()
     {
-        if (RunnerDto.IsWineDerivative(selectedRunner!.runnerType))
+        if (RunnerDto.IsWineDerivative(selectedRunner!.runnerType) && selectedRunner is IWineRunner wineRunner)
         {
             tabGroup.ToggleGroupVisibility(1, true);
             btn_Umu_Location.IsVisible = false;
+
+            winePrefixes = await wineRunner.GetPrefixes();
+            inp_WinePrefix.Setup(winePrefixes.Select(w => w.Item1), 0, ChangeSelectedPrefix);
+            await ChangeSelectedPrefix();
 
             if (selectedRunner!.runnerType == RunnerDto.RunnerType.umu_Launcher)
             {
@@ -223,7 +234,7 @@ public partial class Modal_Settings_Runner : UserControl
 
     private async Task HandleWineToolsCallback(int id)
     {
-        if (!await EnsureExistingProfile())
+        if (!await EnsureExistingProfile() || selectedPrefix == null)
             return;
 
         RunnerManager.SpecialLaunchRequest? req = null;
@@ -238,7 +249,7 @@ public partial class Modal_Settings_Runner : UserControl
         }
 
         if (req.HasValue)
-            await RunnerManager.RunWineTricks(selectedRunner!.runnerId, req.Value);
+            await RunnerManager.RunWineTricks(selectedRunner!.runnerId, req.Value, selectedPrefix.Value.Item2);
     }
 
     private async Task ShareDocuments(bool val)
@@ -297,5 +308,40 @@ public partial class Modal_Settings_Runner : UserControl
             selectedUmuRoot = path;
             btn_Umu_Location.Label = path;
         }
+    }
+
+    private async Task ChangeSelectedPrefix()
+    {
+        int pos = inp_WinePrefix.selectedIndex;
+
+        if (pos < 0 || pos >= (winePrefixes?.Length ?? 0))
+        {
+            selectedPrefix = null;
+            cont_WinePrefixSettings.IsVisible = false;
+            return;
+        }
+
+        cont_WinePrefixSettings.IsVisible = true;
+        selectedPrefix = (winePrefixes![pos].Item1, winePrefixes[pos].Item2);
+    }
+
+    private async Task BrowsePrefix()
+    {
+        if (selectedPrefix == null)
+            return;
+
+        DependencyManager.BrowseLocation(selectedPrefix.Value.Item2);
+    }
+
+    private async Task DeletePrefix()
+    {
+        if (selectedPrefix == null)
+            return;
+
+        if (!await DependencyManager.OpenYesNoModal("Delete Prefix?", $"Are you sure you want to delete the prefix?\nPath is {selectedPrefix.Value.Item2}"))
+            return;
+
+        Directory.Delete(selectedPrefix.Value.Item2, true);
+        await ChangeRunnerType();
     }
 }

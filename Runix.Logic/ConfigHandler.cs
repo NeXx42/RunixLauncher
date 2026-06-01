@@ -11,6 +11,7 @@ using GameLibrary.DB.Tables;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.GameEmbeds;
 using GameLibrary.Logic.Helpers;
+using GameLibrary.Logic.Objects;
 using GameLibrary.Logic.Settings;
 using GameLibrary.Logic.Settings.UI;
 using Logic.db;
@@ -144,10 +145,17 @@ namespace GameLibrary.Logic
                 return;
             }
 
+            RunnerDto[] runners = RunnerManager.GetRunnerProfiles();
+            int? desiredLauncher = await DependencyManager.OpenMultiModal("Runner", runners.Select(r => r.runnerName).ToArray());
+
+            if (desiredLauncher == null)
+                return;
+
             await RunnerManager.RunGame(new RunnerManager.LaunchRequest()
             {
                 identifier = "LocaleEmulator",
                 path = Path.Combine(path, $"{executable}.exe"),
+                runnerId = desiredLauncher.Value,
             });
         }
     }

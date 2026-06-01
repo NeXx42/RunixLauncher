@@ -139,9 +139,9 @@ public static class RunnerManager
     }
 
 
-    public static async Task RunWineTricks(int runnerId, SpecialLaunchRequest request)
+    public static async Task RunWineTricks(int runnerId, SpecialLaunchRequest request, string prefix)
     {
-        if (IsIdentifierRunning($"{runnerId}_{request}"))
+        if (IsIdentifierRunning($"{runnerId}_{request}_{prefix}"))
         {
             await DependencyManager.OpenYesNoModal("Already running", $"{request} is already running, close before trying again");
             return;
@@ -156,8 +156,10 @@ public static class RunnerManager
         {
             identifier = request.ToString(),
             runnerId = runnerId,
+            path = "",
+
             customExecutable = request,
-            path = ""
+            customPrefix = prefix
         });
         runnerDto.HandleSpecialLaunchRequest(req, request);
 
@@ -213,7 +215,7 @@ public static class RunnerManager
         ProcessStartInfo info = new ProcessStartInfo
         {
             FileName = req.command,
-            WorkingDirectory = req.workingDirectory,
+            WorkingDirectory = req.workingDirectory ?? AppContext.BaseDirectory,
 
             UseShellExecute = false,
             RedirectStandardError = true,
@@ -493,7 +495,9 @@ public static class RunnerManager
         public int? runnerId;
 
         public string path;
+        public string? customPrefix;
         public SpecialLaunchRequest? customExecutable;
+
         public string[]? extraWhitelist;
 
         public ConfigProvider<Game_Config>? gameConfig;

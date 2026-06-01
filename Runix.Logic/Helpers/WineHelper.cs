@@ -11,12 +11,12 @@ public static class WineHelper
 
     public static void GetPrefixName(string root, RunnerManager.LaunchRequest req, out string path)
     {
-        path = Path.Combine(root, SHARED_PREFIX_NAME);
+        string prefixName = string.IsNullOrEmpty(req.customPrefix) ? SHARED_PREFIX_NAME : req.customPrefix;
 
         if (req.gameId.HasValue && (req.gameConfig?.GetBoolean(GameLibrary.Logic.Enums.Game_Config.Wine_IsolatedPrefix, false) ?? false))
-        {
-            path = Path.Combine(root, req.gameId.Value.ToString());
-        }
+            prefixName = req.gameId.Value.ToString();
+
+        path = Path.Combine(root, prefixName);
     }
 
     public static async Task SharePrefixDataFolders(string prefixFolder, string sharedLocation, RunnerDto runner)

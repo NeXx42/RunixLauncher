@@ -235,8 +235,12 @@ public class RunnerDto
 
             switch (ofType)
             {
+                case DLLOverrideBehaviour.Disabled: mode = "d"; break;
                 case DLLOverrideBehaviour.LocalOnly: mode = "n"; break;
+                case DLLOverrideBehaviour.BuiltinOnly: mode = "b"; break;
                 case DLLOverrideBehaviour.LocalFallback: mode = "n,b"; break;
+                case DLLOverrideBehaviour.BuiltinFallback: mode = "b,n"; break;
+                case DLLOverrideBehaviour.Default: mode = ""; break;
             }
 
             dllOverrides[dll] = mode;

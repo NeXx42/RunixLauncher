@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using GameLibrary.Logic;
 using GameLibrary.Logic.Interfaces;
 using RunixLauncher.Controls.Modals;
 
@@ -143,5 +145,24 @@ public class UILinker : IUILinker
     {
         var res = await OpenFilesDialog(title, allowedTypes);
         return res != null ? res[0] : null;
+    }
+
+    public void BrowseLocation(string to)
+    {
+        if (ConfigHandler.isOnLinux)
+        {
+            var startInfo = new ProcessStartInfo()
+            {
+                FileName = "xdg-open",
+                UseShellExecute = false
+            };
+
+            startInfo.ArgumentList.Add(to);
+            Process.Start(startInfo);
+        }
+        else
+        {
+            Process.Start("explorer.exe", to);
+        }
     }
 }

@@ -19,4 +19,6 @@ public interface IUILinker
     public Task<string?> OpenFolderDialog(string title);
     public Task<string[]?> OpenFilesDialog(string title, params string[] allowedTypes);
     public Task<string?> OpenFileDialog(string title, params string[] allowedTypes);
+
+    public void BrowseLocation(string to);
 }

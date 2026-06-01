@@ -11,7 +11,7 @@ public class GameEmbed_Locale : IGameEmbed
 
     public void Embed(RunnerManager.LaunchArguments inp, ConfigProvider<RunnerDto.RunnerConfigValues> args)
     {
-        if (!ConfigHandler.isOnLinux && (ConfigHandler.configProvider?.TryGetValue(Enums.ConfigKeys.LocaleEmulator_Location, out string localeEmulatorPath) ?? false))
+        if (ConfigHandler.configProvider?.TryGetValue(Enums.ConfigKeys.LocaleEmulator_Location, out string localeEmulatorPath) ?? false)
         {
             LinkedList<string> commands = new LinkedList<string>();
             commands.AddFirst(Path.Combine(localeEmulatorPath, EMULATOR_PROGRAM_NAME));

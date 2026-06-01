@@ -160,21 +160,7 @@ public abstract class Game
         if (string.IsNullOrEmpty(getAbsoluteFolderLocation) || !Directory.Exists(getAbsoluteFolderLocation))
             return;
 
-        if (ConfigHandler.isOnLinux)
-        {
-            var startInfo = new ProcessStartInfo()
-            {
-                FileName = "xdg-open",
-                UseShellExecute = false
-            };
-
-            startInfo.ArgumentList.Add(getAbsoluteFolderLocation);
-            Process.Start(startInfo);
-        }
-        else
-        {
-            Process.Start("explorer.exe", getAbsoluteFolderLocation);
-        }
+        DependencyManager.BrowseLocation(getAbsoluteFolderLocation);
     }
 
     public async Task UpdateLastPlayed()
