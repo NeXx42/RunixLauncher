@@ -8,7 +8,16 @@ namespace GameLibrary.Logic.Objects;
 
 public class RunnerDto_umu : RunnerDto_Wine
 {
-    private static string getRuntimeLocationRoot => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/Steam/compatibilitytools.d");
+    public string getRuntimeLocationRoot
+    {
+        get
+        {
+            if (globalRunnerValues.TryGetValue(RunnerConfigValues.Umu_Root, out string manualRoot))
+                return manualRoot;
+
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/Steam/compatibilitytools.d");
+        }
+    }
 
     public RunnerDto_umu(dbo_Runner runner, dbo_RunnerConfig[] configValues) : base(runner, configValues)
     {
@@ -52,7 +61,7 @@ public class RunnerDto_umu : RunnerDto_Wine
         return Task.FromResult(res);
     }
 
-    public new static async Task<string[]?> GetRunnerVersions()
+    public override async Task<string[]?> GetRunnerVersion()
     {
         if (!Directory.Exists(getRuntimeLocationRoot))
         {

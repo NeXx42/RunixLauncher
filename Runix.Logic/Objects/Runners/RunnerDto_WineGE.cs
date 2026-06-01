@@ -19,7 +19,7 @@ public class RunnerDto_WineGE : RunnerDto_Wine
 
     protected override string GetWineExecutable(RunnerManager.SpecialLaunchRequest? processName) => Path.Combine(Directory.GetDirectories(GetBinaryPath()).First(), "bin", "wine64");
 
-    public static new async Task<string[]?> GetRunnerVersions() => await GithubVersionHelper.GetRunnerVersions(GITHUB_NAME);
+    protected override async Task<string[]?> GetRunnerVersion_Cached() => await GithubVersionHelper.GetRunnerVersions(GITHUB_NAME);
     public override bool IsInstalled(string? version) => !string.IsNullOrEmpty(version) && Directory.Exists(GetBinaryPath(version));
 
     public override async Task<RunnerManager.LaunchArguments> InitRunDetails(RunnerManager.LaunchRequest game)

@@ -31,7 +31,8 @@ public class RunnerDto
         Generic_Sandbox_BlockNetwork,
         Generic_Sandbox_IsolateFilesystem,
 
-        Generic_EnvironmentVars
+        Generic_EnvironmentVars,
+        Umu_Root
     }
 
 
@@ -111,24 +112,18 @@ public class RunnerDto
 
     // matchers
 
-    public static async Task<string[]?> GetVersionsForRunnerTypes(int typeId)
+    public virtual async Task<string[]?> GetRunnerVersion()
     {
-        if (cachedVersion.ContainsKey(typeId))
-            return cachedVersion[typeId];
+        if (cachedVersion.ContainsKey((int)runnerType))
+            return cachedVersion[(int)runnerType];
 
-        string[]? result = null;
+        string[]? result = await GetRunnerVersion_Cached();
 
-        switch ((RunnerType)typeId)
-        {
-            case RunnerType.Wine: result = await RunnerDto_Wine.GetRunnerVersions(); break;
-            case RunnerType.Wine_GE: result = await RunnerDto_WineGE.GetRunnerVersions(); break;
-            case RunnerType.umu_Launcher: result = await RunnerDto_umu.GetRunnerVersions(); break;
-            case RunnerType.Proton_GE: result = await RunnerDto_ProtonGE.GetRunnerVersions(); break;
-        }
-
-        cachedVersion.Add(typeId, result);
+        cachedVersion.Add((int)runnerType, result);
         return result;
     }
+
+    protected virtual Task<string[]?> GetRunnerVersion_Cached() { return null; }
 
     // logic
 

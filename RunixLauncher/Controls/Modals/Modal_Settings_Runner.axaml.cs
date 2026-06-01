@@ -20,6 +20,7 @@ public partial class Modal_Settings_Runner : UserControl
 
     private RunnerDto? selectedRunner;
     private string? selectedRoot;
+    private string? selectedUmuRoot;
 
     private string[]? versionOptions;
 
@@ -38,6 +39,7 @@ public partial class Modal_Settings_Runner : UserControl
         btn_Wine_SharedDocuments.Register(ShareDocuments, "Updating");
 
         btn_Prefix_Installer.RegisterClick(DownloadVersion, "Downloading");
+        btn_Umu_Location.RegisterClick(UpdateUmuRoot, "Updating");
 
         tabGroup = new UITabGroup(TabGroup_Buttons, TabGroup_Content, true);
 
@@ -69,6 +71,8 @@ public partial class Modal_Settings_Runner : UserControl
     public Task HandleOpen(int runnerId)
     {
         selectedRunner = null;
+        selectedUmuRoot = null;
+
         modalRes = new TaskCompletionSource();
 
         _ = Draw(runnerId);
@@ -119,7 +123,7 @@ public partial class Modal_Settings_Runner : UserControl
             return;
 
 
-        string version = versionOptions != null ? versionOptions[inp_Version.selectedIndex] : string.Empty;
+        string version = (versionOptions?.Length ?? 0) > 0 ? versionOptions![inp_Version.selectedIndex] : string.Empty;
         selectedRunner!.runnerName = inp_Name.Text!;
         selectedRunner!.runnerRoot = selectedRoot!;
         selectedRunner!.runnerVersion = version;
@@ -132,6 +136,17 @@ public partial class Modal_Settings_Runner : UserControl
 
         await selectedRunner!.globalRunnerValues.SaveList(RunnerDto.RunnerConfigValues.Generic_EnvironmentVars, envVars);
         await selectedRunner.UpdateDatabaseEntry();
+
+        switch (selectedRunner!.runnerType)
+        {
+            case RunnerDto.RunnerType.umu_Launcher:
+                if (!string.IsNullOrEmpty(selectedUmuRoot))
+                {
+                    await selectedRunner.globalRunnerValues.SaveValue(RunnerDto.RunnerConfigValues.Umu_Root, selectedUmuRoot);
+                }
+
+                break;
+        }
 
         modalRes?.SetResult();
     }
@@ -164,6 +179,14 @@ public partial class Modal_Settings_Runner : UserControl
             case RunnerDto.RunnerType.umu_Launcher:
             case RunnerDto.RunnerType.Proton_GE:
                 tabGroup.ToggleGroupVisibility(1, true);
+                btn_Umu_Location.IsVisible = false;
+
+                if (selectedRunner!.runnerType == RunnerDto.RunnerType.umu_Launcher)
+                {
+                    btn_Umu_Location.Label = (selectedRunner as RunnerDto_umu)!.getRuntimeLocationRoot;
+                    btn_Umu_Location.IsVisible = true;
+                }
+
                 break;
 
             default:
@@ -176,7 +199,7 @@ public partial class Modal_Settings_Runner : UserControl
 
     private async Task UpdateVersionInput()
     {
-        versionOptions = await RunnerDto.GetVersionsForRunnerTypes((int)selectedRunner!.runnerType);
+        versionOptions = await selectedRunner!.GetRunnerVersion();
 
         if (versionOptions != null)
         {
@@ -265,6 +288,20 @@ public partial class Modal_Settings_Runner : UserControl
             await DependencyManager.OpenLoadingModal(true,
                 selectedRunner.DownloadVersion(versionOptions![inp_Version.selectedIndex])
             );
+        }
+    }
+
+    private async Task UpdateUmuRoot()
+    {
+        if (selectedRunner == null)
+            return;
+
+        string? path = await DependencyManager.OpenFolderDialog("Runtime location");
+
+        if (!string.IsNullOrEmpty(path))
+        {
+            selectedUmuRoot = path;
+            btn_Umu_Location.Label = path;
         }
     }
 }

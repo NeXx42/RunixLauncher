@@ -12,7 +12,7 @@ namespace GameLibrary.Logic.Objects;
 public class RunnerDto_ProtonGE : RunnerDto_Wine
 {
     public const string GITHUB_NAME = "GloriousEggroll/proton-ge-custom";
-    public static async new Task<string[]?> GetRunnerVersions() => await GithubVersionHelper.GetRunnerVersions(GITHUB_NAME);
+    protected override async Task<string[]?> GetRunnerVersion_Cached() => await GithubVersionHelper.GetRunnerVersions(GITHUB_NAME);
 
     public RunnerDto_ProtonGE(dbo_Runner runner, dbo_RunnerConfig[] configValues) : base(runner, configValues)
     {

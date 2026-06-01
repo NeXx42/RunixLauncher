@@ -12,8 +12,6 @@ public class RunnerDto_Wine : RunnerDto
     protected string getPrefixRoot => Path.Combine(runnerRoot, "prefixes").CreateDirectoryIfNotExists();
 
     protected string GetBinaryPath(string? version = null) => Path.Combine(runnerRoot, "binaries", string.IsNullOrEmpty(version) ? runnerVersion : version);
-    public static Task<string[]?> GetRunnerVersions() => Task.FromResult<string[]?>(null);
-
     protected virtual string GetWineExecutable(RunnerManager.SpecialLaunchRequest? launchRequest) => "wine";
 
     public override void HandleSpecialLaunchRequest(RunnerManager.LaunchArguments args, RunnerManager.SpecialLaunchRequest req)
