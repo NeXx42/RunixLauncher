@@ -191,15 +191,8 @@ public static class RunnerManager
             {
                 embeds.Add(new GameEmbed_Firejail());
 
-                if (ConfigHandler.configProvider!.GetBoolean(ConfigKeys.Sandbox_Linux_Firejail_Networking, false))
-                {
-                    await globalConfigValues.SaveBool(RunnerDto.RunnerConfigValues.Generic_Sandbox_BlockNetwork, true);
-                }
-
-                if (ConfigHandler.configProvider!.GetBoolean(ConfigKeys.Sandbox_Linux_Firejail_FileSystemIsolation, false))
-                {
-                    await globalConfigValues.SaveBool(RunnerDto.RunnerConfigValues.Generic_Sandbox_IsolateFilesystem, true);
-                }
+                await globalConfigValues.SaveBool(RunnerDto.RunnerConfigValues.Generic_Sandbox_BlockNetwork, ConfigHandler.configProvider!.GetBoolean(ConfigKeys.Sandbox_Linux_Firejail_Networking, false));
+                await globalConfigValues.SaveBool(RunnerDto.RunnerConfigValues.Generic_Sandbox_IsolateFilesystem, ConfigHandler.configProvider!.GetBoolean(ConfigKeys.Sandbox_Linux_Firejail_FileSystemIsolation, false));
             }
 
             if (ConfigHandler.isFlatpak || true)
@@ -231,7 +224,8 @@ public static class RunnerManager
 
 
 
-        foreach (ArgumentType type in Enum.GetValues(typeof(ArgumentType))) // maintain order
+        ArgumentType[] argumentTypes = (ArgumentType[])Enum.GetValues(typeof(ArgumentType));
+        foreach (ArgumentType type in argumentTypes.OrderBy(x => (int)x)) // maintain order
         {
             if (!req.arguments.TryGetValue(type, out LinkedList<string>? subArguments) || subArguments == null)
                 continue;

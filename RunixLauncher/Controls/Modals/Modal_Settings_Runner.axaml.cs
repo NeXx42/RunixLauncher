@@ -178,6 +178,7 @@ public partial class Modal_Settings_Runner : UserControl
             case RunnerDto.RunnerType.Wine_GE:
             case RunnerDto.RunnerType.umu_Launcher:
             case RunnerDto.RunnerType.Proton_GE:
+            case RunnerDto.RunnerType.Proton_Plus:
                 tabGroup.ToggleGroupVisibility(1, true);
                 btn_Umu_Location.IsVisible = false;
 

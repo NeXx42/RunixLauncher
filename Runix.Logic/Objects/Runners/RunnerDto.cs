@@ -5,6 +5,7 @@ using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.GameRunners;
 using GameLibrary.Logic.Helpers;
 using Runix.Input;
+using Runix.Logic.Objects.Runners;
 using Runix.Structure.Enums;
 
 namespace GameLibrary.Logic.Objects;
@@ -21,6 +22,7 @@ public class RunnerDto
         Wine_GE = 2,
         umu_Launcher = 3,
         Proton_GE = 4,
+        Proton_Plus = 5,
     }
 
     public enum RunnerConfigValues
@@ -71,6 +73,7 @@ public class RunnerDto
             case RunnerType.Wine_GE: return new RunnerDto_WineGE(runner, configValues);
             case RunnerType.umu_Launcher: return new RunnerDto_umu(runner, configValues);
             case RunnerType.Proton_GE: return new RunnerDto_ProtonGE(runner, configValues);
+            case RunnerType.Proton_Plus: return new RunnerDto_ProtonPlus(runner, configValues);
 
             default: return new RunnerDto(runner, configValues);
         }

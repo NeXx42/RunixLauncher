@@ -78,6 +78,7 @@ public class Game_Custom : Game
             case RunnerDto.RunnerType.Wine_GE:
             case RunnerDto.RunnerType.Proton_GE:
             case RunnerDto.RunnerType.umu_Launcher:
+            case RunnerDto.RunnerType.Proton_Plus:
                 if (folderPath.Contains(',') || folderPath.Contains('!'))
                     CreateFixer("Illegal Folder", "This will rename the folder to remove the illegal characters", ResolveFolderPath);
                 break;
