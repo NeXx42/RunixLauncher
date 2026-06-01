@@ -143,7 +143,8 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
                 RunnerDto.RunnerType.Wine,
                 RunnerDto.RunnerType.Wine_GE,
                 RunnerDto.RunnerType.Proton_GE,
-                RunnerDto.RunnerType.umu_Launcher
+                RunnerDto.RunnerType.umu_Launcher,
+                RunnerDto.RunnerType.Proton_Plus,
             ];
 
             configOptions = [

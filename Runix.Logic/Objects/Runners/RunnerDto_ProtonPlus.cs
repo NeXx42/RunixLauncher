@@ -14,12 +14,13 @@ public class RunnerDto_ProtonPlus : RunnerDto_Wine
     {
         string[] candidates =
         {
-            Path.Combine(Environment.GetFolderPath( Environment.SpecialFolder.UserProfile), ".share", "steam"),
-            Path.Combine(Environment.GetFolderPath( Environment.SpecialFolder.UserProfile), ".share", "Steam"),
-            Path.Combine(Environment.GetFolderPath( Environment.SpecialFolder.UserProfile), ".steam", "steam"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".share", "steam"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".share", "Steam"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".steam", "steam"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".steam", "debian-installation"),
 
-            Path.Combine(Environment.GetFolderPath( Environment.SpecialFolder.UserProfile), ".var", "app", "com.valvesoftware.Steam", ".steam", "steam"),
-            Path.Combine(Environment.GetFolderPath( Environment.SpecialFolder.UserProfile), ".var", "app", "com.valvesoftware.Steam", ".local", "share", "Steam"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".var", "app", "com.valvesoftware.Steam", ".steam", "steam"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".var", "app", "com.valvesoftware.Steam", ".local", "share", "Steam"),
         };
 
         List<string> versions = new List<string>();
