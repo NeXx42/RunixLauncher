@@ -38,6 +38,11 @@ public class RunnerDto_Wine : RunnerDto, IWineRunner
                 launch.AddFirst("control");
                 launch.AddLast("joy.cpl");
                 break;
+
+            case RunnerManager.SpecialLaunchRequest.WineControl:
+                launch.AddFirst("control");
+                launch.AddFirst("intl.cpl");
+                break;
         }
 
         args.arguments[RunnerManager.ArgumentType.Application] = launch;
@@ -55,6 +60,7 @@ public class RunnerDto_Wine : RunnerDto, IWineRunner
         RunnerManager.LaunchArguments res = new RunnerManager.LaunchArguments() { command = GetWineExecutable(game.customExecutable) };
         WineHelper.GetPrefixName(getPrefixRoot, game, out string winePrefix);
 
+        AddLogging(res, game.gameConfig?.GetEnum(Game_Config.General_LoggingLevel, LoggingLevel.Off) ?? LoggingLevel.Off);
         AddDefaultArgumentsToInit(ref game, ref res);
 
         res.whiteListedDirs.Add(Path.GetDirectoryName(game.path)!);
@@ -63,7 +69,6 @@ public class RunnerDto_Wine : RunnerDto, IWineRunner
 
         res.environmentArguments.Add("WINEPREFIX", winePrefix);
 
-        AddLogging(res, game.gameConfig?.GetEnum(Game_Config.General_LoggingLevel, LoggingLevel.Off) ?? LoggingLevel.Off);
         return res;
     }
 
@@ -89,7 +94,7 @@ public class RunnerDto_Wine : RunnerDto, IWineRunner
         if (string.IsNullOrEmpty(logString))
             return;
 
-        args.environmentArguments.Add("WINEDEBUG", logString);
+        args.environmentArguments["WINEDEBUG"] = logString;
     }
 
 

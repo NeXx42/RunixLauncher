@@ -39,7 +39,7 @@ public partial class Modal_Settings_Runner : UserControl
 
         btn_Dir.RegisterClick(SelectDirectory);
 
-        btn_Wine_Tools.Setup(["CFG", "Wine Tricks", "CMD", "Registry", "Joystick"], HandleWineToolsCallback);
+        btn_Wine_Tools.Setup(["CFG", "Wine Tricks", "CMD", "Registry", "Joystick", "Control Panel"], HandleWineToolsCallback);
         btn_Wine_SharedDocuments.Register(ShareDocuments, "Updating");
         btn_WinePrefix_Browse.RegisterClick(BrowsePrefix, "Browsing");
         btn_WinePrefix_Delete.RegisterClick(DeletePrefix, "Deleting");
@@ -245,7 +245,7 @@ public partial class Modal_Settings_Runner : UserControl
             case 2: req = RunnerManager.SpecialLaunchRequest.WineCMD; break;
             case 3: req = RunnerManager.SpecialLaunchRequest.WineRegistry; break;
             case 4: req = RunnerManager.SpecialLaunchRequest.WineJoystick; break;
-
+            case 5: req = RunnerManager.SpecialLaunchRequest.WineControl; break;
         }
 
         if (req.HasValue)

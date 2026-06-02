@@ -484,7 +484,8 @@ public static class RunnerManager
         WineTricks,
         WineCMD,
         WineRegistry,
-        WineJoystick
+        WineJoystick,
+        WineControl
     }
 
     public struct LaunchRequest

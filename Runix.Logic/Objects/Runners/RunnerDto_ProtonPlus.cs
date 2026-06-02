@@ -51,6 +51,7 @@ public class RunnerDto_ProtonPlus : RunnerDto_Wine
 
         res.arguments[RunnerManager.ArgumentType.Launcher].AddLast("run");
 
+        AddLogging(res, game.gameConfig?.GetEnum(Game_Config.General_LoggingLevel, LoggingLevel.Off) ?? LoggingLevel.Off);
         AddDefaultArgumentsToInit(ref game, ref res);
 
         res.whiteListedDirs.Add(Path.GetDirectoryName(game.path)!);
@@ -63,9 +64,6 @@ public class RunnerDto_ProtonPlus : RunnerDto_Wine
         res.environmentArguments.Add("STEAM_COMPAT_DATA_PATH", winePrefix);
         res.environmentArguments.Add("WINEPREFIX", Path.Combine(winePrefix, "pfx"));
         res.environmentArguments.Add("STEAM_COMPAT_CLIENT_INSTALL_PATH", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".steam/steam"));
-
-
-        AddLogging(res, game.gameConfig?.GetEnum(Game_Config.General_LoggingLevel, LoggingLevel.Off) ?? LoggingLevel.Off);
 
         return Task.FromResult(res);
     }

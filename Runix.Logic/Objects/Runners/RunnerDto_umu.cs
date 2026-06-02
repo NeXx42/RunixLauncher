@@ -36,6 +36,7 @@ public class RunnerDto_umu : RunnerDto_Wine
             res.arguments[RunnerManager.ArgumentType.Launcher].AddLast("/c");
         }
 
+        res.environmentArguments.Add("UMU_LOG", "debug");
         AddDefaultArgumentsToInit(ref game, ref res);
 
         res.environmentArguments.Add("WINEPREFIX", winePrefix);
@@ -43,7 +44,6 @@ public class RunnerDto_umu : RunnerDto_Wine
         res.environmentArguments.Add("STEAM_RUNTIME", "1");
         res.environmentArguments.Add("GAMEID", game.gameConfig?.GetValue(Game_Config.Launcher_umu_Id) ?? "0");
 
-        res.environmentArguments.Add("UMU_LOG", "debug");
 
         string homeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
