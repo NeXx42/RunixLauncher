@@ -8,6 +8,7 @@
       <common:Common_ButtonToggle x:Name="tabBtn_General" Label="General"/>
       <common:Common_ButtonToggle x:Name="tabBtn_Launching" Label="Launching"/>
       <common:Common_ButtonToggle x:Name="tabBtn_Runner" Label="Running"/>
+      <common:Common_ButtonToggle x:Name="tabBtn_ExternalApplications" Label="External Applications"/>
     </StackPanel>
 
     <StackPanel Grid.Column="2">
@@ -117,6 +118,9 @@
           <common:Common_List Label="Custom DLL overrides" x:Name="inp_Wine_DLLOverride_custom"/>
         </StackPanel>
       </StackPanel>
+
+      <!-- External Applications -->
+      <StackPanel x:Name="tab_ExternalApplications" Spacing="5" IsVisible="True" Margin="5 0 0 0"/>
     </StackPanel>
   </Grid>
 </UserControl>

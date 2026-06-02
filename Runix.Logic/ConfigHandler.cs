@@ -17,6 +17,7 @@ using GameLibrary.Logic.Settings.UI;
 using Logic.db;
 using Runix.Logic.Helpers;
 using Runix.Logic.Settings;
+using Runix.Logic.Settings.UI;
 
 namespace GameLibrary.Logic
 {
@@ -91,6 +92,7 @@ namespace GameLibrary.Logic
 
                         new Setting_Title("Misc", 10, SettingOSCompatibility.Universal),
                         new Setting_Generic_Config("Concurrency", SettingOSCompatibility.Universal, ConfigKeys.Launcher_Concurrency, new SettingsUI_Toggle()),
+                        new Setting_ExternalApplications(),
 
                         new Setting_Title("Firejail", 0, SettingOSCompatibility.Linux),
                         new Setting_Generic_Config("Use firejail", SettingOSCompatibility.Linux, ConfigKeys.Sandbox_Linux_Firejail_Enabled, new SettingsUI_Toggle()),

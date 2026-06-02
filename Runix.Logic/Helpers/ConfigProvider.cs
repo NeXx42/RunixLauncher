@@ -82,7 +82,7 @@ public class ConfigProvider<ENUMTYPE>
     public async Task<bool> SaveEnum<T>(ENUMTYPE key, T v) where T : Enum => await SaveInteger(key, Convert.ToInt32(v));
     public async Task<bool> SaveInteger(ENUMTYPE key, int v) => await SaveValue(key, v.ToString());
     public async Task<bool> SaveBool(ENUMTYPE key, bool b) => await SaveValue(key, b ? "1" : "0");
-    public async Task<bool> SaveList<T>(ENUMTYPE key, T[] dat) => await SaveValue(key, JsonSerializer.Serialize(dat));
+    public async Task<bool> SaveList<T>(ENUMTYPE key, ICollection<T> dat) => await SaveValue(key, JsonSerializer.Serialize(dat));
 
     public async Task<bool> SaveValue(ENUMTYPE key, string? val)
     {

@@ -23,4 +23,5 @@ public enum ConfigKeys
     LocaleEmulator_Location,
     Steam_Location,
     Steam_BridgeShortcutId,
+    ExternalApplicationList
 }

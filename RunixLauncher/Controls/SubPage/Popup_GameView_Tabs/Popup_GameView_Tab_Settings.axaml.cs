@@ -9,7 +9,9 @@ using Avalonia.Media;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.Objects;
+using Microsoft.VisualBasic;
 using Runix.Logic.Helpers;
+using Runix.Structure.Data;
 using Runix.Structure.Enums;
 using RunixLauncher.Controls.Modals;
 using RunixLauncher.Helpers;
@@ -29,7 +31,8 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
         tabGroup = new UITabGroup(
             new UITabGroup_GroupToggleButton(tab_General, tabBtn_General),
             new UITabGroup_GroupToggleButton(tab_LaunchSettings, tabBtn_Launching),
-            new UITabGroup_GroupToggleButton(tab_RunnerSettings, tabBtn_Runner)
+            new UITabGroup_GroupToggleButton(tab_RunnerSettings, tabBtn_Runner),
+            new UITabGroup_GroupToggleButton(tab_ExternalApplications, tabBtn_ExternalApplications)
         );
 
         _ = tabGroup.ChangeSelection(0);
@@ -185,6 +188,7 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
             DrawLibraries(game!);
             DrawRunners(game!);
             DrawBinaries(game!);
+            DrawExternalApplications(game!);
             await UpdateSupportedSettings();
 
             foreach (ConfigChangerBase config in configOptions)
@@ -298,6 +302,48 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 
             await MainWindow.instance!.DisplayModalAsync<Modal_Settings_Runner>(EditModal);
             async Task EditModal(Modal_Settings_Runner modal) => await modal.HandleOpen(runner.runnerId);
+        }
+
+        private void DrawExternalApplications(Game game)
+        {
+            element.tab_ExternalApplications.Children.Clear();
+
+            if (ConfigHandler.configProvider!.TryGetList(ConfigKeys.ExternalApplicationList, out Data_ExternalApplication[] apps))
+            {
+                foreach (Data_ExternalApplication app in apps)
+                {
+                    Grid g = new Grid();
+                    g.ColumnDefinitions = [new ColumnDefinition(GridLength.Star), new ColumnDefinition(10, GridUnitType.Pixel), new ColumnDefinition(250, GridUnitType.Pixel)];
+
+                    Label l = new Label();
+                    l.Content = app.title;
+
+                    Common_Button btn = new Common_Button();
+                    btn.RegisterClick(() => LaunchExternalApplication(game, app));
+                    btn.Label = "Launch";
+                    Grid.SetColumn(btn, 3);
+
+                    g.Children.Add(l);
+                    g.Children.Add(btn);
+                    g.Height = 30;
+
+                    element.tab_ExternalApplications.Children.Add(g);
+                }
+            }
+        }
+
+        private async Task LaunchExternalApplication(Game game, Data_ExternalApplication app)
+        {
+            if (string.IsNullOrEmpty(app.path))
+                return;
+
+            await RunnerManager.RunGame(new RunnerManager.LaunchRequest()
+            {
+                identifier = app.title,
+
+                path = app.path,
+                runnerId = game.runnerId,
+            });
         }
 
 
