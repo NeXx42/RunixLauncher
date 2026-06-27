@@ -163,11 +163,15 @@ public static class RunnerManager
         });
         runnerDto.HandleSpecialLaunchRequest(req, request);
 
-        req.loggingLevel = LoggingLevel.Off;
+        req.loggingLevel = LoggingLevel.Minimal;
         ExecuteRunRequest(req, null);
     }
 
-
+    public static async Task RunNative(string pathToExecutable)
+    {
+        LaunchArguments req = new LaunchArguments() { command = pathToExecutable, loggingLevel = LoggingLevel.Minimal, identifier = pathToExecutable };
+        ExecuteRunRequest(req, null);
+    }
 
 
     private static async Task HandleEmbeds(int? gameId, LaunchArguments args, RunnerDto runnerDto)
@@ -224,8 +228,6 @@ public static class RunnerManager
             ErrorDialog = true
         };
 
-
-
         ArgumentType[] argumentTypes = (ArgumentType[])Enum.GetValues(typeof(ArgumentType));
         foreach (ArgumentType type in argumentTypes.OrderBy(x => (int)x)) // maintain order
         {
@@ -240,7 +242,6 @@ public static class RunnerManager
                 info.ArgumentList.Add(arg);
             }
         }
-
 
         foreach (var arg in req.environmentArguments)
         {

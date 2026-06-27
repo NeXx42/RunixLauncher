@@ -23,6 +23,7 @@ public class RunnerDto
         umu_Launcher = 3,
         Proton_GE = 4,
         Proton_Plus = 5,
+        Ryujinx = 6,
     }
 
     public static bool IsWineDerivative(RunnerType? type) =>
@@ -81,6 +82,7 @@ public class RunnerDto
             case RunnerType.umu_Launcher: return new RunnerDto_umu(runner, configValues);
             case RunnerType.Proton_GE: return new RunnerDto_ProtonGE(runner, configValues);
             case RunnerType.Proton_Plus: return new RunnerDto_ProtonPlus(runner, configValues);
+            case RunnerType.Ryujinx: return new RunnerDto_Ryujinx(runner, configValues);
 
             default: return new RunnerDto(runner, configValues);
         }
@@ -133,7 +135,7 @@ public class RunnerDto
         return result;
     }
 
-    protected virtual Task<string[]?> GetRunnerVersion_Cached() { return null; }
+    protected virtual Task<string[]?> GetRunnerVersion_Cached() { return Task.FromResult<string[]?>(null); }
 
     // logic
 
@@ -279,4 +281,6 @@ public class RunnerDto
 
         return Task.FromResult(args);
     }
+
+    public virtual Task LaunchLauncher() => Task.CompletedTask;
 }

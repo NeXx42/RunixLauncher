@@ -9,7 +9,7 @@
       <StackPanel VerticalAlignment="Top" Height="30" Orientation="Horizontal" Spacing="5" x:Name="TabGroup_Buttons" Margin="5">
         <Controls:Common_ButtonToggle Label="General"/>
         <Controls:Common_ButtonToggle Label="Wine"/>
-        <Controls:Common_ButtonToggle Label=""/>
+        <Controls:Common_ButtonToggle Label="Ryujinx"/>
         <Controls:Common_ButtonToggle Label=""/>
       </StackPanel>
 
@@ -33,6 +33,8 @@
             <Grid ColumnDefinitions="100, *, Auto" Height="30" x:Name="group_Version">
               <Label Content="Version" />
               <Controls:Common_Dropdown Grid.Column="1" x:Name="inp_Version" HorizontalAlignment="Stretch" />
+              <Controls:Common_Button Grid.Column="1" x:Name="btn_VersionDirSelector" HorizontalAlignment="Stretch" Label="Select"/>
+
               <Controls:Common_Button Grid.Column="2" x:Name="btn_Prefix_Installer" HorizontalAlignment="Stretch" Label="Download" Margin="5, 0, 0, 0"/>
             </Grid>
 
@@ -71,6 +73,20 @@
 
             </StackPanel>
           </StackPanel>
+
+          <!--  Ryujinx  -->
+          <StackPanel Spacing="5">
+            <Label Content="Tools"/>
+            <StackPanel Margin="5, 0, 0, 0" Spacing="5">
+              <Grid ColumnDefinitions="100, *" Height="30">
+                <Label Content="Ryujinx" />
+                <Controls:Common_Button Grid.Column="1" x:Name="btn_Ryujinx_Launch" HorizontalAlignment="Stretch" Label="Launch"/>
+              </Grid>
+
+            </StackPanel>
+          </StackPanel>
+
+
         </Grid>
       </ScrollViewer>
 

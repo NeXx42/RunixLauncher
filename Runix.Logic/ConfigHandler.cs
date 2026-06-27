@@ -157,7 +157,7 @@ namespace GameLibrary.Logic
             {
                 identifier = "LocaleEmulator",
                 path = Path.Combine(path, $"{executable}.exe"),
-                runnerId = desiredLauncher.Value,
+                runnerId = runners[desiredLauncher.Value].runnerId,
             });
         }
     }

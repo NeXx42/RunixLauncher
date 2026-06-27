@@ -267,7 +267,11 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
 
         private async Task UpdateSupportedSettings()
         {
-            ((Visual)element.inp_binary.Parent!).IsVisible = RunnerDto.IsWineDerivative(inspectingGame.runnerType);
+            bool isWineDerivative = false;
+
+            ((Visual)element.inp_binary.Parent!).IsVisible = isWineDerivative;
+            ((Visual)element.inp_Wine_DLLOverride_custom.Parent!).IsVisible = isWineDerivative;
+            ((Visual)element.inp_Wine_DLLOverride_steamapi64.Parent!).IsVisible = isWineDerivative;
 
             foreach (ConfigChangerBase config in configOptions)
                 config.HandleSupportedType(inspectingGame.runnerType ?? RunnerDto.RunnerType.None);

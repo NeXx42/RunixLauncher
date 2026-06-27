@@ -69,6 +69,13 @@ public partial class Indexer_FolderView : UserControl
 
         switch (extension.ToLower())
         {
+            case ".nsp":
+                btn_Action.IsVisible = true;
+                btn_Action.Label = "Select";
+
+                selectedFile = (selectedItem!.fullPath, SelectedFileType.Executable);
+                break;
+
             case ".exe":
             case ".appimage":
                 btn_Action.IsVisible = true;

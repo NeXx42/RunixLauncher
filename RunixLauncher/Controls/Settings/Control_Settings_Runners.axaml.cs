@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -101,16 +102,24 @@ public partial class Control_Settings_Runners : UserControl, ISettingControl
         }
         else
         {
-            int? desiredType = await DependencyManager.OpenMultiModal("Runner type", System.Enum.GetNames(typeof(RunnerDto.RunnerType)));
+            (string, RunnerDto.RunnerType?)[] options = [
+                ("Cancel", null), ..
+                ((RunnerDto.RunnerType[])System.Enum.GetValues(typeof(RunnerDto.RunnerType)))
+                    .Where(r => r != RunnerDto.RunnerType.None)
+                    .Select(r => (r.ToString(), r))
+            ];
 
-            if (desiredType.HasValue)
+            int? desiredType = await DependencyManager.OpenMultiModal("Runner type", options.Select(o => o.Item1).ToArray());
+            RunnerDto.RunnerType? selectedRunner = desiredType.HasValue ? options[desiredType.Value].Item2 : null;
+
+            if (selectedRunner.HasValue)
             {
                 string? path = await DependencyManager.OpenFolderDialog("Runner root");
 
                 if (string.IsNullOrEmpty(path))
                     return;
 
-                await RunnerManager.CreateProfile(path, (RunnerDto.RunnerType)desiredType.Value, string.Empty);
+                await RunnerManager.CreateProfile(path, selectedRunner.Value, string.Empty);
                 await LoadValue();
             }
         }

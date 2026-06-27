@@ -204,7 +204,7 @@ public partial class Page_Library : UserControl, IControlChild
 
         await Task.WhenAll(
             Settings.OnOpen(subPageCancellationToken?.Token ?? CancellationToken.None),
-            AnimationHelper.MoveUpAndFade(Indexer, subPageCancellationToken?.Token ?? CancellationToken.None)
+            AnimationHelper.MoveUpAndFade(Settings, subPageCancellationToken?.Token ?? CancellationToken.None)
         );
 
         openedMenu = Settings;
@@ -217,7 +217,7 @@ public partial class Page_Library : UserControl, IControlChild
 
         await Task.WhenAll(
             TagEditor.OnOpen(subPageCancellationToken?.Token ?? CancellationToken.None),
-            AnimationHelper.MoveUpAndFade(Indexer, subPageCancellationToken?.Token ?? CancellationToken.None)
+            AnimationHelper.MoveUpAndFade(TagEditor, subPageCancellationToken?.Token ?? CancellationToken.None)
         );
     }
 

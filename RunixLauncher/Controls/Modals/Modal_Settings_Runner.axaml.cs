@@ -23,8 +23,8 @@ public partial class Modal_Settings_Runner : UserControl
     private RunnerDto? selectedRunner;
     private string? selectedRoot;
     private string? selectedUmuRoot;
+    private string? selectedVersion;
 
-    private string[]? versionOptions;
     private (string, string)[]? winePrefixes;
     private (string, string)? selectedPrefix;
 
@@ -45,8 +45,10 @@ public partial class Modal_Settings_Runner : UserControl
         btn_WinePrefix_Delete.RegisterClick(DeletePrefix, "Deleting");
 
         btn_Prefix_Installer.RegisterClick(DownloadVersion, "Downloading");
+        btn_VersionDirSelector.RegisterClick(SetVersion, "Updating");
         btn_Umu_Location.RegisterClick(UpdateUmuRoot, "Updating");
 
+        btn_Ryujinx_Launch.RegisterClick(LaunchLauncher, "Launching");
 
         tabGroup = new UITabGroup(TabGroup_Buttons, TabGroup_Content, true);
 
@@ -105,6 +107,9 @@ public partial class Modal_Settings_Runner : UserControl
 
         selectedRoot = selectedRunner?.runnerRoot ?? string.Empty;
         btn_Dir.Label = selectedRoot ?? "Select directory";
+
+        selectedVersion = selectedRunner?.runnerVersion ?? string.Empty;
+        btn_VersionDirSelector.Label = selectedVersion ?? "SelectVersion";
     }
 
     private async Task UpdateWineDetails()
@@ -130,10 +135,9 @@ public partial class Modal_Settings_Runner : UserControl
             return;
 
 
-        string version = (versionOptions?.Length ?? 0) > 0 ? versionOptions![inp_Version.selectedIndex] : string.Empty;
         selectedRunner!.runnerName = inp_Name.Text!;
         selectedRunner!.runnerRoot = selectedRoot!;
-        selectedRunner!.runnerVersion = version;
+        selectedRunner!.runnerVersion = selectedVersion ?? string.Empty;
 
         Data_EnvironmentVar[] envVars = inp_CustomEnvironmentVariables.GetData<Grid>().Select(x => new Data_EnvironmentVar()
         {
@@ -179,10 +183,15 @@ public partial class Modal_Settings_Runner : UserControl
 
     private async Task ChangeRunnerType()
     {
+        UpdateVersionInstallerButton();
+
+        inp_Version.IsVisible = false;
+        btn_Umu_Location.IsVisible = false;
+        btn_VersionDirSelector.IsVisible = false;
+
         if (RunnerDto.IsWineDerivative(selectedRunner!.runnerType) && selectedRunner is IWineRunner wineRunner)
         {
             tabGroup.ToggleGroupVisibility(1, true);
-            btn_Umu_Location.IsVisible = false;
 
             winePrefixes = await wineRunner.GetPrefixes();
             inp_WinePrefix.Setup(winePrefixes.Select(w => w.Item1), 0, ChangeSelectedPrefix);
@@ -199,25 +208,21 @@ public partial class Modal_Settings_Runner : UserControl
             tabGroup.ToggleGroupVisibility(1, false);
         }
 
-        await UpdateVersionInput();
-    }
-
-    private async Task UpdateVersionInput()
-    {
-        versionOptions = await selectedRunner!.GetRunnerVersion();
+        string[]? versionOptions = await selectedRunner!.GetRunnerVersion();
 
         if (versionOptions != null)
         {
             int selectedVersion = versionOptions.IndexOf(selectedRunner?.runnerVersion);
 
             inp_Version.IsVisible = true;
-            inp_Version.Setup(versionOptions, selectedVersion == -1 ? 0 : selectedVersion, UpdateVersionInstallerButton);
-
-            UpdateVersionInstallerButton();
+            inp_Version.Setup(versionOptions, selectedVersion == -1 ? 0 : selectedVersion, ChangeVersionDropdownSelection);
         }
         else
         {
-            inp_Version.IsVisible = false;
+            if (selectedRunner.runnerType == RunnerDto.RunnerType.Ryujinx)
+            {
+                btn_VersionDirSelector.IsVisible = true;
+            }
         }
     }
 
@@ -274,24 +279,43 @@ public partial class Modal_Settings_Runner : UserControl
         }
     }
 
+    private void ChangeVersionDropdownSelection()
+    {
+        selectedVersion = inp_Version.selectedValue?.ToString() ?? string.Empty;
+        UpdateVersionInstallerButton();
+    }
+
+    private async Task SetVersion()
+    {
+        string? dir = await DependencyManager.OpenFileDialog("Select ryujinx", "AppImage");
+
+        if (string.IsNullOrEmpty(dir) || !File.Exists(dir))
+            return;
+
+        selectedVersion = dir;
+        btn_VersionDirSelector.Label = dir ?? "Select Version";
+
+        UpdateVersionInstallerButton();
+    }
+
     private void UpdateVersionInstallerButton()
     {
-        if (!selectedRunner!.IsInstalled(versionOptions![inp_Version.selectedIndex]))
+        if (selectedRunner?.IsInstalled(selectedVersion) ?? false)
         {
-            btn_Prefix_Installer.IsVisible = true;
+            btn_Prefix_Installer.IsVisible = false;
         }
         else
         {
-            btn_Prefix_Installer.IsVisible = false;
+            btn_Prefix_Installer.IsVisible = true;
         }
     }
 
     private async Task DownloadVersion()
     {
-        if (!selectedRunner!.IsInstalled(versionOptions![inp_Version.selectedIndex]))
+        if (!string.IsNullOrEmpty(selectedVersion) && !selectedRunner!.IsInstalled(selectedVersion))
         {
             await DependencyManager.OpenLoadingModal(true,
-                selectedRunner.DownloadVersion(versionOptions![inp_Version.selectedIndex])
+                selectedRunner.DownloadVersion(selectedVersion!)
             );
         }
     }
@@ -344,4 +368,6 @@ public partial class Modal_Settings_Runner : UserControl
         Directory.Delete(selectedPrefix.Value.Item2, true);
         await ChangeRunnerType();
     }
+
+    private async Task LaunchLauncher() => selectedRunner?.LaunchLauncher();
 }
