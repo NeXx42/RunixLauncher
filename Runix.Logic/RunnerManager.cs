@@ -136,6 +136,7 @@ public static class RunnerManager
         dat.arguments[ArgumentType.Application].AddLast($"steam://rungameid/{game.appId}");
 
         ExecuteRunRequest(dat, null);
+        await game.UpdateLastPlayed();
     }
 
 
