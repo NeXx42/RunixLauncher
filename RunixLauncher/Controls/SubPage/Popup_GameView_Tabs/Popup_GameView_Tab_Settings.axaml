@@ -1,8 +1,8 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="RunixLauncher.Controls.SubPages.Popup_GameView_Tabs.Popup_GameView_Tab_Settings"
-  xmlns:common="clr-namespace:RunixLauncher.Controls">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="RunixLauncher.Controls.SubPages.Popup_GameView_Tabs.Popup_GameView_Tab_Settings"
+             xmlns:common="clr-namespace:RunixLauncher.Controls">
   <Grid ColumnDefinitions="150 20 *">
     <StackPanel Orientation="Vertical" Grid.Column="0" Spacing="5">
       <common:Common_ButtonToggle x:Name="tabBtn_General" Label="General"/>
@@ -117,6 +117,7 @@
 
           <common:Common_List Label="Custom DLL overrides" x:Name="inp_Wine_DLLOverride_custom"/>
         </StackPanel>
+
       </StackPanel>
 
       <!-- External Applications -->
