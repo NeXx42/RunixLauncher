@@ -584,8 +584,8 @@ public static class RunnerManager
                     Share = FileShare.ReadWrite
                 });
 
-                process.OutputDataReceived += OnOutput;
-                process.ErrorDataReceived += OnOutput;
+                process.OutputDataReceived += (o, a) => _ = OnOutput(o, a);
+                process.ErrorDataReceived += (o, a) => _ = OnOutput(o, a);
             }
 
             this.gameId = gameId;
@@ -604,7 +604,7 @@ public static class RunnerManager
             }
         }
 
-        private async void OnOutput(object sender, DataReceivedEventArgs args)
+        private async Task OnOutput(object sender, DataReceivedEventArgs args)
         {
             if (!string.IsNullOrEmpty(args.Data))
             {

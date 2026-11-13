@@ -40,7 +40,7 @@ public static class OverlayManager
 
             Process p = Process.Start(processInfo)!;
 
-            activeGTKOverlay = (new Thread(async () => await ListenForGTKOutput(gameId, p)), p);
+            activeGTKOverlay = (new Thread(() => _ = ListenForGTKOutput(gameId, p)), p);
             activeGTKOverlay.Value.thread.Start();
         }
         else

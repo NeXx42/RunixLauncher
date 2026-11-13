@@ -25,7 +25,7 @@ public static class ImageManager
     {
         fetcher = implementation;
 
-        imageFetchThread = new Thread(GameImageFetcher);
+        imageFetchThread = new Thread(() => _ = GameImageFetcher());
         imageFetchThread.Name = "Image Thread";
         imageFetchThread.Start();
 
@@ -63,7 +63,7 @@ public static class ImageManager
         }
     }
 
-    private static async void GameImageFetcher()
+    private static async Task GameImageFetcher()
     {
         while (true)
         {

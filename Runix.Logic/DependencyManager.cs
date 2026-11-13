@@ -56,15 +56,15 @@ public static class DependencyManager
         cachedDBLocation = path;
     }
 
-    private static async void HandleDatabaseException(Exception error, string? sql)
+    private static void HandleDatabaseException(Exception error, string? sql)
     {
         if (string.IsNullOrEmpty(sql))
         {
-            await OpenYesNoModal("Database Logic Exception", $"{error.Message}\n\n{error.StackTrace}");
+            _ = OpenYesNoModal("Database Logic Exception", $"{error.Message}\n\n{error.StackTrace}");
         }
         else
         {
-            await OpenYesNoModal("SQL Exception", $"{sql}\n{error.Message}");
+            _ = OpenYesNoModal("SQL Exception", $"{sql}\n{error.Message}");
         }
     }
 
@@ -84,7 +84,7 @@ public static class DependencyManager
         => uiLinker!.InvokeOnUIThread(a);
 
     public static void InvokeOnUIThread(Func<Task> a)
-        => uiLinker!.InvokeOnUIThread(async () => await a());
+        => uiLinker!.InvokeOnUIThread(() => _ = a());
 
 
     public static async Task OpenLoadingModal(bool progressiveLoad, params LoadingTask[] tasks)

@@ -89,7 +89,7 @@ namespace GameLibrary.Logic
             return true;
         }
 
-        private static Task CopyFiles(string existing, string destination)
+        private static async Task CopyFiles(string existing, string destination)
         {
             Directory.CreateDirectory(destination);
 
@@ -102,11 +102,10 @@ namespace GameLibrary.Logic
             foreach (var directory in Directory.GetDirectories(existing))
             {
                 var destSubDir = Path.Combine(destination, Path.GetFileName(directory));
-                CopyFiles(directory, destSubDir);
+                await CopyFiles(directory, destSubDir);
             }
 
             Directory.Delete(existing, recursive: true);
-            return Task.CompletedTask;
         }
 
 
@@ -258,7 +257,7 @@ namespace GameLibrary.Logic
             return extractFolderName;
         }
 
-        private static Task ReadProgressOfExtraction(Process p, IProgress<int> progress, CancellationToken cancellationToken)
+        private static async Task ReadProgressOfExtraction(Process p, IProgress<int> progress, CancellationToken cancellationToken)
         {
             int charNumber;
             const int newLineCharNumber = '\b';
@@ -267,7 +266,7 @@ namespace GameLibrary.Logic
 
             TaskCompletionSource task = new TaskCompletionSource();
 
-            Task.Run(() =>
+            await Task.Run(() =>
             {
                 while (!p.HasExited)
                 {
@@ -301,8 +300,6 @@ namespace GameLibrary.Logic
 
                 task.SetResult();
             });
-
-            return task.Task;
         }
 
         public interface IImportEntry

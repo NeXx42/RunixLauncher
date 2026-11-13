@@ -53,15 +53,15 @@ public static class ExtensionMethods
 
     public static Action WrapTaskInExceptionHandler(Func<Task> task)
     {
-        return async () =>
+        return () =>
         {
             try
             {
-                await task();
+                _ = task();
             }
             catch (Exception e)
             {
-                await DependencyManager.OpenExceptionDialog("Unhandled Task Exception", e);
+                _ = DependencyManager.OpenExceptionDialog("Unhandled Task Exception", e);
             }
         };
     }
