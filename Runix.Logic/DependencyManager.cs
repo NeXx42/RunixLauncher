@@ -13,6 +13,7 @@ public static class DependencyManager
     public static string GetUserStorageFolder() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), APPLICATION_NAME);
     public static string? cachedDBLocation { get; private set; }
 
+    public static Database_Instance? database { get; private set; }
 
     public static async Task PreSetup(IUILinker linker, IImageFetcher imageFetcher)
     {
@@ -35,7 +36,9 @@ public static class DependencyManager
             await CreateDBPointerFile(Path.Combine(GetUserStorageFolder(), $"{APPLICATION_NAME}.db"));
         }
 
-        await Database_Manager.Init(cachedDBLocation!, HandleDatabaseException);
+        database = new Database_Instance();
+        await database.Init(cachedDBLocation!, HandleDatabaseException);
+
         await ConfigHandler.Init();
 
         uiLinker = linker;

@@ -69,7 +69,7 @@ public abstract class Game
 
     protected async Task UpdateDatabaseEntry(params string[] columns)
     {
-        await Database_Manager.Update(new dbo_Game()
+        await DependencyManager.database!.Update(new dbo_Game()
         {
             id = gameId,
 
@@ -102,12 +102,12 @@ public abstract class Game
             configValue = val
         };
 
-        await Database_Manager.AddOrUpdate(conf, SQLFilter.Equal(nameof(dbo_GameConfig.gameId), gameId).Equal(nameof(dbo_GameConfig.configKey), key));
+        await DependencyManager.database!.AddOrUpdate(conf, SQLFilter.Equal(nameof(dbo_GameConfig.gameId), gameId).Equal(nameof(dbo_GameConfig.configKey), key));
     }
 
     private async Task DeleteConfig(string key)
     {
-        await Database_Manager.Delete<dbo_GameConfig>(SQLFilter.Equal(nameof(dbo_GameConfig.gameId), gameId).Equal(nameof(dbo_GameConfig.configKey), key.ToString()));
+        await DependencyManager.database!.Delete<dbo_GameConfig>(SQLFilter.Equal(nameof(dbo_GameConfig.gameId), gameId).Equal(nameof(dbo_GameConfig.configKey), key.ToString()));
     }
 
     // updating properties
@@ -144,12 +144,12 @@ public abstract class Game
         if (tags!.Contains(tagId))
         {
             tags.Remove(tagId);
-            await Database_Manager.Delete<dbo_GameTag>(SQLFilter.Equal(nameof(dbo_GameTag.GameId), gameId).Equal(nameof(dbo_GameTag.TagId), tagId));
+            await DependencyManager.database!.Delete<dbo_GameTag>(SQLFilter.Equal(nameof(dbo_GameTag.GameId), gameId).Equal(nameof(dbo_GameTag.TagId), tagId));
         }
         else
         {
             tags.Add(tagId);
-            await Database_Manager.InsertItem(new dbo_GameTag() { GameId = gameId, TagId = tagId });
+            await DependencyManager.database!.InsertItem(new dbo_GameTag() { GameId = gameId, TagId = tagId });
         }
 
         LibraryManager.onGameDetailsUpdate?.Invoke(gameId);

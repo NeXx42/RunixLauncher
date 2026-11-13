@@ -16,7 +16,7 @@ public class Setting_EpicGamesIntegration : SettingBase
 
     public override async Task<T> LoadSetting<T>(T fallback) where T : default
     {
-        return (T)(object)await Database_Manager.Exists<dbo_Game>(SQLFilter.Equal(nameof(dbo_Game.status), (int)Game_Status.EpicGamesIntegrator));
+        return (T)(object)await DependencyManager.database!.Exists<dbo_Game>(SQLFilter.Equal(nameof(dbo_Game.status), (int)Game_Status.EpicGamesIntegrator));
     }
 
     public override async Task<bool> SaveSetting<T>(T val)

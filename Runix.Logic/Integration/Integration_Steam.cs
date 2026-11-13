@@ -19,7 +19,7 @@ public static class Integration_Steam
         if (installedApps == null)
             return;
 
-        dbo_Game[]? savedSteamGames = await Database_Manager.GetItems<dbo_Game>(SQLFilter.Equal(nameof(dbo_Game.libraryId), libId));
+        dbo_Game[]? savedSteamGames = await DependencyManager.database!.GetItems<dbo_Game>(SQLFilter.Equal(nameof(dbo_Game.libraryId), libId));
 
         Dictionary<long, dbo_Game> existingGames = savedSteamGames.ToDictionary(x => long.Parse(x.executablePath!), x => x);
         savedSteamGames = null;
@@ -57,7 +57,7 @@ public static class Integration_Steam
 
     private static async Task<int> GetOrCreateLibrary()
     {
-        dbo_Libraries? existingLib = await Database_Manager.GetItem<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libraryExternalType), (int)Library_ExternalProviders.Steam));
+        dbo_Libraries? existingLib = await DependencyManager.database!.GetItem<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libraryExternalType), (int)Library_ExternalProviders.Steam));
 
         if (existingLib == null)
         {
@@ -68,8 +68,8 @@ public static class Integration_Steam
                 alias = "steamlib"
             };
 
-            await Database_Manager.InsertItem(existingLib);
-            existingLib = await Database_Manager.GetItem<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libraryExternalType), (int)Library_ExternalProviders.Steam)); // need to refetch for auto id
+            await DependencyManager.database!.InsertItem(existingLib);
+            existingLib = await DependencyManager.database!.GetItem<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libraryExternalType), (int)Library_ExternalProviders.Steam)); // need to refetch for auto id
         }
 
         return existingLib!.libaryId;

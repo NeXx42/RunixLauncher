@@ -385,14 +385,14 @@ public static class RunnerManager
             isDefault = !cachedDefaultRunnerId.HasValue
         };
 
-        await Database_Manager.InsertItem(profile);
+        await DependencyManager.database!.InsertItem(profile);
         await RecacheRunners();
     }
 
     public static async Task RecacheRunners()
     {
         HashSet<int> existingRunners = cachedRunners.Keys.ToHashSet();
-        dbo_Runner[] runnerDbs = await Database_Manager.GetItems<dbo_Runner>(SQLFilter.OrderAsc(nameof(dbo_Runner.runnerId)));
+        dbo_Runner[] runnerDbs = await DependencyManager.database!.GetItems<dbo_Runner>(SQLFilter.OrderAsc(nameof(dbo_Runner.runnerId)));
 
         foreach (dbo_Runner runner in runnerDbs)
         {
@@ -420,7 +420,7 @@ public static class RunnerManager
             throw new Exception("Runner not found");
         }
 
-        dbo_RunnerConfig[] globalConfig = await Database_Manager.GetItems<dbo_RunnerConfig>(SQLFilter.Equal(nameof(dbo_RunnerConfig.runnerId), runnerDb.runnerId));
+        dbo_RunnerConfig[] globalConfig = await DependencyManager.database!.GetItems<dbo_RunnerConfig>(SQLFilter.Equal(nameof(dbo_RunnerConfig.runnerId), runnerDb.runnerId));
         return RunnerDto.Create(runnerDb, globalConfig);
     }
 
@@ -428,7 +428,7 @@ public static class RunnerManager
     public static RunnerDto[] GetRunnerProfiles() => cachedRunners.Values.ToArray();
 
     public static async Task<int> GetGameCountForRunner(int runnerId)
-        => await Database_Manager.GetCount<dbo_Game>(SQLFilter.Equal(nameof(dbo_Game.runnerId), runnerId));
+        => await DependencyManager.database!.GetCount<dbo_Game>(SQLFilter.Equal(nameof(dbo_Game.runnerId), runnerId));
 
     public static async Task<bool> DeleteRunnerProfile(int id)
     {
@@ -446,8 +446,8 @@ public static class RunnerManager
 
         await LibraryManager.ClearRunner(id);
 
-        await Database_Manager.Delete<dbo_RunnerConfig>(SQLFilter.Equal(nameof(dbo_RunnerConfig.runnerId), id));
-        await Database_Manager.Delete<dbo_Runner>(SQLFilter.Equal(nameof(dbo_Runner.runnerId), id));
+        await DependencyManager.database!.Delete<dbo_RunnerConfig>(SQLFilter.Equal(nameof(dbo_RunnerConfig.runnerId), id));
+        await DependencyManager.database!.Delete<dbo_Runner>(SQLFilter.Equal(nameof(dbo_Runner.runnerId), id));
 
 
         dbo_Game temp = new dbo_Game()
@@ -459,7 +459,7 @@ public static class RunnerManager
             runnerId = null
         };
 
-        await Database_Manager.Update(temp, SQLFilter.Equal(nameof(dbo_Game.runnerId), id), nameof(dbo_Game.runnerId));
+        await DependencyManager.database!.Update(temp, SQLFilter.Equal(nameof(dbo_Game.runnerId), id), nameof(dbo_Game.runnerId));
         await RecacheRunners();
 
         return true;
@@ -468,7 +468,7 @@ public static class RunnerManager
     public static async Task SetDefaultRunner(int runnerId)
     {
         string sql = $"UPDATE {dbo_Runner.tableName} SET {nameof(dbo_Runner.isDefault)} = case when {nameof(dbo_Runner.runnerId)} = {runnerId} then 1 else null end";
-        await Database_Manager.ExecuteSQLNonQuery(sql, CancellationToken.None);
+        await DependencyManager.database!.ExecuteSQLNonQuery(sql, CancellationToken.None);
 
         cachedDefaultRunnerId = runnerId;
 

@@ -32,7 +32,7 @@ namespace GameLibrary.Logic
 
         public static async Task Init()
         {
-            dbo_Config[] config = await Database_Manager.GetItems<dbo_Config>();
+            dbo_Config[] config = await DependencyManager.database!.GetItems<dbo_Config>();
             configProvider = new ConfigProvider<ConfigKeys>(config.Select(x => (x.key, x.value)), SaveConfig, DeleteConfig);
 
             isOnLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
@@ -124,11 +124,11 @@ namespace GameLibrary.Logic
                 value = value,
             };
 
-            await Database_Manager.AddOrUpdate(dbo, SQLFilter.Equal(nameof(dbo_Config.key), key), nameof(dbo_Config.value));
+            await DependencyManager.database!.AddOrUpdate(dbo, SQLFilter.Equal(nameof(dbo_Config.key), key), nameof(dbo_Config.value));
         }
 
         private static Task DeleteConfig(string key)
-            => Database_Manager.Delete<dbo_Config>(SQLFilter.Equal(nameof(dbo_Config.key), key));
+            => DependencyManager.database!.Delete<dbo_Config>(SQLFilter.Equal(nameof(dbo_Config.key), key));
 
 
         public static bool IsSettingSupported(SettingOSCompatibility compatibility)

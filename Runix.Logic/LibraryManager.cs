@@ -29,7 +29,7 @@ namespace GameLibrary.Logic
 
         public static async Task FindLibraries()
         {
-            dbo_Libraries[] libraries = await Database_Manager.GetItems<dbo_Libraries>();
+            dbo_Libraries[] libraries = await DependencyManager.database!.GetItems<dbo_Libraries>();
             cachedLibraries = libraries.ToDictionary(x => x.libaryId, x => new LibraryDto(x));
         }
 
@@ -86,13 +86,13 @@ namespace GameLibrary.Logic
                         if (libraryId.HasValue)
                         {
                             newGame.gameFolder = useGuidFolderNames ? Guid.NewGuid().ToString() : gameName;
-                            dbo_Libraries library = (await Database_Manager.GetItem<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libaryId), libraryId.Value)))!;
+                            dbo_Libraries library = (await DependencyManager.database!.GetItem<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libaryId), libraryId.Value)))!;
 
                             if (!await FileManager.MoveGameToItsLibrary(newGame, folder.getBinaryPath, library.rootPath))
                                 return;
                         }
 
-                        await Database_Manager.InsertItem(newGame);
+                        await DependencyManager.database!.InsertItem(newGame);
                         successfulGames.Add(importEntry.Key);
                     });
                 }
@@ -109,7 +109,7 @@ namespace GameLibrary.Logic
             sql += $" LIMIT {filterRequest.take} OFFSET {filterRequest.take * filterRequest.page};";
 
             int? totalCount = null;
-            int[] res = await Database_Manager.GetItemsGeneric(sql, DeserializeDatabaseRequest, cancellationToken);
+            int[] res = await DependencyManager.database!.GetItemsGeneric(sql, DeserializeDatabaseRequest, cancellationToken);
 
             filteredGameCount = totalCount ?? 0;
             return res;
@@ -137,13 +137,13 @@ namespace GameLibrary.Logic
             try
             {
 
-                dbo_Game? dboGame = await Database_Manager.GetItem<dbo_Game>(SQLFilter.Equal(nameof(dbo_Game.id), gameId), cancellationToken);
+                dbo_Game? dboGame = await DependencyManager.database!.GetItem<dbo_Game>(SQLFilter.Equal(nameof(dbo_Game.id), gameId), cancellationToken);
                 if (dboGame == null || cancellationToken.IsCancellationRequested) return null;
 
-                dbo_GameTag[] dboTags = await Database_Manager.GetItems<dbo_GameTag>(SQLFilter.Equal(nameof(dbo_GameTag.GameId), gameId), cancellationToken);
+                dbo_GameTag[] dboTags = await DependencyManager.database!.GetItems<dbo_GameTag>(SQLFilter.Equal(nameof(dbo_GameTag.GameId), gameId), cancellationToken);
                 if (cancellationToken.IsCancellationRequested) return null;
 
-                dbo_GameConfig[] dboConfig = await Database_Manager.GetItems<dbo_GameConfig>(SQLFilter.Equal(nameof(dbo_GameConfig.gameId), gameId), cancellationToken);
+                dbo_GameConfig[] dboConfig = await DependencyManager.database!.GetItems<dbo_GameConfig>(SQLFilter.Equal(nameof(dbo_GameConfig.gameId), gameId), cancellationToken);
                 if (cancellationToken.IsCancellationRequested) return null;
 
                 if (dboGame.libraryId.HasValue && cachedLibraries.TryGetValue(dboGame.libraryId.Value, out LibraryDto? lib) && lib != null)
@@ -185,9 +185,9 @@ namespace GameLibrary.Logic
                 }
             }
 
-            await Database_Manager.Delete<dbo_GameConfig>(SQLFilter.Equal(nameof(dbo_GameConfig.gameId), game.gameId));
-            await Database_Manager.Delete<dbo_GameTag>(SQLFilter.Equal(nameof(dbo_GameTag.GameId), game.gameId));
-            await Database_Manager.Delete<dbo_Game>(SQLFilter.Equal(nameof(dbo_Game.id), game.gameId));
+            await DependencyManager.database!.Delete<dbo_GameConfig>(SQLFilter.Equal(nameof(dbo_GameConfig.gameId), game.gameId));
+            await DependencyManager.database!.Delete<dbo_GameTag>(SQLFilter.Equal(nameof(dbo_GameTag.GameId), game.gameId));
+            await DependencyManager.database!.Delete<dbo_Game>(SQLFilter.Equal(nameof(dbo_Game.id), game.gameId));
             cachedGames.Remove(game.gameId);
 
             onGameDeletion?.Invoke();
@@ -196,7 +196,7 @@ namespace GameLibrary.Logic
 
         public static async Task GenerateLibrary(string path)
         {
-            await Database_Manager.InsertItem(new dbo_Libraries()
+            await DependencyManager.database!.InsertItem(new dbo_Libraries()
             {
                 rootPath = path
             });
@@ -206,7 +206,7 @@ namespace GameLibrary.Logic
 
         public static async Task CreateTag(string tagName)
         {
-            await Database_Manager.InsertItem(new dbo_Tag()
+            await DependencyManager.database!.InsertItem(new dbo_Tag()
             {
                 TagName = tagName,
             });
@@ -222,7 +222,7 @@ namespace GameLibrary.Logic
 
         public static async Task InsertGames(dbo_Game[] games)
         {
-            await Database_Manager.InsertItem(games);
+            await DependencyManager.database!.InsertItem(games);
             onGameDeletion?.Invoke();
         }
 
@@ -241,10 +241,10 @@ namespace GameLibrary.Logic
 
         public static async Task<Game[]> GetGamesPerLibrary(int libraryId, CancellationToken token)
         {
-            string paramName = Database_Manager.GetGenericParameterName();
+            string paramName = Database_Instance.GetGenericParameterName();
             string sql = $"SELECT {nameof(dbo_Game.id)} FROM {dbo_Game.tableName} WHERE {nameof(dbo_Game.libraryId)} = @{paramName}";
 
-            int[] games = await Database_Manager.ExecuteSQLQuery(sql, Deserializer, token, new SQLiteParameter(paramName, libraryId));
+            int[] games = await DependencyManager.database!.ExecuteSQLQuery(sql, Deserializer, token, new SQLiteParameter(paramName, libraryId));
             List<Game> relevantGames = new List<Game>();
 
             foreach (int gameId in games)

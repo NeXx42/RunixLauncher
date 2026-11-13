@@ -39,7 +39,7 @@ public static class TagManager
     {
         managedTags = new List<TagDto>();
 
-        if (await Database_Manager.Exists<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libraryExternalType), Library_ExternalProviders.Steam)))
+        if (await DependencyManager.database!.Exists<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libraryExternalType), Library_ExternalProviders.Steam)))
         {
             managedTags.Add(new TagDto_Managed(TagDto_Managed.ManagedTagType.Steam));
         }
@@ -48,14 +48,14 @@ public static class TagManager
     private static async Task LoadUnmanagedTags()
     {
         HashSet<int> existingTags = unmanagedTags.Keys.ToHashSet();
-        int[] tags = await Database_Manager.GetItemsGeneric($"SELECT {nameof(dbo_Tag.TagId)} id FROM {dbo_Tag.tableName}", (reader) => Task.FromResult(int.Parse(reader["id"].ToString()!)));
+        int[] tags = await DependencyManager.database!.GetItemsGeneric($"SELECT {nameof(dbo_Tag.TagId)} id FROM {dbo_Tag.tableName}", (reader) => Task.FromResult(int.Parse(reader["id"].ToString()!)));
 
         // improvement would be to do a single database call with the missing tags instead of individually. too much work
         foreach (int tag in tags)
         {
             if (!unmanagedTags.ContainsKey(tag))
             {
-                dbo_Tag? dto = await Database_Manager.GetItem<dbo_Tag>(SQLFilter.Equal(nameof(dbo_Tag.TagId), tag));
+                dbo_Tag? dto = await DependencyManager.database!.GetItem<dbo_Tag>(SQLFilter.Equal(nameof(dbo_Tag.TagId), tag));
                 unmanagedTags.Add(tag, new TagDto(dto!));
             }
 
@@ -119,7 +119,7 @@ public static class TagManager
         }
 
         dbo_Tag dto = new dbo_Tag() { TagName = tag };
-        await Database_Manager.InsertItem(dto);
+        await DependencyManager.database!.InsertItem(dto);
 
         MarkTagsAsDirty();
         onTagChange?.Invoke(null, false);

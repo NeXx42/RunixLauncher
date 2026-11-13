@@ -28,7 +28,7 @@ public class LibraryDto
 
     private async Task UpdateDatabaseEntry(params string[] columns)
     {
-        await Database_Manager.Update(new dbo_Libraries()
+        await DependencyManager.database!.Update(new dbo_Libraries()
         {
             rootPath = root,
             libaryId = libraryId,

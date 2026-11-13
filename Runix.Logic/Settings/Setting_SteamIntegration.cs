@@ -16,7 +16,7 @@ public class Setting_SteamIntegration : SettingBase
 
     public override async Task<T> LoadSetting<T>(T fallback) where T : default
     {
-        return (T)(object)await Database_Manager.Exists<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libraryExternalType), (int)Library_ExternalProviders.Steam));
+        return (T)(object)await DependencyManager.database!.Exists<dbo_Libraries>(SQLFilter.Equal(nameof(dbo_Libraries.libraryExternalType), (int)Library_ExternalProviders.Steam));
     }
 
     public override async Task<bool> SaveSetting<T>(T val)

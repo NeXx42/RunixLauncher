@@ -103,7 +103,7 @@ public class RunnerDto
             runnerVersion = runnerVersion,
         };
 
-        await Database_Manager.Update(dbo, SQLFilter.Equal(nameof(dbo_Runner.runnerId), runnerId), columns);
+        await DependencyManager.database!.Update(dbo, SQLFilter.Equal(nameof(dbo_Runner.runnerId), runnerId), columns);
     }
 
     private async Task SaveConfigValue(string key, string val)
@@ -115,11 +115,11 @@ public class RunnerDto
             settingValue = val
         };
 
-        await Database_Manager.AddOrUpdate(dbo, SQLFilter.Equal(nameof(dbo_RunnerConfig.runnerId), runnerId).Equal(nameof(dbo_RunnerConfig.settingKey), key), nameof(dbo_RunnerConfig.settingValue));
+        await DependencyManager.database!.AddOrUpdate(dbo, SQLFilter.Equal(nameof(dbo_RunnerConfig.runnerId), runnerId).Equal(nameof(dbo_RunnerConfig.settingKey), key), nameof(dbo_RunnerConfig.settingValue));
     }
 
     private async Task DeleteConfigValue(string key)
-        => await Database_Manager.Delete<dbo_RunnerConfig>(SQLFilter.Equal(nameof(dbo_RunnerConfig.runnerId), runnerId).Equal(nameof(dbo_RunnerConfig.settingKey), key));
+        => await DependencyManager.database!.Delete<dbo_RunnerConfig>(SQLFilter.Equal(nameof(dbo_RunnerConfig.runnerId), runnerId).Equal(nameof(dbo_RunnerConfig.settingKey), key));
 
 
     // matchers

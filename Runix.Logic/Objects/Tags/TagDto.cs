@@ -26,13 +26,13 @@ public class TagDto
             TagName = to
         };
 
-        await Database_Manager.Update(dto, SQLFilter.Equal(nameof(dbo_Tag.TagId), id));
+        await DependencyManager.database!.Update(dto, SQLFilter.Equal(nameof(dbo_Tag.TagId), id));
     }
 
     public async Task Delete()
     {
-        await Database_Manager.Delete<dbo_Tag>(SQLFilter.Equal(nameof(dbo_Tag.TagId), id));
-        await Database_Manager.Delete<dbo_GameTag>(SQLFilter.Equal(nameof(dbo_GameTag.TagId), id));
+        await DependencyManager.database!.Delete<dbo_Tag>(SQLFilter.Equal(nameof(dbo_Tag.TagId), id));
+        await DependencyManager.database!.Delete<dbo_GameTag>(SQLFilter.Equal(nameof(dbo_GameTag.TagId), id));
     }
 
     public virtual bool DoesFitGame(Game game)
