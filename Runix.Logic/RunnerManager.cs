@@ -91,7 +91,7 @@ public static class RunnerManager
 
             await HandleEmbeds(launchRequest.gameId, launchArguments, selectedRunner);
 
-            launchArguments.gameId = gameDto?.gameId;
+            launchArguments.gameId ??= gameDto?.gameId;
             launchArguments.identifier = launchRequest.identifier;
             launchArguments.loggingLevel = gameDto?.config.GetEnum(Game_Config.General_LoggingLevel, LoggingLevel.Off) ?? LoggingLevel.Off;
 
@@ -606,6 +606,9 @@ public static class RunnerManager
 
         private async Task OnOutput(object sender, DataReceivedEventArgs args)
         {
+            if (!(writer?.BaseStream.CanWrite ?? false))
+                return;
+
             if (!string.IsNullOrEmpty(args.Data))
             {
                 if (writer != null)

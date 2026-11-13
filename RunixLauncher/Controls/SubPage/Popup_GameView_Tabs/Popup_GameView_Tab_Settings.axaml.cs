@@ -344,9 +344,11 @@ public partial class Popup_GameView_Tab_Settings : Popup_GameView_TabBase
             await RunnerManager.RunGame(new RunnerManager.LaunchRequest()
             {
                 identifier = app.title,
-
                 path = app.path,
+
+                gameId = game.gameId,
                 runnerId = game.runnerId,
+                gameConfig = game.config
             });
         }
 

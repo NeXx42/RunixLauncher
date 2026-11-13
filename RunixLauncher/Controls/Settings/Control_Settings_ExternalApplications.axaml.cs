@@ -14,7 +14,7 @@ namespace RunixLauncher.Controls.Settings;
 
 public partial class Control_Settings_ExternalApplications : UserControl, ISettingControl
 {
-    private SettingBase setting;
+    private SettingBase? setting;
 
     public Control_Settings_ExternalApplications()
     {
@@ -89,11 +89,11 @@ public partial class Control_Settings_ExternalApplications : UserControl, ISetti
 
     public async Task SaveValue(List<Data_ExternalApplication> res)
     {
-        await setting.SaveSetting(res);
+        await setting!.SaveSetting(res);
     }
 
     public async Task LoadValue()
     {
-        await inp_Control.LoadAsync<Data_ExternalApplication>(async () => await setting.LoadSetting(new Data_ExternalApplication[0]));
+        await inp_Control.LoadAsync<Data_ExternalApplication>(async () => await setting!.LoadSetting(new Data_ExternalApplication[0]));
     }
 }
