@@ -38,9 +38,14 @@ public class LibraryDto
         }, SQLFilter.Equal(nameof(dbo_Libraries.libaryId), libraryId), columns);
     }
 
-    public async Task UpdateAlias(string to)
+    public async Task Update(string name, string root)
     {
-        alias = to;
-        await UpdateDatabaseEntry(nameof(dbo_Libraries.alias));
+        this.alias = name;
+        this.root = root;
+
+        await UpdateDatabaseEntry([
+            nameof(dbo_Libraries.alias),
+            nameof(dbo_Libraries.rootPath)
+        ]);
     }
 }

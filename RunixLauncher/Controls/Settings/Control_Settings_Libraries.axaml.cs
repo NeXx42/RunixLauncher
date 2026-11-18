@@ -84,42 +84,14 @@ public partial class Control_Settings_Libraries : UserControl, ISettingControl
         async Task HandleModal(Modal_Library modal)
         {
             await modal.HandleOpen(selectedProfile.HasValue ? elements![selectedProfile.Value].lib : null);
-            //SoftRefresh();
-        }
-        /*
-
-        if (selectedProfile.HasValue)
-        {
-            string? alias = await DependencyManager.OpenStringInputModal("New Alias");
-
-            if (string.IsNullOrEmpty(alias))
-                return;
-
-            await elements![selectedProfile.Value].RenameAlias(alias);
-            return;
-        }
-
-        if (await DependencyManager.OpenConfirmationAsync("Select Root", "Select a folder that will be the basis of the library.", ("Select Folder", HandleModal, "Selecting")) == -1)
-            return;
-
-        async Task HandleModal()
-        {
-            string? path = await DependencyManager.OpenFolderDialog("Root");
-
-            if (string.IsNullOrEmpty(path))
-                return;
-
-            await LibraryManager.GenerateLibrary(path);
             await LoadValue();
-        }*/
+        }
     }
 
     private async Task DeleteSelectedProfile()
     {
         if (!selectedProfile.HasValue)
             return;
-
-
     }
 
 
@@ -161,12 +133,6 @@ public partial class Control_Settings_Libraries : UserControl, ISettingControl
         public void ToggleSelection(bool to)
         {
             border.Background = to ? CommonColours.SettingsList_selectedBrush : CommonColours.SettingsList_unselectedBrush;
-        }
-
-        public async Task RenameAlias(string to)
-        {
-            await lib.UpdateAlias(to);
-            Redraw();
         }
     }
 }

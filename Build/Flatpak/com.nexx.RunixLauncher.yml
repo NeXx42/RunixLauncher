@@ -11,10 +11,6 @@ finish-args:
   - --socket=wayland
   - --device=dri
   - --filesystem=home
-  - --filesystem=/media
-  - --filesystem=/run/media
-  - --talk-name=org.freedesktop.Flatpak
-  - --socket=pulseaudio
   
 modules:
   - name: RunixLauncher

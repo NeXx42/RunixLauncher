@@ -33,6 +33,37 @@ namespace GameLibrary.Logic
             cachedLibraries = libraries.ToDictionary(x => x.libaryId, x => new LibraryDto(x));
         }
 
+        public static async Task AddOrUpdateLibrary(int? id, string alias, string root)
+        {
+            if (id.HasValue && cachedLibraries.TryGetValue(id.Value, out LibraryDto? lib))
+            {
+                dbo_Libraries updatedLib = new dbo_Libraries
+                {
+                    libaryId = lib.libraryId,
+                    alias = alias,
+                    rootPath = root,
+                    libraryExternalType = (int?)lib.externalType,
+                };
+
+                await DependencyManager.database!.Update(updatedLib, SQLFilter.Equal(nameof(dbo_Libraries.libaryId), id.Value), [
+                    nameof(dbo_Libraries.alias),
+                    nameof(dbo_Libraries.rootPath)
+                ]);
+
+                cachedLibraries[updatedLib.libaryId] = new LibraryDto(updatedLib);
+            }
+            else
+            {
+                dbo_Libraries updatedLib = new dbo_Libraries
+                {
+                    alias = alias,
+                    rootPath = root,
+                };
+
+                updatedLib = (await DependencyManager.database!.InsertItem(updatedLib)).Single();
+                cachedLibraries[updatedLib.libaryId] = new LibraryDto(updatedLib);
+            }
+        }
 
         public static async Task<List<string>> ImportGames(Dictionary<string, FileManager.IImportEntry?> availableImports, int? libraryId)
         {

@@ -20,13 +20,16 @@ public partial class Modal_Library : UserControl
     private UITabGroup tabGroup;
     private List<GameGroup> linkedGames = new List<GameGroup>();
 
+    private string? libraryRoot;
 
     public Modal_Library()
     {
         InitializeComponent();
 
         btn_Close.RegisterClick(() => modalRes?.SetResult());
-        btn_Move.RegisterClick(() => StartTransfer(), "Transferring");
+
+        btn_Save.RegisterClick(Save, "Saving");
+        btn_Move.RegisterClick(StartTransfer, "Transferring");
 
         tabGroup = new UITabGroup(TabGroup_Buttons, TabGroup_Content, true);
     }
@@ -34,6 +37,8 @@ public partial class Modal_Library : UserControl
     public Task HandleOpen(LibraryDto? lib)
     {
         selectedLibrary = lib;
+        libraryRoot = lib?.root;
+
         modalRes = new TaskCompletionSource();
 
         _ = Draw();
@@ -44,12 +49,15 @@ public partial class Modal_Library : UserControl
 
     private async Task Draw()
     {
-        await tabGroup.ChangeSelection(0);
+        await tabGroup.OnOpen(0, [true, selectedLibrary != null]);
 
         inp_Name.Text = selectedLibrary?.alias;
-        btn_Dir.Label = selectedLibrary?.root ?? "Set Root";
 
-        await DrawGameList();
+        btn_Dir.Label = libraryRoot ?? "Set Root";
+        btn_Dir.RegisterClick(UpdateLibraryLocation);
+
+        if (selectedLibrary != null)
+            await DrawGameList();
     }
 
     private async Task DrawGameList()
@@ -57,17 +65,14 @@ public partial class Modal_Library : UserControl
         linkedGames = new List<GameGroup>();
         cont_Games.Children.Clear();
 
-        if (selectedLibrary != null)
+        Game[] games = await LibraryManager.GetGamesPerLibrary(selectedLibrary!.libraryId, CancellationToken.None);
+
+        foreach (Game game in games)
         {
-            Game[] games = await LibraryManager.GetGamesPerLibrary(selectedLibrary!.libraryId, CancellationToken.None);
+            GameGroup ui = new GameGroup(game);
 
-            foreach (Game game in games)
-            {
-                GameGroup ui = new GameGroup(game);
-
-                linkedGames.Add(ui);
-                cont_Games.Children.Add(ui.ui);
-            }
+            linkedGames.Add(ui);
+            cont_Games.Children.Add(ui.ui);
         }
     }
 
@@ -89,6 +94,26 @@ public partial class Modal_Library : UserControl
 
         Func<Task>[] moveEvents = toMove.Select(x => (Func<Task>)(() => x.ChangeLibrary(targetLibrary))).ToArray();
         await DependencyManager.OpenLoadingModal(true, moveEvents);
+    }
+
+    private async Task UpdateLibraryLocation()
+    {
+        if (selectedLibrary != null)
+            return; // would involve manually moving everything
+
+        string? dir = await DependencyManager.OpenFolderDialog("Root");
+
+        libraryRoot = dir;
+        btn_Dir.Label = libraryRoot ?? "Set Root";
+    }
+
+    private async Task Save()
+    {
+        if (string.IsNullOrEmpty(inp_Name.Text) || string.IsNullOrEmpty(libraryRoot))
+            return;
+
+        await LibraryManager.AddOrUpdateLibrary(selectedLibrary?.libraryId, inp_Name.Text, libraryRoot);
+        modalRes?.SetResult();
     }
 
     private class GameGroup

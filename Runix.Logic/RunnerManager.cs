@@ -202,7 +202,7 @@ public static class RunnerManager
                 await globalConfigValues.SaveBool(RunnerDto.RunnerConfigValues.Generic_Sandbox_IsolateFilesystem, ConfigHandler.configProvider!.GetBoolean(ConfigKeys.Sandbox_Linux_Firejail_FileSystemIsolation, false));
             }
 
-            if (ConfigHandler.isFlatpak || true)
+            if (ConfigHandler.isFlatpak)
             {
                 embeds.Add(new GameEmbed_Flatpak());
             }

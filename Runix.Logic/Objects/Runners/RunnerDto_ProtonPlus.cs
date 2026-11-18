@@ -33,7 +33,10 @@ public class RunnerDto_ProtonPlus : RunnerDto_Wine
                 versions.AddRange(Directory.GetDirectories(tools));
         }
 
-        return Task.FromResult(versions.ToArray())!;
+        return Task.FromResult((string[])[
+            "",
+            ..versions
+        ])!;
     }
 
     public RunnerDto_ProtonPlus(dbo_Runner runner, dbo_RunnerConfig[] configValues) : base(runner, configValues)

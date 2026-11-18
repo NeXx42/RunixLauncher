@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -52,6 +53,17 @@ public class UITabGroup
         {
             groups[i].Setup(this, i);
         }
+    }
+
+    public virtual async Task OnOpen(int startTab, params bool[] enabledTabs)
+    {
+        for (int i = 0; i < groups.Length; i++)
+        {
+            bool isEnabled = i >= enabledTabs.Length ? true : enabledTabs[i];
+            groups[i].SetVisibility(isEnabled);
+        }
+
+        await ChangeSelection(startTab);
     }
 
     public virtual async Task ChangeSelection(int to)

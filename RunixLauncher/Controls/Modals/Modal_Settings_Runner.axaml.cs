@@ -98,7 +98,11 @@ public partial class Modal_Settings_Runner : UserControl
         await UpdateWineDetails();
         await ChangeRunnerType();
 
-        await tabGroup.ChangeSelection(0);
+        await tabGroup.OnOpen(0,
+            true,
+            RunnerDto.IsWineDerivative(selectedRunner?.runnerType ?? RunnerDto.RunnerType.None),
+            selectedRunner?.runnerType == RunnerDto.RunnerType.Ryujinx
+        );
     }
 
     private async Task UpdateDefaultDetails()

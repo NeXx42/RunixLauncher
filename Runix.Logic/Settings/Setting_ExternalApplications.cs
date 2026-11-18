@@ -18,7 +18,7 @@ public class Setting_ExternalApplications : SettingBase
         if (ConfigHandler.configProvider!.TryGetList(GameLibrary.Logic.Enums.ConfigKeys.ExternalApplicationList, out Data_ExternalApplication[] res))
             return (T)(object)res;
 
-        return (T)(object)new List<Data_ExternalApplication>();
+        return (T)(object)new Data_ExternalApplication[0];
     }
 
     public override async Task<bool> SaveSetting<T>(T val)
