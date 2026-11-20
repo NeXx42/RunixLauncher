@@ -1,9 +1,9 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="1200" x:Class="RunixLauncher.Controls.SubPage.Popup_AddGames"
-  xmlns:Comps="clr-namespace:RunixLauncher.Controls.SubPage.Indexer"
-  xmlns:Common="clr-namespace:RunixLauncher.Controls">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="1200" x:Class="RunixLauncher.Controls.SubPage.Popup_AddGames"
+             xmlns:Comps="clr-namespace:RunixLauncher.Controls.SubPage.Indexer"
+             xmlns:Common="clr-namespace:RunixLauncher.Controls">
   <Border Background="{DynamicResource colour_Background}" CornerRadius="10,10,0,0" BorderBrush="{DynamicResource colour_Border}" BorderThickness="1">
     <Grid>
       <Grid>
@@ -15,8 +15,9 @@
 
         <Label Grid.Row="0" Content="Indexer" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Center" FontSize="30" Margin="20"/>
 
-        <StackPanel x:Name="cont_FoundGames" Margin="10,100,10,100" VerticalAlignment="Top" Spacing="5">
-        </StackPanel>
+        <ScrollViewer Grid.Row="1" VerticalAlignment="Top">
+          <StackPanel x:Name="cont_FoundGames" Margin="10"  Spacing="5" />
+        </ScrollViewer>
 
         <!-- Controls -->
 

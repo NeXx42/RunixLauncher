@@ -20,8 +20,18 @@ public static class ThemeHelper
     {
         string theme = "default";
 
-        if (ConfigHandler.configProvider!.TryGetValue(ConfigKeys.Appearance_Theme, out string savedTheme))
-            theme = savedTheme;
+        if (ConfigHandler.configProvider!.GetInteger(ConfigKeys.Appearance_Theme, out int savedThemeIndex))
+        {
+            try
+            {
+                theme = GetThemes()[savedThemeIndex];
+            }
+            catch
+            {
+                Console.WriteLine("Failed to get saved theme, reverting to default");
+                await ConfigHandler.configProvider!.SaveInteger(ConfigKeys.Appearance_Theme, 0);
+            }
+        }
 
         await ChangeTheme(theme);
     }
