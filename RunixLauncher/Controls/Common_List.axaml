@@ -4,7 +4,7 @@
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="RunixLauncher.Controls.Common_List"
   xmlns:Controls="clr-namespace:RunixLauncher.Controls"
   xmlns:local="clr-namespace:RunixLauncher.Controls" x:DataType="local:Common_List">
-  <Border CornerRadius="5" Background="#0f1419" BorderBrush="#1b1f24" BorderThickness="1">
+  <Border CornerRadius="5" Background="{DynamicResource colour_Panel}" BorderBrush="{DynamicResource colour_PanelBorder}" BorderThickness="1">
     <Grid Margin="5" RowDefinitions="Auto * 30">
       <Label Content="{Binding Label, Mode=OneWay}"/>
 

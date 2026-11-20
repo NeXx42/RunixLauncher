@@ -1,6 +1,6 @@
 namespace GameLibrary.Logic.Settings.UI;
 
-public class SettingsUI_Button : ISettingsUI
+public struct SettingsUI_Button : ISettingsUI
 {
     public enum GenericModalLaunchers
     {

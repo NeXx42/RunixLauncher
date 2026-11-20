@@ -2,9 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using Avalonia.Media;
-using GameLibrary.Logic.Helpers;
 
 namespace RunixLauncher.Controls;
 
@@ -26,42 +23,15 @@ public partial class Common_ButtonToggle : UserControl
         set => SetValue(InternalPaddingProperty, value);
     }
 
-    private static SolidColorBrush? m_Brush_Selected;
-    private static SolidColorBrush Brush_Selected
-    {
-        get
-        {
-            m_Brush_Selected ??= new SolidColorBrush(Color.FromRgb(26, 159, 255));
-            return m_Brush_Selected;
-        }
-    }
-
-    private static SolidColorBrush? m_Brush_UnSelected;
-    private static SolidColorBrush Brush_UnSelected
-    {
-        get
-        {
-            m_Brush_UnSelected ??= new SolidColorBrush(Color.FromRgb(20, 30, 40));
-            return m_Brush_UnSelected;
-        }
-    }
-
-    private static SolidColorBrush? m_BorderBrush_UnSelected;
-    private static SolidColorBrush BorderBrush_UnSelected
-    {
-        get
-        {
-            m_BorderBrush_UnSelected ??= new SolidColorBrush(Color.FromRgb(38, 43, 48));
-            return m_BorderBrush_UnSelected;
-        }
-    }
 
     public bool isSelected
     {
         set
         {
-            ctrl.Background = value ? Brush_Selected : Brush_UnSelected;
-            ctrl.BorderBrush = value ? Brush_Selected : BorderBrush_UnSelected;
+            if (value)
+                ctrl.Classes.Add("Selected");
+            else
+                ctrl.Classes.Clear();
 
             m_isSelected = value;
         }

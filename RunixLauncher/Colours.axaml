@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <!-- Add Controls for Previewer Here -->
+    </Border>
+  </Design.PreviewWith>
+
+  <SolidColorBrush x:Key="colour_Root" Color="#080c0f"/>
+
+  <SolidColorBrush x:Key="colour_HeaderBar" Color="#1E1E1E"/>
+  <SolidColorBrush x:Key="colour_BarLight" Color="#181818"/>
+  <SolidColorBrush x:Key="colour_Background" Color="#0a0e13"/>
+  <SolidColorBrush x:Key="colour_BackgroundDarker" Color="#111111"/>
+  <SolidColorBrush x:Key="colour_Border" Color="#FF333333"/>
+  
+  <SolidColorBrush x:Key="colour_Panel" Color="#0e1419"/>
+  <SolidColorBrush x:Key="colour_PanelBorder" Color="#1e2328"/>
+
+  <SolidColorBrush x:Key="colour_ButtonBackground" Color="#111920"/>
+  <SolidColorBrush x:Key="colour_ButtonBorder" Color="#262b30"/>
+  <SolidColorBrush x:Key="colour_ButtonHover" Color="#1a2732"/>
+  
+  <SolidColorBrush x:Key="colour_Accent" Color="#1a9fff"/>
+</ResourceDictionary>

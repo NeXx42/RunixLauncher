@@ -35,6 +35,8 @@ public partial class MainWindow : Window, IControllerInputCallback
     private async Task OnStartAsync()
     {
         await DependencyManager.PreSetup(new UILinker(), new AvaloniaImageBrushFetcher());
+        await ThemeHelper.Startup();
+
         string? passwordHash = ConfigHandler.configProvider!.GetValue(ConfigKeys.PasswordHash);
 
         if (!string.IsNullOrEmpty(passwordHash))

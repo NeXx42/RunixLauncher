@@ -6,7 +6,7 @@
     xmlns:components="clr-namespace:RunixLauncher.Controls.SubPage">
 
 
-    <Grid Background="#080c0f">
+    <Grid Background="{DynamicResource colour_Root}">
         <Image x:Name="img_Bg" Opacity=".02" Stretch="UniformToFill">
             <Image.Effect>
                 <BlurEffect Radius="25"/>
@@ -24,7 +24,7 @@
                     </StackPanel>
                 </Grid>
 
-                <Border Background="#0e1419" BorderBrush="#1e2328" BorderThickness="1" CornerRadius="0" BoxShadow="0 0 10 0 #000000" Grid.Row="1" MinWidth="500">
+                <Border Background="{DynamicResource colour_Panel}" BorderBrush="{DynamicResource colour_PanelBorder}" BorderThickness="1" CornerRadius="0" BoxShadow="0 0 10 0 #000000" Grid.Row="1" MinWidth="500">
                     <Grid ColumnDefinitions="*, 15, Auto" Margin="15" Height="70">
 
                         <!-- Tags -->

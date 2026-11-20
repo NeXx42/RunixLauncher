@@ -11,13 +11,10 @@
 
     </Application.Styles>
     <Application.Resources>
-        <SolidColorBrush x:Key="bg_HeaderBar" Color="#1E1E1E"/>
-        <SolidColorBrush x:Key="bg_BarLight" Color="#181818"/>
-        <SolidColorBrush x:Key="bg_Background" Color="#0a0e13"/>
-        <SolidColorBrush x:Key="bg_BackgroundDarker" Color="#111111"/>
-        <SolidColorBrush x:Key="bg_Border" Color="#FF333333"/>
-
-        <SolidColorBrush x:Key="btn_Background" Color="#2C2C2C"/>
-        <SolidColorBrush x:Key="btn_Border" Color="#FF444444"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="Colours.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

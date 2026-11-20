@@ -22,6 +22,20 @@
     <ProjectReference Include="..\Runix.Logic\Runix.Logic.csproj" />
     <ProjectReference Include="..\Runix.Input\Runix.Input.csproj" />
   </ItemGroup>
+  <!-- Resources -->
+  <Target Name="CopyToBuildOutput" AfterTargets="Build">
+    <ItemGroup>
+      <ThemeFiles Include="Themes\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ThemeFiles)" DestinationFolder="$(TargetDir)Themes\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="CopyToPublishOutput" AfterTargets="Publish">
+    <ItemGroup>
+      <ThemeFiles Include="Themes\**\*.*" />
+      <LanguageFiles Include="Languages\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ThemeFiles)" DestinationFolder="$(PublishDir)Themes\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
   <!-- Overlay -->
   <ItemGroup Condition="'$(Configuration)' == 'Debug' And Exists('..\GameLibrary_GTKOverlay\target\debug\GameLibrary_GTKOverlay')">
     <None Include="..\GameLibrary_GTKOverlay\target\debug\GameLibrary_GTKOverlay">

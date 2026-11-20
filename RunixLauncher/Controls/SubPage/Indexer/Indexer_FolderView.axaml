@@ -5,7 +5,7 @@
   xmlns:local="clr-namespace:RunixLauncher.Controls.SubPage.Indexer" x:DataType="local:Indexer_FolderViewModel"
   xmlns:Common="clr-namespace:RunixLauncher.Controls">
   <Grid>
-    <Border Background="#0a0e13" CornerRadius="10" BorderBrush="{DynamicResource bg_Border}" BorderThickness="1">
+    <Border Background="{DynamicResource colour_Background}" CornerRadius="10" BorderBrush="{DynamicResource colour_Border}" BorderThickness="1">
       <Grid>
         <Grid Margin="5 5 5 50">
           <ScrollViewer>
@@ -32,7 +32,7 @@
     </Border>
 
     <Border Background="#7d000000" x:Name="cont_Progress">
-      <Border Background="#0a0e13" CornerRadius="10" BorderBrush="{DynamicResource bg_Border}" BorderThickness="1" Width="350" Height="75">
+      <Border Background="{DynamicResource colour_Background}" CornerRadius="10" BorderBrush="{DynamicResource colour_Border}" BorderThickness="1" Width="350" Height="75">
         <Grid Margin="5">
           <Label Content="Extracting" HorizontalAlignment="Center"/>
 

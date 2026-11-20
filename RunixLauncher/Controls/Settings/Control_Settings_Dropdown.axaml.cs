@@ -9,8 +9,8 @@ namespace RunixLauncher.Controls.Settings;
 
 public partial class Control_Settings_Dropdown : UserControl, ISettingControl
 {
-    private bool hasNullEntry;
-    private SettingBase? settings;
+    protected bool hasNullEntry;
+    protected SettingBase? settings;
 
     public Control_Settings_Dropdown()
     {
@@ -36,13 +36,13 @@ public partial class Control_Settings_Dropdown : UserControl, ISettingControl
         return this;
     }
 
-    public async Task LoadValue()
+    public virtual async Task LoadValue()
     {
         int selected = await settings!.LoadSetting(-1);
         btn.SilentlyChangeValue(hasNullEntry ? selected + 1 : selected);
     }
 
-    private async Task SaveValue()
+    protected virtual async Task SaveValue()
     {
         int? selected = btn.selectedIndex;
 

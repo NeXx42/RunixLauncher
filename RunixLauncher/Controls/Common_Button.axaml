@@ -6,20 +6,20 @@
 
     <UserControl.Styles>
         <Style Selector="Border#ctrl">
-            <Setter Property="Background" Value="#111920"/>
-            <Setter Property="BorderBrush" Value="#262b30"/>
+            <Setter Property="Background" Value="{DynamicResource colour_ButtonBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource colour_ButtonBorder}"/>
         </Style>
         <Style Selector="local|Common_Button:pointerover Border#ctrl">
-            <Setter Property="Background" Value="#1a2732"/>
+            <Setter Property="Background" Value="{DynamicResource colour_ButtonHover}"/>
         </Style>
 
 
         <Style Selector="local|Common_Button.positive Border#ctrl">
-            <Setter Property="Background" Value="#1a9fff"/>
-            <Setter Property="BorderBrush" Value="#1a9fff"/>
+            <Setter Property="Background" Value="{DynamicResource colour_Accent}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource colour_Accent}"/>
         </Style>
         <Style Selector="local|Common_Button.positive:pointerover Border#ctrl">
-            <Setter Property="BoxShadow" Value="0 0 10 0 #1a9fff"/>
+            <Setter Property="BoxShadow" Value="0 0 10 0 #23a1fb"/>
             <Setter Property="Background" Value="#23a1fb"/>
             <Setter Property="BorderBrush" Value="#23a1fb"/>
         </Style>

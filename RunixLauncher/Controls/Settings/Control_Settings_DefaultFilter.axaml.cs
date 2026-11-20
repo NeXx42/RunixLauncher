@@ -11,22 +11,27 @@ namespace RunixLauncher.Controls.Settings;
 
 public partial class Control_Settings_DefaultFilter : UserControl, ISettingControl
 {
-    private SettingBase setting;
+    private SettingBase? setting;
     private bool isAscending;
 
-    public Control_Settings_DefaultFilter(SettingBase setting)
+    public Control_Settings_DefaultFilter()
     {
         InitializeComponent();
+    }
 
+    public Control_Settings_DefaultFilter Draw(SettingBase setting)
+    {
         this.setting = setting;
 
         type.Setup(GameFilterRequest.getOrderOptionsNames, 0, Save);
         dir.RegisterClick(FlipDirection);
+
+        return this;
     }
 
     public async Task LoadValue()
     {
-        int res = await setting.LoadSetting(0);
+        int res = await setting!.LoadSetting(0);
         (int order, isAscending) = GameFilterRequest.DecodeOrder(res);
 
         type.SilentlyChangeValue(order);
@@ -41,6 +46,6 @@ public partial class Control_Settings_DefaultFilter : UserControl, ISettingContr
         RedrawDirection();
     }
 
-    private async Task Save() => await setting.SaveSetting(GameFilterRequest.EncodeOrder(type.selectedIndex, isAscending));
+    private async Task Save() => await setting!.SaveSetting(GameFilterRequest.EncodeOrder(type.selectedIndex, isAscending));
     private void RedrawDirection() => dir.Label = isAscending ? "Ascending" : "Descending";
 }

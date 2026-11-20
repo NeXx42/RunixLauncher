@@ -1,6 +1,6 @@
 namespace GameLibrary.Logic.Settings.UI;
 
-public class SettingsUI_Title : ISettingsUI
+public struct SettingsUI_Title : ISettingsUI
 {
     public readonly string title;
     public readonly double margin;

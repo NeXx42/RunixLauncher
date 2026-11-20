@@ -1,9 +1,9 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="RunixLauncher.Controls.Modals.Modal_SteamBridge"
-  xmlns:Common="clr-namespace:RunixLauncher.Controls">
-  <Border VerticalAlignment="Center" HorizontalAlignment="Center" Width="500" MaxHeight="800" Background="#0f1419" CornerRadius="16" ClipToBounds="True" BorderBrush="#1b1f24" BorderThickness="1">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="RunixLauncher.Controls.Modals.Modal_SteamBridge"
+             xmlns:Common="clr-namespace:RunixLauncher.Controls">
+  <Border VerticalAlignment="Center" HorizontalAlignment="Center" Width="500" MaxHeight="800" Background="{DynamicResource colour_Background}" BorderBrush="{DynamicResource colour_Border}"  CornerRadius="16" ClipToBounds="True" BorderThickness="1">
     <StackPanel Margin="10">
       <Label HorizontalAlignment="Center" FontSize="20">Steam Bridge</Label>
       <TextBlock TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center">

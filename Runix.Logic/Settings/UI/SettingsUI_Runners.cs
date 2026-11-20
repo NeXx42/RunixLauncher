@@ -3,6 +3,6 @@ using GameLibrary.Logic.Database.Tables;
 
 namespace GameLibrary.Logic.Settings.UI;
 
-public class SettingsUI_Runners : ISettingsUI
+public struct SettingsUI_Runners : ISettingsUI
 {
 }

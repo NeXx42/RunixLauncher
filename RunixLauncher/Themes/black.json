@@ -1,0 +1,14 @@
+{
+    "colour_Root": "#000000",
+    "colour_HeaderBar": "#101010",
+    "colour_BarLight": "#080808",
+    "colour_Background": "#000000",
+    "colour_BackgroundDarker": "#050505",
+    "colour_Border": "#252525",
+    "colour_Panel": "#080808",
+    "colour_PanelBorder": "#1a1a1a",
+    "colour_ButtonBackground": "#111111",
+    "colour_ButtonBorder": "#292929",
+    "colour_ButtonHover": "#202020",
+    "colour_Accent": "#1a9fff"
+}

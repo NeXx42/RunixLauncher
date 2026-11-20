@@ -12,7 +12,7 @@
             </Style>
             <Style Selector="Border#ctrl.hovered">
                 <Setter Property="RenderTransform" Value="translateY(-5px)"/>
-                <Setter Property="BorderBrush" Value="#67c1f5"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource colour_Accent}"/>
             </Style>
         </Border.Styles>
         <Border.Transitions>

@@ -1,9 +1,9 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="1920" d:DesignHeight="1080" x:Class="RunixLauncher.Controls.Modals.Modal_Library"
-  xmlns:Controls="clr-namespace:RunixLauncher.Controls">
-  <Border VerticalAlignment="Center" HorizontalAlignment="Center" Width="500" Height="400" Background="#0f1419" CornerRadius="16" ClipToBounds="True" BorderBrush="#1b1f24" BorderThickness="1">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="1920" d:DesignHeight="1080" x:Class="RunixLauncher.Controls.Modals.Modal_Library"
+             xmlns:Controls="clr-namespace:RunixLauncher.Controls">
+  <Border VerticalAlignment="Center" HorizontalAlignment="Center" Width="500" Height="400" Background="{DynamicResource colour_Background}" BorderBrush="{DynamicResource colour_Border}" CornerRadius="16" ClipToBounds="True" BorderThickness="1">
     <Grid RowDefinitions="Auto, *, 50">
 
       <StackPanel VerticalAlignment="Top" Height="30" Orientation="Horizontal" Spacing="5" x:Name="TabGroup_Buttons" Margin="5">

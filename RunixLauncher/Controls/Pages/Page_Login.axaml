@@ -3,7 +3,7 @@
   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450" x:Class="RunixLauncher.Controls.Pages.Page_Login"
   xmlns:common="clr-namespace:RunixLauncher.Controls">
-  <Border VerticalAlignment="Center" HorizontalAlignment="Center" Width="700" Height="150" Background="#1E1E1E" CornerRadius="5">
+  <Border VerticalAlignment="Center" HorizontalAlignment="Center" Width="700" Height="150" Background="{DynamicResource colour_HeaderBar}" CornerRadius="5">
     <Grid Margin="15">
       <Label Content="Login" VerticalAlignment="Top" HorizontalAlignment="Center" Height="40" FontSize="20"/>
 
