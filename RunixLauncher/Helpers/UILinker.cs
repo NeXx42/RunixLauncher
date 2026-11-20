@@ -86,7 +86,7 @@ public class UILinker : IUILinker
         }
     }
 
-    public async Task<int?> OpenMultiSelectModal(string title, string[] options)
+    public async Task<int?> OpenMultiSelectModal(string title, bool allowClosing, params string[] options)
     {
         int? res = null;
         await MainWindow.instance!.DisplayModalAsync<Modal_MultiSelect>(ModalRequest);
@@ -95,7 +95,7 @@ public class UILinker : IUILinker
 
         async Task ModalRequest(Modal_MultiSelect modal)
         {
-            res = await modal.RequestModal(title, options);
+            res = await modal.RequestModal(title, allowClosing, options);
         }
     }
 

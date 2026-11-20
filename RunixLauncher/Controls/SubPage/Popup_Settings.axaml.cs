@@ -86,12 +86,18 @@ public partial class Popup_Settings : UserControl, IControlChild
                 case SettingsUI_Title settingsUI_Title: return new Control_Settings_Title().Draw(settingsUI_Title);
                 case SettingsUI_Toggle settingsUI_Toggle: return new Control_Settings_Toggle().Draw(setting, settingsUI_Toggle);
                 case SettingsUI_DefaultFilter settingsUI_DefaultFilter: return new Control_Settings_DefaultFilter().Draw(setting);
-                case SettingsUI_Runners settingsUI_Runners: return new Control_Settings_Runners().Draw(setting, settingsUI_Runners);
                 case SettingsUI_Dropdown settingsUI_Dropdown: return new Control_Settings_Dropdown().Draw(setting, settingsUI_Dropdown);
-                case SettingsUI_Libraries settingsUI_Libraries: return new Control_Settings_Libraries().Draw(setting, settingsUI_Libraries);
                 case SettingsUI_DirectorySelector settingsUI_DirectorySelector: return new Control_Settings_DirectorySelector().Draw(setting, settingsUI_DirectorySelector);
-                case SettingsUI_ExternalApplications settingsUI_ExternalApplications: return new Control_Settings_ExternalApplications().Draw(setting, settingsUI_ExternalApplications);
 
+                case SettingsUI_RuntimeDerived:
+                    switch (System.Enum.Parse<ConfigHandler.RuntimeConfigs>(setting.getName))
+                    {
+                        case ConfigHandler.RuntimeConfigs.Libraries: return new Control_Settings_LibraryList();
+
+                        case ConfigHandler.RuntimeConfigs.Runners: return new Control_Settings_RunnerList();
+                        case ConfigHandler.RuntimeConfigs.ExternalApplications: return new Control_Settings_ExternalApplicationList();
+                    }
+                    break;
             }
 
             return null;

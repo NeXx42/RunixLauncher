@@ -115,8 +115,8 @@ public static class DependencyManager
     public static async Task OpenMessageDialog(string header, string description) // replace with actual dialog
         => await uiLinker!.OpenMessageModal(header, description);
 
-    public static async Task<int?> OpenMultiModal(string header, string[] options)
-        => await uiLinker!.OpenMultiSelectModal(header, options);
+    public static async Task<int?> OpenMultiModal(string header, bool allowClosing, params string[] options)
+        => await uiLinker!.OpenMultiSelectModal(header, allowClosing, options);
 
 
     public static async Task<string[]?> OpenFoldersDialog(string title)

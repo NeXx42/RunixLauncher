@@ -1,0 +1,35 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="RunixLauncher.Controls.Common_ItemList_Entry" x:Name="root">
+  <Border >
+    <Border.Styles>
+      <Style Selector="#root>Border">
+        <Setter Property="Background" Value="Transparent" />
+      </Style>
+      <Style Selector="#root.Odd>Border">
+        <Setter Property="Background" Value="Black" />
+      </Style>
+    </Border.Styles>
+
+    <Grid ColumnDefinitions="* Auto" Margin="5">
+      <Border x:Name="cont"/>
+
+      <Border Grid.Column="1" Cursor="Hand" CornerRadius="8" x:Name="btn_Edit">
+        <Border.Styles>
+          <Style Selector="Border">
+            <Setter Property="Background" Value="#01000000" />
+          </Style>
+          <Style Selector="Border:pointerover">
+            <Setter Property="Background" Value="{DynamicResource colour_ButtonBackground}" />
+          </Style>
+        </Border.Styles>
+        <Viewbox Height="12" Margin="5" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Fill="White" Data="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
+        </Viewbox>
+      </Border>
+    </Grid>
+  </Border>
+</UserControl>

@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="using:RunixLauncher.Controls"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="RunixLauncher.Controls.Common_ItemList" x:Name="root">
+  <StackPanel Spacing="5">
+    <Grid>
+      <Label FontSize="20" Content="{Binding #root.Label}"/>
+
+      <Border x:Name="btn_Add" HorizontalAlignment="Right" Cursor="Hand" CornerRadius="8">
+        <Border.Styles>
+          <Style Selector="Border">
+            <Setter Property="Background" Value="#01000000" />
+          </Style>
+          <Style Selector="Border:pointerover">
+            <Setter Property="Background" Value="{DynamicResource colour_ButtonBackground}" />
+          </Style>
+        </Border.Styles>
+        <Viewbox Width="20" Margin="5" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Path Fill="White" Data="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+        </Viewbox>
+      </Border>
+    </Grid>
+
+    <Border CornerRadius="8" Background="{DynamicResource colour_Panel}" BorderThickness="1" BorderBrush="{DynamicResource colour_PanelBorder}" ClipToBounds="True">
+      <Grid>
+        <StackPanel x:Name="cont" MinHeight="20" />
+      </Grid>
+    </Border>
+  </StackPanel>
+</UserControl>

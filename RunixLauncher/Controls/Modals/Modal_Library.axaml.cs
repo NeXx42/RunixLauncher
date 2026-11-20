@@ -81,9 +81,9 @@ public partial class Modal_Library : UserControl
         Game[] toMove = linkedGames.Where(x => x.IsSelected()).Select(x => x.game).ToArray();
 
         LibraryDto[] possibleLibraries = LibraryManager.GetLibraries().Where(x => x.libraryId != selectedLibrary?.libraryId).ToArray();
-        int? selected = await DependencyManager.OpenMultiModal("Target Library", [.. possibleLibraries.Select(x => x.getFullName), "Cancel"]);
+        int? selected = await DependencyManager.OpenMultiModal("Target Library", true, possibleLibraries.Select(x => x.getFullName).ToArray());
 
-        if (!selected.HasValue || selected.Value >= possibleLibraries.Length)
+        if (!selected.HasValue)
             return;
 
         string gameNames = string.Join("\n", toMove.Select(x => x.gameName));

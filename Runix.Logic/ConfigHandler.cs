@@ -23,6 +23,13 @@ namespace GameLibrary.Logic
 {
     public static class ConfigHandler
     {
+        public enum RuntimeConfigs
+        {
+            Libraries,
+            Runners,
+            ExternalApplications
+        }
+
         public static bool isOnLinux { private set; get; }
         public static bool isFlatpak => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("FLATPAK_ID"));
 
@@ -77,7 +84,7 @@ namespace GameLibrary.Logic
                     "Libraries",
                     [
                         new Setting_Title("Libraries", 0, SettingOSCompatibility.Universal),
-                        new Setting_Libraries(),
+                        new Setting_RuntimeDerived(RuntimeConfigs.Libraries, SettingOSCompatibility.Universal),
 
                         new Setting_Title("Steam", 0, SettingOSCompatibility.Universal),
                         new Setting_SteamIntegration(),
@@ -89,11 +96,11 @@ namespace GameLibrary.Logic
                     "Running",
                     [
                         new Setting_Title("Runners", 0, SettingOSCompatibility.Linux),
-                        new Setting_Runners(),
+                        new Setting_RuntimeDerived(RuntimeConfigs.Runners, SettingOSCompatibility.Universal),
 
                         new Setting_Title("Misc", 10, SettingOSCompatibility.Universal),
                         new Setting_Generic_Config("Concurrency", SettingOSCompatibility.Universal, ConfigKeys.Launcher_Concurrency, new SettingsUI_Toggle()),
-                        new Setting_ExternalApplications(),
+                        new Setting_RuntimeDerived(RuntimeConfigs.ExternalApplications, SettingOSCompatibility.Universal),
 
                         new Setting_Title("Firejail", 0, SettingOSCompatibility.Linux),
                         new Setting_Generic_Config("Use firejail", SettingOSCompatibility.Linux, ConfigKeys.Sandbox_Linux_Firejail_Enabled, new SettingsUI_Toggle()),
@@ -149,7 +156,7 @@ namespace GameLibrary.Logic
             }
 
             RunnerDto[] runners = RunnerManager.GetRunnerProfiles();
-            int? desiredLauncher = await DependencyManager.OpenMultiModal("Runner", runners.Select(r => r.runnerName).ToArray());
+            int? desiredLauncher = await DependencyManager.OpenMultiModal("Runner", true, runners.Select(r => r.runnerName).ToArray());
 
             if (desiredLauncher == null)
                 return;

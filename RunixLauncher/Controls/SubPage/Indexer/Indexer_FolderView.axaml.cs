@@ -134,11 +134,10 @@ public partial class Indexer_FolderView : UserControl
     private async Task LaunchBinary(string path)
     {
         RunnerDto[] runners = RunnerManager.GetRunnerProfiles();
-        int? selected = await DependencyManager.OpenMultiModal("Runner", runners.Select(x => x.runnerName).ToArray());
+        int? selected = await DependencyManager.OpenMultiModal("Runner", true, runners.Select(x => x.runnerName).ToArray());
 
         if (selected == null)
             return;
-
 
         await RunnerManager.RunGame(new RunnerManager.LaunchRequest()
         {
