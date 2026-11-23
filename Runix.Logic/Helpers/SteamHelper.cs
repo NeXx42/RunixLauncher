@@ -154,7 +154,7 @@ public static class SteamHelper
 
             for (int i = 0; i < paths.Count; i++)
             {
-                if (paths[i].Equals(path, StringComparison.CurrentCultureIgnoreCase))
+                if (paths[i].Contains(path, StringComparison.CurrentCultureIgnoreCase))
                 {
                     // not sure if this is actually true. Its assuming that each entry has a single appname and apppath
                     ulong id = ids[i];

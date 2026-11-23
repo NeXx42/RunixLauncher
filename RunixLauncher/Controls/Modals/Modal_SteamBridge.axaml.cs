@@ -1,7 +1,9 @@
+using System;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using GameLibrary.Logic;
 using Runix.Logic.Helpers;
 
 namespace RunixLauncher.Controls.Modals;
@@ -28,6 +30,18 @@ public partial class Modal_SteamBridge : UserControl
 
     private async Task ValidateBridge()
     {
-        btn_Validate.Label = await SteamHelper.ValidateBridge() ? "Valid" : "Invalid";
+        try
+        {
+            bool found = await SteamHelper.ValidateBridge();
+            btn_Validate.Label = found ? "Valid" : "Invalid";
+        }
+        catch (Exception e)
+        {
+            LoggingHelper.LogError(e);
+
+            btn_Validate.Label = "Failed";
+            await DependencyManager.OpenExceptionDialog("Error", e);
+        }
+
     }
 }

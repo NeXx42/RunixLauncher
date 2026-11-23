@@ -234,7 +234,7 @@ public partial class Modal_Settings_Runner : UserControl
     {
         if (selectedRunner == null)
         {
-            await DependencyManager.OpenYesNoModal("Failed!", "Cannot complete operation on an uncreated profile.\nSave before attempting again.");
+            await DependencyManager.OpenExceptionDialog("Failed!", "Cannot complete operation on an uncreated profile.\nSave before attempting again.");
             return false;
         }
 

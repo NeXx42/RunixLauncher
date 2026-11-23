@@ -65,7 +65,7 @@ public class RunnerDto_umu : RunnerDto_Wine
     {
         if (!Directory.Exists(getRuntimeLocationRoot))
         {
-            await DependencyManager.OpenYesNoModal("UMU failure", "No runtimes found");
+            await DependencyManager.OpenExceptionDialog("UMU failure", "No runtimes found");
             return ["INVALID"];
         }
 

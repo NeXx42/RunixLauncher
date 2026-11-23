@@ -11,6 +11,7 @@ using GameLibrary.DB;
 using GameLibrary.DB.Tables;
 using GameLibrary.Logic.Helpers;
 using GameLibrary.Logic.Objects;
+using Runix.Logic.Helpers;
 using SharpCompress.Archives;
 using SharpCompress.Common;
 using SharpCompress.Readers;
@@ -208,8 +209,7 @@ namespace GameLibrary.Logic
             info.ArgumentList.Add(archivePath);
             info.ArgumentList.Add(extractFolderName);
 
-            Process p = new Process();
-            p.StartInfo = info;
+            Process p = ProcessHelper.Create(info);
 
             p.Start();
             await ReadProgressOfExtraction(p, progress, cancellationToken);
@@ -243,8 +243,7 @@ namespace GameLibrary.Logic
             info.ArgumentList.Add("-y");
             info.ArgumentList.Add("-bsp1"); // for when i can figure out capturing percentages
 
-            Process p = new Process();
-            p.StartInfo = info;
+            Process p = ProcessHelper.Create(info);
 
             p.Start();
             await ReadProgressOfExtraction(p, progress, cancellationToken);

@@ -151,7 +151,7 @@ namespace GameLibrary.Logic
         {
             if (!(configProvider?.TryGetValue(ConfigKeys.LocaleEmulator_Location, out string path) ?? false))
             {
-                await DependencyManager.OpenYesNoModal("No emulator defined", "Unable to launch the locale emulator because there is no path defined.");
+                await DependencyManager.OpenExceptionDialog("No emulator defined", new Exception("Unable to launch the locale emulator because there is no path defined."));
                 return;
             }
 

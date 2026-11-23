@@ -7,6 +7,7 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Interfaces;
+using Runix.Logic.Helpers;
 using RunixLauncher.Controls.Modals;
 
 namespace RunixLauncher.Helpers;
@@ -158,7 +159,7 @@ public class UILinker : IUILinker
             };
 
             startInfo.ArgumentList.Add(to);
-            Process.Start(startInfo);
+            Process.Start(startInfo.UpdateProcessStartInfoForEnv());
         }
         else
         {

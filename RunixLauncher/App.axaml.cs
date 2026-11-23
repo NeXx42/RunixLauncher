@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using GameLibrary.Logic;
+using Runix.Logic.Helpers;
 using RunixLauncher.Helpers;
 
 namespace RunixLauncher;
@@ -39,10 +40,16 @@ public partial class App : Application
 
     private async Task CatchExceptionAsync(Exception exception)
     {
+        try
+        {
+            LoggingHelper.LogError(exception);
+        }
+        catch { }
+
         // don't want this to loop endlessly loop for some reason
         try
         {
-            await DependencyManager.OpenYesNoModal("Unhandled exception", $"{exception.Message}\n\n{exception.StackTrace}");
+            await DependencyManager.OpenExceptionDialog("Unhandled exception", exception);
         }
         catch { }
     }

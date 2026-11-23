@@ -116,7 +116,8 @@ public static class RunnerManager
         }
         catch (Exception e)
         {
-            await DependencyManager.OpenYesNoModal("Failed to launch game!", e.Message);
+            LoggingHelper.LogError(e);
+            await DependencyManager.OpenExceptionDialog("Failed to launch game!", e);
         }
         finally
         {
@@ -201,11 +202,6 @@ public static class RunnerManager
                 await globalConfigValues.SaveBool(RunnerDto.RunnerConfigValues.Generic_Sandbox_BlockNetwork, ConfigHandler.configProvider!.GetBoolean(ConfigKeys.Sandbox_Linux_Firejail_Networking, false));
                 await globalConfigValues.SaveBool(RunnerDto.RunnerConfigValues.Generic_Sandbox_IsolateFilesystem, ConfigHandler.configProvider!.GetBoolean(ConfigKeys.Sandbox_Linux_Firejail_FileSystemIsolation, false));
             }
-
-            if (ConfigHandler.isFlatpak)
-            {
-                embeds.Add(new GameEmbed_Flatpak());
-            }
         }
 
         foreach (IGameEmbed embed in embeds.OrderByDescending(x => x.getOrder))
@@ -250,15 +246,15 @@ public static class RunnerManager
             {
                 info.EnvironmentVariables[arg.Key] = arg.Value;
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(e);
+                LoggingHelper.LogWarning($"Failed to apply env var {arg}");
             }
         }
 
         Process process = new Process
         {
-            StartInfo = info,
+            StartInfo = info.UpdateProcessStartInfoForEnv(),
             EnableRaisingEvents = true
         };
 
@@ -312,21 +308,18 @@ public static class RunnerManager
         }
 
 
-        Process process = new Process
+        Process process = ProcessHelper.Create(new ProcessStartInfo()
         {
-            StartInfo = new ProcessStartInfo()
-            {
-                FileName = "steam",
-                Arguments = $"steam://launch/{shortcutId}",
+            FileName = "steam",
 
-                UseShellExecute = false,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-                RedirectStandardInput = true,
-                ErrorDialog = true
-            },
-            EnableRaisingEvents = true
-        };
+            UseShellExecute = false,
+            RedirectStandardError = true,
+            RedirectStandardOutput = true,
+            RedirectStandardInput = true,
+            ErrorDialog = true
+        }, $"steam://launch/{shortcutId}");
+
+        process.EnableRaisingEvents = true;
 
         if (!string.IsNullOrEmpty(req.identifier))
         {
@@ -438,8 +431,10 @@ public static class RunnerManager
         {
             Directory.Delete(runner.runnerRoot, true);
         }
-        catch
+        catch (Exception e)
         {
+            LoggingHelper.LogError(e);
+
             if (!await DependencyManager.OpenYesNoModal("Failed deletion", "do you want to proceed with the record deletion?"))
                 return false;
         }
@@ -512,7 +507,6 @@ public static class RunnerManager
         Launcher = 0,
         LocaleEmulator = 1,
         Application = 10,
-        Flatpak = -9999
     }
 
     public class LaunchArguments
@@ -620,7 +614,10 @@ public static class RunnerManager
                         await writer.WriteLineAsync(args.Data);
                         await writer.FlushAsync();
                     }
-                    catch { }
+                    catch (Exception e)
+                    {
+                        LoggingHelper.LogError(e);
+                    }
                     finally
                     {
                         _writeLock.Release();
@@ -656,7 +653,7 @@ public static class RunnerManager
                 {
                     RedirectStandardOutput = true,
                     UseShellExecute = false
-                };
+                }.UpdateProcessStartInfoForEnv();
                 using var pgrep = Process.Start(psi);
                 string? line;
 

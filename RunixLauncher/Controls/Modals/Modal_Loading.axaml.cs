@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using GameLibrary.Logic;
+using Runix.Logic.Helpers;
 using RunixLauncher.Helpers;
 
 namespace RunixLauncher.Controls.Modals;
@@ -43,6 +44,7 @@ public partial class Modal_Loading : UserControl
                 }
                 catch (Exception e)
                 {
+                    LoggingHelper.LogError(e);
                     await DependencyManager.OpenExceptionDialog("", e);
                 }
             }

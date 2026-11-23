@@ -1,4 +1,5 @@
 using GameLibrary.Logic.Objects;
+using Runix.Logic.Helpers;
 
 namespace GameLibrary.Logic.Helpers;
 
@@ -61,6 +62,7 @@ public static class ExtensionMethods
             }
             catch (Exception e)
             {
+                LoggingHelper.LogError(e);
                 _ = DependencyManager.OpenExceptionDialog("Unhandled Task Exception", e);
             }
         };

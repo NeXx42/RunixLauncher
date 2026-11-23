@@ -4,6 +4,7 @@ using GameLibrary.DB.Tables;
 using GameLibrary.Logic.Database.Tables;
 using GameLibrary.Logic.Enums;
 using GameLibrary.Logic.Objects;
+using Runix.Logic.Helpers;
 
 namespace GameLibrary.Logic
 {
@@ -194,6 +195,7 @@ namespace GameLibrary.Logic
             }
             catch (Exception e)
             {
+                LoggingHelper.LogError(e);
                 await DependencyManager.OpenExceptionDialog("Failed to load game", e);
                 return null;
             }
@@ -209,6 +211,7 @@ namespace GameLibrary.Logic
                 }
                 catch (Exception e)
                 {
+                    LoggingHelper.LogError(e);
                     string paragraph = $"Failed to delete games files!\n\n{e.Message}\n\nDo you want to delete the record anyway?";
 
                     if (!await DependencyManager.OpenYesNoModal("Delete record?", paragraph))

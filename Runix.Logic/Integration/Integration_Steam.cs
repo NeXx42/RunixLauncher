@@ -119,8 +119,7 @@ public static class Integration_Steam
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Failed to parse gameid - {id}");
-            Console.WriteLine(e.Message);
+            LoggingHelper.LogError(e);
             return null;
         }
 

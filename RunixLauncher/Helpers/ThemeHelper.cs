@@ -8,6 +8,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using GameLibrary.Logic;
 using GameLibrary.Logic.Enums;
+using Runix.Logic.Helpers;
 
 namespace RunixLauncher.Helpers;
 
@@ -26,9 +27,9 @@ public static class ThemeHelper
             {
                 theme = GetThemes()[savedThemeIndex];
             }
-            catch
+            catch (Exception e)
             {
-                Console.WriteLine("Failed to get saved theme, reverting to default");
+                LoggingHelper.LogError(e);
                 await ConfigHandler.configProvider!.SaveInteger(ConfigKeys.Appearance_Theme, 0);
             }
         }
@@ -89,7 +90,7 @@ public static class ThemeHelper
                 }
                 catch (Exception e)
                 {
-
+                    LoggingHelper.LogError(e);
                 }
             }
         }

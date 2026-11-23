@@ -120,6 +120,7 @@ public static class GithubVersionHelper
         }
         catch (Exception e)
         {
+            LoggingHelper.LogError(e);
             throw new Exception($"Failed to download file, {e.Message}");
         }
     }
@@ -137,8 +138,7 @@ public static class GithubVersionHelper
             UseShellExecute = false,
         };
 
-        Process p = new Process();
-        p.StartInfo = startInfo;
+        Process p = ProcessHelper.Create(startInfo);
 
         p.Start();
         await p.WaitForExitAsync();

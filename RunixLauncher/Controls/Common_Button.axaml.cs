@@ -10,7 +10,9 @@ using Avalonia.Media.Immutable;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using GameLibrary.Controller;
+using GameLibrary.Logic;
 using GameLibrary.Logic.Helpers;
+using Runix.Logic.Helpers;
 using RunixLauncher.Utils;
 
 namespace RunixLauncher.Controls
@@ -67,7 +69,15 @@ namespace RunixLauncher.Controls
                 if (!string.IsNullOrEmpty(asyncMessage))
                     Dispatcher.UIThread.Post(() => SetValue(LabelProperty!, asyncMessage));
 
-                await callback();
+                try
+                {
+                    await callback();
+                }
+                catch (Exception e)
+                {
+                    LoggingHelper.LogError(e);
+                    await DependencyManager.OpenExceptionDialog("Error", e);
+                }
 
                 if (!string.IsNullOrEmpty(asyncMessage))
                     Dispatcher.UIThread.Post(() => SetValue(LabelProperty!, defaultMessage));

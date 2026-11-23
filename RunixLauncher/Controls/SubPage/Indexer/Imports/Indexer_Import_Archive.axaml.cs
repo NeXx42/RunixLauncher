@@ -7,6 +7,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using GameLibrary.Logic;
+using Runix.Logic.Helpers;
 
 namespace RunixLauncher.Controls.SubPage.Indexer.Imports;
 
@@ -53,8 +54,11 @@ public partial class Indexer_Import_Archive : UserControl, IIndexer_Import
         if (extractToken != null)
         {
             await extractToken.CancelAsync();
+            RecheckExtract();
+
             return;
         }
+
         extractToken = new CancellationTokenSource();
         Progress<int> progress = new Progress<int>((int per) =>
         {
@@ -62,7 +66,18 @@ public partial class Indexer_Import_Archive : UserControl, IIndexer_Import
         });
 
         inp_ProgressBar.IsVisible = true;
-        archiveData!.extractedFolder = await FileManager.RequestExtract(archiveData!.archivePath, progress, extractToken.Token);
+
+        try
+        {
+            archiveData!.extractedFolder = await FileManager.RequestExtract(archiveData!.archivePath, progress, extractToken.Token);
+        }
+        catch (Exception e)
+        {
+            LoggingHelper.LogError(e);
+
+            await DependencyManager.OpenExceptionDialog("Error while extracting", e);
+            extractToken = null;
+        }
 
         RecheckExtract();
     }

@@ -60,11 +60,11 @@ public static class DependencyManager
     {
         if (string.IsNullOrEmpty(sql))
         {
-            _ = OpenYesNoModal("Database Logic Exception", $"{error.Message}\n\n{error.StackTrace}");
+            _ = OpenExceptionDialog("Database Logic Exception", new Exception($"{error.Message}\n\n{error.StackTrace}"));
         }
         else
         {
-            _ = OpenYesNoModal("SQL Exception", $"{sql}\n{error.Message}");
+            _ = OpenExceptionDialog("SQL Exception", new Exception($"{sql}\n{error.Message}"));
         }
     }
 
@@ -108,6 +108,9 @@ public static class DependencyManager
 
     public static async Task<int> OpenConfirmationAsync(string title, string paragraph, params (string btn, Func<Task> callback, string? loadingMessage)[] controls)
         => await uiLinker!.OpenConfirmationAsync(title, paragraph, controls);
+
+    public static async Task OpenExceptionDialog(string header, string msg) // replace with actual dialog
+        => await uiLinker!.OpenMessageModal(header, msg);
 
     public static async Task OpenExceptionDialog(string header, Exception e) // replace with actual dialog
         => await uiLinker!.OpenMessageModal(header, $"{e.Message}\n\n{e.StackTrace}");
